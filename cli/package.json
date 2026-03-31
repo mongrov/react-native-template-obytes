@@ -1,18 +1,18 @@
 {
-  "name": "create-obytes-app",
-  "version": "1.8.0",
+  "name": "create-mongrov-obytes-app",
+  "version": "0.81.5",
   "description": "Obytes expo starter cli",
   "homepage": "https://github.com/obytes/react-native-template-obytes",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/obytes/react-native-template-obytes.git"
+    "url": "git+https://github.com/mongrov/react-native-template-obytes.git"
   },
   "main": "index.js",
   "scripts": {
     "start": "node ."
   },
   "bin": {
-    "create-obytes-app": "index.js"
+    "create-mongrov-obytes-app": "index.js"
   },
   "files": [
     "index.js",

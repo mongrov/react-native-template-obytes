@@ -27,9 +27,11 @@ export default function TabLayout() {
   }, [hideSplash, status]);
 
   if (isFirstTime) {
+    SplashScreen.hideAsync();
     return <Redirect href="/onboarding" />;
   }
   if (status === 'signOut') {
+    SplashScreen.hideAsync();
     return <Redirect href="/login" />;
   }
   return (
