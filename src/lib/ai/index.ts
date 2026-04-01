@@ -1,5 +1,6 @@
 import type { AIConfig } from '@mongrov/ai';
 import { createOpenAI } from '@ai-sdk/openai';
+import { fetch as expoFetch } from 'expo/fetch';
 import Env from 'env';
 
 /**
@@ -16,7 +17,11 @@ function createModel() {
     return null;
   }
 
-  const openai = createOpenAI({ apiKey });
+  // Use expo/fetch for streaming support in React Native
+  const openai = createOpenAI({
+    apiKey,
+    fetch: expoFetch as unknown as typeof globalThis.fetch,
+  });
   return openai('gpt-4o-mini');
 }
 
