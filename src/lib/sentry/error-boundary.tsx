@@ -1,7 +1,15 @@
-import * as Sentry from '@sentry/react-native';
 import * as React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Text, View } from 'react-native';
+
+// Lazy-load Sentry to avoid crashes in Expo Go
+let Sentry: typeof import('@sentry/react-native') | null = null;
+try {
+  Sentry = require('@sentry/react-native');
+}
+catch {
+  // Native module not available
+}
 
 function ErrorFallback({ error }: { error: unknown }) {
   return (
@@ -25,7 +33,7 @@ export function SentryErrorBoundary({
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
       onError={(error, info) => {
-        Sentry.captureException(error, {
+        Sentry?.captureException(error, {
           extra: { componentStack: info.componentStack },
         });
       }}

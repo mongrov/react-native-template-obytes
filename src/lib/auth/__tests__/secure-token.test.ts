@@ -14,6 +14,14 @@ jest.mock('expo-secure-store', () => ({
   }),
 }));
 
+jest.mock('@/lib/storage', () => ({
+  storage: {
+    getString: jest.fn(),
+    set: jest.fn(),
+    remove: jest.fn(),
+  },
+}));
+
 describe('tokenStore', () => {
   beforeEach(() => {
     Object.keys(mockStore).forEach(k => delete mockStore[k]);

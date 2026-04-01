@@ -1,7 +1,6 @@
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { LoggingProvider } from '@mongrov/core';
 import { ThemeProvider } from '@react-navigation/native';
-import * as Sentry from '@sentry/react-native';
 import Env from 'env';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -18,6 +17,14 @@ import { loadSelectedTheme } from '@/lib/hooks/use-selected-theme';
 import { initSentry, SentryErrorBoundary } from '@/lib/sentry';
 // Import  global CSS file
 import '../global.css';
+// Lazy-load Sentry to avoid crashes in Expo Go
+let Sentry: typeof import('@sentry/react-native') | null = null;
+try {
+  Sentry = require('@sentry/react-native');
+}
+catch {
+  // Native module not available
+}
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -75,14 +82,14 @@ function Providers({ children }: { children: React.ReactNode }) {
               }
             : undefined,
           onLog: (entry) => {
-            Sentry.addBreadcrumb({
+            Sentry?.addBreadcrumb({
               message: entry.message,
-              level: entry.level as Sentry.SeverityLevel,
+              level: entry.level as import('@sentry/react-native').SeverityLevel,
               data: entry.data,
             });
           },
           onException: (error, context) => {
-            Sentry.captureException(error, { extra: context });
+            Sentry?.captureException(error, { extra: context });
           },
         }}
       >
