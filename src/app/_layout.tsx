@@ -1,3 +1,4 @@
+import type { LogEntry, LogTransport } from '@mongrov/core';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { LoggingProvider } from '@mongrov/core';
 import { ThemeProvider } from '@react-navigation/native';
@@ -18,7 +19,8 @@ import { initSentry, SentryErrorBoundary } from '@/lib/sentry';
 // Import  global CSS file
 import '../global.css';
 // Lazy-load Sentry to avoid crashes in Expo Go
-let Sentry: typeof import('@sentry/react-native') | null = null;
+type SentryModule = typeof import('@sentry/react-native');
+let Sentry: SentryModule | null = null;
 try {
   Sentry = require('@sentry/react-native');
 }
@@ -60,6 +62,24 @@ export default function RootLayout() {
   );
 }
 
+// Custom transport that forwards warn/error entries to Sentry as breadcrumbs
+const sentryBreadcrumbTransport: LogTransport = {
+  name: 'sentry-breadcrumbs',
+  send: async (entries: LogEntry[]) => {
+    if (!Sentry)
+      return;
+    for (const entry of entries) {
+      if (entry.level === 'warn' || entry.level === 'error') {
+        Sentry.addBreadcrumb({
+          message: entry.message,
+          level: entry.level as 'info' | 'warning' | 'error' | 'debug',
+          data: entry.data,
+        });
+      }
+    }
+  },
+};
+
 function Providers({ children }: { children: React.ReactNode }) {
   const theme = useThemeConfig();
 
@@ -81,13 +101,7 @@ function Providers({ children }: { children: React.ReactNode }) {
                 headers: webhookHeaders,
               }
             : undefined,
-          onLog: (entry) => {
-            Sentry?.addBreadcrumb({
-              message: entry.message,
-              level: entry.level as import('@sentry/react-native').SeverityLevel,
-              data: entry.data,
-            });
-          },
+          transports: Sentry ? [sentryBreadcrumbTransport] : [],
           onException: (error, context) => {
             Sentry?.captureException(error, { extra: context });
           },

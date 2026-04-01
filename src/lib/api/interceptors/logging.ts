@@ -1,12 +1,16 @@
 import type { Logger } from '@mongrov/core';
 import type { AxiosInstance } from 'axios';
 
+/**
+ * Attaches request/response logging interceptors to an Axios instance.
+ * Returns a cleanup function that ejects the interceptors.
+ */
 export function setupLoggingInterceptor(
   api: AxiosInstance,
   logger: Logger,
-) {
+): () => void {
   // Request logging
-  api.interceptors.request.use((config) => {
+  const reqId = api.interceptors.request.use((config) => {
     (config as any)._startTime = Date.now();
     logger.debug('API Request', {
       method: config.method?.toUpperCase(),
@@ -17,7 +21,7 @@ export function setupLoggingInterceptor(
   });
 
   // Response logging
-  api.interceptors.response.use(
+  const resId = api.interceptors.response.use(
     (response) => {
       const duration = Date.now() - ((response.config as any)._startTime ?? 0);
       logger.debug('API Response', {
@@ -38,4 +42,9 @@ export function setupLoggingInterceptor(
       return Promise.reject(error);
     },
   );
+
+  return () => {
+    api.interceptors.request.eject(reqId);
+    api.interceptors.response.eject(resId);
+  };
 }

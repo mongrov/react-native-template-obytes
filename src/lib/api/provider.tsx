@@ -14,9 +14,9 @@ export function APIProvider({ children }: { children: React.ReactNode }) {
 
   const logger = useLogger();
 
-  // Wire up logging interceptor once when provider mounts
+  // Wire up logging interceptor; eject on unmount / logger change
   React.useEffect(() => {
-    setupLoggingInterceptor(client, logger);
+    return setupLoggingInterceptor(client, logger);
   }, [logger]);
 
   return (

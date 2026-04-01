@@ -1,16 +1,14 @@
-<p align="center">
-    <img alt="React Native Template Obytes" src="https://github.com/obytes/react-native-template-obytes/assets/11137944/a8163d23-897a-4efe-91ce-b9bf7348c18f" width="200" />
-</p>
-
 <h1 align="center">
-  React Native Template Obytes
+  Mongrov Starter
 </h1>
 
-![expo](https://img.shields.io/github/package-json/dependency-version/obytes/react-native-template-obytes/expo?label=expo) ![react-native](https://img.shields.io/github/package-json/dependency-version/obytes/react-native-template-obytes/react-native?label=react-native) ![GitHub Repo stars](https://img.shields.io/github/stars/obytes/react-native-template-obytes) ![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/m/obytes/react-native-template-obytes) ![GitHub issues](https://img.shields.io/github/issues/obytes/react-native-template-obytes) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/obytes/react-native-template-obytes)
+<p align="center">
+  Enterprise React Native starter template, built on <a href="https://github.com/obytes/react-native-template-obytes">Obytes Template</a>
+</p>
 
-📱 A template for your next React Native project 🚀, Made with developer experience and performance first: Expo, TypeScript, TailwindCSS, Husky, Lint-Staged, expo-router, react-query, TanStack Form, I18n.
+A production-ready React Native / Expo template with structured logging, Sentry integration, JWT auth scaffolding, API interceptors, and a built-in dev tools screen. Powered by [`@mongrov/core`](https://github.com/mongrov/mongrov-core).
 
-> Welcome to the Obytes Mobile Tribe's Expo / React Native Starter Kit!
+**Expo SDK 54 | React Native 0.81 | TypeScript | TailwindCSS | Expo Router | React Query | Zustand**
 
 ## 🚀 Motivation
 
@@ -108,6 +106,16 @@ Configuration is driven by environment variables:
 | `expo-local-authentication` | Biometric authentication support |
 | `expo-updates` | OTA update checking |
 | `jwt-decode` | JWT token decoding for session management |
+
+### Expo Go Compatibility
+
+All native module imports (`expo-secure-store`, `@sentry/react-native`) use lazy `require()` with
+try/catch so the app runs in **Expo Go** without crashing. When native modules are unavailable:
+
+- **SecureStore** falls back to MMKV storage
+- **Sentry** calls become no-ops (errors still render via `react-error-boundary`)
+
+For production builds with a custom dev client, all native modules are fully functional.
 
 ## Is this starter for me?
 
