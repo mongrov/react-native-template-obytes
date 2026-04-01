@@ -1,7 +1,6 @@
 import Env from 'env';
 import { useRouter } from 'expo-router';
 import { useRef } from 'react';
-import { useUniwind } from 'uniwind';
 
 import {
   colors,
@@ -11,21 +10,22 @@ import {
   View,
 } from '@/components/ui';
 import { Github, Rate, Share, Support, Website } from '@/components/ui/icons';
-import { useAuthStore as useAuth } from '@/features/auth/use-auth-store';
-import { useSession } from '@/lib/auth/use-session';
+import { useAuth, useSession } from '@/lib/auth';
 import { translate } from '@/lib/i18n';
+import { useColorScheme } from '@/lib/theme';
 import { LanguageItem } from './components/language-item';
 import { SettingsContainer } from './components/settings-container';
 import { SettingsItem } from './components/settings-item';
 import { ThemeItem } from './components/theme-item';
 
 export function SettingsScreen() {
-  const signOut = useAuth.use.signOut();
-  const { theme } = useUniwind();
+  const { signOut } = useAuth();
+  const { isDark } = useColorScheme();
   const iconColor
-    = theme === 'dark' ? colors.neutral[400] : colors.neutral[500];
+    = isDark ? colors.neutral[400] : colors.neutral[500];
   const router = useRouter();
-  const { hasPermission } = useSession();
+  const session = useSession();
+  const hasPermission = session?.hasPermission ?? (() => false);
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 

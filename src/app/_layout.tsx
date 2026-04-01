@@ -1,7 +1,10 @@
 import type { LogEntry, LogTransport } from '@mongrov/core';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { AuthProvider } from '@mongrov/auth';
 import { LoggingProvider } from '@mongrov/core';
-import { ThemeProvider } from '@react-navigation/native';
+import { ThemeProvider } from '@mongrov/theme';
+import { useNavigationTheme } from '@mongrov/theme/navigation';
+import { ThemeProvider as NavThemeProvider } from '@react-navigation/native';
 import Env from 'env';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -9,13 +12,12 @@ import * as React from 'react';
 import { StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { KeyboardProvider } from 'react-native-keyboard-controller';
-import { useThemeConfig } from '@/components/ui/use-theme-config';
-import { hydrateAuth } from '@/features/auth/use-auth-store';
 
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { APIProvider } from '@/lib/api';
-import { loadSelectedTheme } from '@/lib/hooks/use-selected-theme';
+import { authConfig } from '@/lib/auth';
 import { initSentry, SentryErrorBoundary } from '@/lib/sentry';
+import { appTheme, useColorScheme } from '@/lib/theme';
 // Import  global CSS file
 import '../global.css';
 // Lazy-load Sentry to avoid crashes in Expo Go
@@ -34,9 +36,6 @@ export { ErrorBoundary } from 'expo-router';
 export const unstable_settings = {
   initialRouteName: '(app)',
 };
-
-hydrateAuth();
-loadSelectedTheme();
 
 // Initialize Sentry
 if (Env.EXPO_PUBLIC_SENTRY_DSN) {
@@ -81,8 +80,6 @@ const sentryBreadcrumbTransport: LogTransport = {
 };
 
 function Providers({ children }: { children: React.ReactNode }) {
-  const theme = useThemeConfig();
-
   const webhookHeaders = Env.EXPO_PUBLIC_LOG_WEBHOOK_HEADERS
     ? JSON.parse(Env.EXPO_PUBLIC_LOG_WEBHOOK_HEADERS) as Record<string, string>
     : undefined;
@@ -107,24 +104,40 @@ function Providers({ children }: { children: React.ReactNode }) {
           },
         }}
       >
-        <GestureHandlerRootView
-          style={styles.container}
-          // eslint-disable-next-line better-tailwindcss/no-unknown-classes
-          className={theme.dark ? `dark` : undefined}
-        >
-          <KeyboardProvider>
-            <ThemeProvider value={theme}>
-              <APIProvider>
-                <BottomSheetModalProvider>
-                  {children}
-                  <FlashMessage position="top" />
-                </BottomSheetModalProvider>
-              </APIProvider>
-            </ThemeProvider>
-          </KeyboardProvider>
-        </GestureHandlerRootView>
+        <ThemeProvider theme={appTheme}>
+          <InnerProviders>
+            {children}
+          </InnerProviders>
+        </ThemeProvider>
       </LoggingProvider>
     </SentryErrorBoundary>
+  );
+}
+
+/** Inner providers that need ThemeProvider context (useNavTheme, useColorScheme) */
+function InnerProviders({ children }: { children: React.ReactNode }) {
+  const navTheme = useNavigationTheme();
+  const { isDark } = useColorScheme();
+
+  return (
+    <GestureHandlerRootView
+      style={styles.container}
+      // eslint-disable-next-line better-tailwindcss/no-unknown-classes
+      className={isDark ? `dark` : undefined}
+    >
+      <KeyboardProvider>
+        <NavThemeProvider value={navTheme}>
+          <AuthProvider config={authConfig}>
+            <APIProvider>
+              <BottomSheetModalProvider>
+                {children}
+                <FlashMessage position="top" />
+              </BottomSheetModalProvider>
+            </APIProvider>
+          </AuthProvider>
+        </NavThemeProvider>
+      </KeyboardProvider>
+    </GestureHandlerRootView>
   );
 }
 

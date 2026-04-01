@@ -6,7 +6,10 @@
 - **TypeScript** - Strict type safety throughout
 - **Expo Router 6** - File-based routing (like Next.js)
 - **TailwindCSS** via Uniwind/Nativewind - Utility-first styling for React Native
-- **Zustand** - Lightweight global state management
+- **@mongrov/auth** - Authentication state machine (AuthProvider, useAuth, useSession)
+- **@mongrov/theme** - Design tokens & dark mode (ThemeProvider, useColorScheme, useNavigationTheme)
+- **@mongrov/core** - Structured logging (LoggingProvider, useLogger)
+- **Zustand** - Lightweight global state management (non-auth state only)
 - **React Query** - Server state and data fetching
 - **TanStack Form + Zod** - Type-safe form handling and validation
 - **MMKV** - Encrypted local storage
@@ -19,7 +22,7 @@ src/
 ├── app/              # Expo Router file-based routes (add new routes here)
 ├── features/         # Feature modules - auth, feed, settings are EXAMPLES
 ├── components/ui/    # Pre-built UI components (button, input, modal, etc.)
-├── lib/              # Pre-configured utilities (api, auth, i18n, storage)
+├── lib/              # Pre-configured utilities (api, auth, theme, i18n, storage)
 ├── translations/     # i18n files (en.json, ar.json - add more languages)
 └── global.css        # TailwindCSS configuration
 
@@ -54,9 +57,12 @@ pnpm build:production:ios       # EAS production build
 - **Add routes**: Create files in `src/app/` (file-based routing)
 - **Forms**: Use TanStack Form + Zod (see `src/features/auth/components/login-form.tsx`)
 - **Data fetching**: Use React Query (see `src/features/feed/api.ts`)
-- **Global state**: Use Zustand (see `src/features/auth/use-auth-store.tsx`)
+- **Auth**: Use `@mongrov/auth` — `useAuth()` for signIn/signOut/status, `useSession()` for user info (see `src/lib/auth/`)
+- **Theme/Dark mode**: Use `@mongrov/theme` — `useColorScheme()` for dark/light, `useTheme()` for tokens (see `src/lib/theme/`)
+- **Auth adapter**: Implement `AuthAdapter` in `src/lib/auth/adapter.ts` (swap demo for real backend)
+- **Global state**: Use Zustand for non-auth state
 - **Styling**: NativeWind/Tailwind classes (see `src/components/ui/button.tsx`)
-- **Storage**: Use MMKV via `src/lib/storage.tsx` for sensitive data
+- **Storage**: Use MMKV via `src/lib/storage.tsx` for non-auth data
 - **Imports**: Always use `@/` prefix, never relative imports
 
 ## How: Essential Rules

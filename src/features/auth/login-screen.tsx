@@ -3,16 +3,16 @@ import { useRouter } from 'expo-router';
 
 import * as React from 'react';
 import { FocusAwareStatusBar } from '@/components/ui';
+import { useAuth } from '@/lib/auth';
 import { LoginForm } from './components/login-form';
-import { useAuthStore } from './use-auth-store';
 
 export function LoginScreen() {
   const router = useRouter();
-  const signIn = useAuthStore.use.signIn();
+  const { signIn } = useAuth();
 
-  const onSubmit: LoginFormProps['onSubmit'] = (data) => {
+  const onSubmit: LoginFormProps['onSubmit'] = async (data) => {
     console.log(data);
-    signIn({ access: 'access-token', refresh: 'refresh-token' });
+    await signIn({ email: data.email, password: data.password });
     router.push('/');
   };
 

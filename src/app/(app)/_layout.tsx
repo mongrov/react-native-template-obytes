@@ -8,17 +8,19 @@ import {
   Settings as SettingsIcon,
   Style as StyleIcon,
 } from '@/components/ui/icons';
-import { useAuthStore as useAuth } from '@/features/auth/use-auth-store';
+import { useAuth } from '@/lib/auth';
 import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 
 export default function TabLayout() {
-  const status = useAuth.use.status();
+  const { isHydrated, isAuthenticated, status } = useAuth();
   const [isFirstTime] = useIsFirstTime();
+
   const hideSplash = useCallback(async () => {
     await SplashScreen.hideAsync();
   }, []);
+
   useEffect(() => {
-    if (status !== 'idle') {
+    if (status === 'authenticated') {
       const timer = setTimeout(() => {
         hideSplash();
       }, 1000);
@@ -30,7 +32,14 @@ export default function TabLayout() {
     SplashScreen.hideAsync();
     return <Redirect href="/onboarding" />;
   }
-  if (status === 'signOut') {
+
+  // Before hydrate completes, show nothing (splash is still visible)
+  if (!isHydrated) {
+    return null;
+  }
+
+  // Hydration is done. If not authenticated, redirect to login.
+  if (!isAuthenticated) {
     SplashScreen.hideAsync();
     return <Redirect href="/login" />;
   }

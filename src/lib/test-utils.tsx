@@ -3,16 +3,21 @@ import type { RenderOptions } from '@testing-library/react-native';
 
 import type { ReactElement } from 'react';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { ThemeProvider } from '@mongrov/theme';
 import { NavigationContainer } from '@react-navigation/native';
 import { render, userEvent } from '@testing-library/react-native';
 import * as React from 'react';
+import { appTheme } from '@/lib/theme';
+
 import '@shopify/flash-list/jestSetup';
 
 function createAppWrapper() {
   return ({ children }: { children: React.ReactNode }) => (
-    <BottomSheetModalProvider>
-      <NavigationContainer>{children}</NavigationContainer>
-    </BottomSheetModalProvider>
+    <ThemeProvider theme={appTheme}>
+      <BottomSheetModalProvider>
+        <NavigationContainer>{children}</NavigationContainer>
+      </BottomSheetModalProvider>
+    </ThemeProvider>
   );
 }
 

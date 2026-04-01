@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { useReactQueryDevTools } from '@dev-plugins/react-query';
+import { useAuthInterceptor } from '@mongrov/auth/interceptor';
 import { useLogger } from '@mongrov/core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as React from 'react';
@@ -13,6 +14,9 @@ export function APIProvider({ children }: { children: React.ReactNode }) {
   useReactQueryDevTools(queryClient);
 
   const logger = useLogger();
+
+  // Wire up auth interceptor; eject on unmount
+  useAuthInterceptor(client);
 
   // Wire up logging interceptor; eject on unmount / logger change
   React.useEffect(() => {

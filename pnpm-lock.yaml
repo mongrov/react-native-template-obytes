@@ -17,9 +17,15 @@ importers:
       '@gorhom/bottom-sheet':
         specifier: ^5.2.8
         version: 5.2.8(@types/react@19.1.17)(react-native-gesture-handler@2.28.0(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-reanimated@4.1.6(@babel/core@7.28.6)(react-native-worklets@0.7.2(@babel/core@7.28.6)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      '@mongrov/auth':
+        specifier: ^0.2.0
+        version: 0.2.0(axios@1.13.2)(expo-local-authentication@17.0.8(expo@54.0.32))(expo-secure-store@15.0.8(expo@54.0.32))(react-native-mmkv@4.1.1(react-native-nitro-modules@0.33.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(zustand@5.0.10(@types/react@19.1.17)(react@19.1.0)(use-sync-external-store@1.6.0(react@19.1.0)))
       '@mongrov/core':
         specifier: ^0.2.0
         version: 0.2.0(expo-file-system@19.0.21(expo@54.0.32)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0)))(expo-network@8.0.8(expo@54.0.32)(react@19.1.0))(react-native-mmkv@4.1.1(react-native-nitro-modules@0.33.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      '@mongrov/theme':
+        specifier: ^0.2.0
+        version: 0.2.0(react-native-mmkv@4.1.1(react-native-nitro-modules@0.33.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(zustand@5.0.10(@types/react@19.1.17)(react@19.1.0)(use-sync-external-store@1.6.0(react@19.1.0)))
       '@sentry/react-native':
         specifier: ~7.2.0
         version: 7.2.0(expo@54.0.32)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -95,9 +101,6 @@ importers:
       i18next:
         specifier: ^25.8.0
         version: 25.8.0(typescript@5.9.3)
-      jwt-decode:
-        specifier: ^4.0.0
-        version: 4.0.0
       lodash.memoize:
         specifier: ^4.1.2
         version: 4.1.2
@@ -267,6 +270,9 @@ importers:
       jest-junit:
         specifier: ^16.0.0
         version: 16.0.0
+      jwt-decode:
+        specifier: ^4.0.0
+        version: 4.0.0
       lint-staged:
         specifier: ^16.2.7
         version: 16.2.7
@@ -1894,6 +1900,27 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
+  '@mongrov/auth@0.2.0':
+    resolution: {integrity: sha512-JCSkOejpgqaqshvb1OunG9cL0QdyFAsVkRtvDRMAEtGFDU45+kADjlBsvJmvRty0HlscFiOXNP1MVlDg248ohA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      axios: '>=1'
+      expo-local-authentication: '>=14'
+      expo-secure-store: '>=14'
+      react: '>=18'
+      react-native: '>=0.74'
+      react-native-mmkv: '>=3'
+      zustand: '>=5'
+    peerDependenciesMeta:
+      axios:
+        optional: true
+      expo-local-authentication:
+        optional: true
+      expo-secure-store:
+        optional: true
+      react-native-mmkv:
+        optional: true
+
   '@mongrov/core@0.2.0':
     resolution: {integrity: sha512-a8uw110v9VJWCz/eLQqRpeCWzHQiNJnoQcsSOYWIfnVIk3r7hLKpfu7qfT4VIziCNNlgQkWzpK1ZvS4QCzJZJw==}
     engines: {node: '>=18'}
@@ -1908,6 +1935,18 @@ packages:
         optional: true
       expo-network:
         optional: true
+      react-native-mmkv:
+        optional: true
+
+  '@mongrov/theme@0.2.0':
+    resolution: {integrity: sha512-WtRLaDvuBtXg4N/BQUJaEbQtUKJEf4dt06bjyDlEM/zgzw9tdohfowP6yTukpyCuEVI+k9GqkDfWE/0NDnLsFQ==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      react: '>=18'
+      react-native: '>=0.74'
+      react-native-mmkv: '>=3'
+      zustand: '>=5'
+    peerDependenciesMeta:
       react-native-mmkv:
         optional: true
 
@@ -10483,6 +10522,18 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  '@mongrov/auth@0.2.0(axios@1.13.2)(expo-local-authentication@17.0.8(expo@54.0.32))(expo-secure-store@15.0.8(expo@54.0.32))(react-native-mmkv@4.1.1(react-native-nitro-modules@0.33.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(zustand@5.0.10(@types/react@19.1.17)(react@19.1.0)(use-sync-external-store@1.6.0(react@19.1.0)))':
+    dependencies:
+      jwt-decode: 4.0.0
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0)
+      zustand: 5.0.10(@types/react@19.1.17)(react@19.1.0)(use-sync-external-store@1.6.0(react@19.1.0))
+    optionalDependencies:
+      axios: 1.13.2
+      expo-local-authentication: 17.0.8(expo@54.0.32)
+      expo-secure-store: 15.0.8(expo@54.0.32)
+      react-native-mmkv: 4.1.1(react-native-nitro-modules@0.33.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+
   '@mongrov/core@0.2.0(expo-file-system@19.0.21(expo@54.0.32)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0)))(expo-network@8.0.8(expo@54.0.32)(react@19.1.0))(react-native-mmkv@4.1.1(react-native-nitro-modules@0.33.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)':
     dependencies:
       react: 19.1.0
@@ -10490,6 +10541,14 @@ snapshots:
     optionalDependencies:
       expo-file-system: 19.0.21(expo@54.0.32)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))
       expo-network: 8.0.8(expo@54.0.32)(react@19.1.0)
+      react-native-mmkv: 4.1.1(react-native-nitro-modules@0.33.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+
+  '@mongrov/theme@0.2.0(react-native-mmkv@4.1.1(react-native-nitro-modules@0.33.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(zustand@5.0.10(@types/react@19.1.17)(react@19.1.0)(use-sync-external-store@1.6.0(react@19.1.0)))':
+    dependencies:
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0)
+      zustand: 5.0.10(@types/react@19.1.17)(react@19.1.0)(use-sync-external-store@1.6.0(react@19.1.0))
+    optionalDependencies:
       react-native-mmkv: 4.1.1(react-native-nitro-modules@0.33.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
 
   '@motionone/animation@10.18.0':
