@@ -48,6 +48,67 @@ When creating this starter kit, we had several guiding principles in mind::
 - 🧪 Unit testing setup with [Jest](https://jestjs.io/) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/).
 - 🔍 E2E testing capabilities with [Maestro](https://maestro.mobile.dev/) for comprehensive app testing.
 
+## 🔧 Mongrov Additions
+
+This fork includes production-ready modules from `@mongrov/core` and additional scaffolding for enterprise apps:
+
+### Structured Logging (`@mongrov/core`)
+
+A zero-vendor-lock logging system integrated via `LoggingProvider` in the root layout:
+
+- **Ring buffer** — In-memory circular buffer for recent log entries, viewable in the Dev Tools screen.
+- **File transport** — Rolling daily JSONL files via `expo-file-system` with configurable retention.
+- **Webhook transport** — HTTP batched log shipping with offline queue (persisted via MMKV, exponential backoff).
+- **Dev Tools screen** — Hidden screen accessible by tapping the version number 5 times in Settings, once in `__DEV__` mode, or immediately if the user has the `dev-tools` permission via JWT. Displays filterable log entries with export-to-share functionality.
+
+Configuration is driven by environment variables:
+
+| Variable | Purpose |
+|---|---|
+| `EXPO_PUBLIC_LOG_LEVEL` | Minimum log level (`debug`, `info`, `warn`, `error`) |
+| `EXPO_PUBLIC_LOG_WEBHOOK_URL` | Webhook endpoint for remote log shipping |
+| `EXPO_PUBLIC_LOG_WEBHOOK_HEADERS` | JSON string of headers for the webhook |
+
+### Sentry Integration (`lib/sentry/`)
+
+- `initSentry(dsn)` — Initializes `@sentry/react-native` with environment-aware trace sampling.
+- `SentryErrorBoundary` — Wraps the app and reports uncaught errors to Sentry.
+- `useSentryScreenTracking()` — Adds screen-change breadcrumbs via expo-router.
+- Controlled by `EXPO_PUBLIC_SENTRY_DSN` env var — omit to disable entirely.
+
+### Auth Scaffolding (`lib/auth/`)
+
+- `secure-token.ts` — `expo-secure-store` wrapper for access/refresh token storage.
+- `use-session.ts` — `useSession()` hook that decodes the JWT and returns user, tenant, permissions, and a `hasPermission()` helper.
+
+### API Interceptors (`lib/api/interceptors/`)
+
+- **Auth interceptor** — Attaches Bearer token, handles 401 with refresh-token retry, signs out on failure.
+- **Error transform interceptor** — Normalizes error shapes into a consistent `AppError` class.
+- **Logging interceptor** — Logs request/response/error with duration. Automatically wired up in `APIProvider` which has access to the Logger via `LoggingProvider` context.
+
+### Utility Modules
+
+| Module | Location | Description |
+|---|---|---|
+| Network state | `lib/network/` | Re-exports `useNetworkState()` from `@mongrov/core` |
+| App updates | `lib/updates/` | `useAppUpdate()` hook — checks `expo-updates` on mount |
+| Lifecycle | `lib/lifecycle/` | `useAppState()` and `useOnForeground(callback)` hooks |
+| Permissions | `lib/permissions/` | Generic `usePermission(requestFn)` hook with status/request/openSettings |
+
+### New Dependencies
+
+| Package | Purpose |
+|---|---|
+| `@mongrov/core` | Structured logging engine |
+| `@sentry/react-native` | Error tracking and performance monitoring |
+| `expo-file-system` | File-based log transport |
+| `expo-network` | Network connectivity monitoring |
+| `expo-secure-store` | Secure token storage |
+| `expo-local-authentication` | Biometric authentication support |
+| `expo-updates` | OTA update checking |
+| `jwt-decode` | JWT token decoding for session management |
+
 ## Is this starter for me?
 
 Yes 😀
@@ -111,6 +172,11 @@ We value the feedback and contributions of our users, and we encourage you to le
 - [React Native Screens](https://github.com/software-mansion/react-native-screens)
 - [Tailwind Variants](https://www.tailwind-variants.org/)
 - [Zod](https://zod.dev/)
+- [@mongrov/core](https://github.com/mongrov/mongrov-core) — Structured logging with ring buffer, file, and webhook transports
+- [@sentry/react-native](https://docs.sentry.io/platforms/react-native/) — Error tracking and performance monitoring
+- [Expo Secure Store](https://docs.expo.dev/versions/latest/sdk/securestore/) — Secure token storage
+- [Expo Updates](https://docs.expo.dev/versions/latest/sdk/updates/) — OTA update support
+- [jwt-decode](https://github.com/auth0/jwt-decode) — JWT token decoding
 
 ## Contributors
 

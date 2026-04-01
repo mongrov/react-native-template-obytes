@@ -15,6 +15,14 @@ const envSchema = z.object({
   EXPO_PUBLIC_VAR_NUMBER: z.number(),
   EXPO_PUBLIC_VAR_BOOL: z.boolean(),
 
+  // Logging (@mongrov/core)
+  EXPO_PUBLIC_LOG_WEBHOOK_URL: z.string().url().optional(),
+  EXPO_PUBLIC_LOG_WEBHOOK_HEADERS: z.string().optional(),
+  EXPO_PUBLIC_LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).optional(),
+
+  // Sentry
+  EXPO_PUBLIC_SENTRY_DSN: z.string().url().optional(),
+
   // only available for app.config.ts usage
   APP_BUILD_ONLY_VAR: z.string().optional(),
 });
@@ -58,6 +66,10 @@ const _env: z.infer<typeof envSchema> = {
   EXPO_PUBLIC_ASSOCIATED_DOMAIN: process.env.EXPO_PUBLIC_ASSOCIATED_DOMAIN,
   EXPO_PUBLIC_VAR_NUMBER: Number(process.env.EXPO_PUBLIC_VAR_NUMBER ?? 0),
   EXPO_PUBLIC_VAR_BOOL: process.env.EXPO_PUBLIC_VAR_BOOL === 'true',
+  EXPO_PUBLIC_LOG_WEBHOOK_URL: process.env.EXPO_PUBLIC_LOG_WEBHOOK_URL,
+  EXPO_PUBLIC_LOG_WEBHOOK_HEADERS: process.env.EXPO_PUBLIC_LOG_WEBHOOK_HEADERS,
+  EXPO_PUBLIC_LOG_LEVEL: (process.env.EXPO_PUBLIC_LOG_LEVEL ?? undefined) as 'debug' | 'info' | 'warn' | 'error' | undefined,
+  EXPO_PUBLIC_SENTRY_DSN: process.env.EXPO_PUBLIC_SENTRY_DSN,
   APP_BUILD_ONLY_VAR: process.env.APP_BUILD_ONLY_VAR,
 };
 
