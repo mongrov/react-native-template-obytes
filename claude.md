@@ -7,7 +7,7 @@
 - **Expo Router 6** - File-based routing (like Next.js)
 - **TailwindCSS** via Uniwind/Nativewind - Utility-first styling for React Native
 - **@mongrov/auth** - Authentication state machine (AuthProvider, useAuth, useSession)
-- **@mongrov/theme** - Design tokens & dark mode (ThemeProvider, useColorScheme, useNavigationTheme)
+- **Uniwind** - Dark mode via `Uniwind.setTheme()` + MMKV persistence (see `src/lib/theme/`)
 - **@mongrov/core** - Structured logging (LoggingProvider, useLogger)
 - **Zustand** - Lightweight global state management (non-auth state only)
 - **React Query** - Server state and data fetching
@@ -58,7 +58,7 @@ pnpm build:production:ios       # EAS production build
 - **Forms**: Use TanStack Form + Zod (see `src/features/auth/components/login-form.tsx`)
 - **Data fetching**: Use React Query (see `src/features/feed/api.ts`)
 - **Auth**: Use `@mongrov/auth` — `useAuth()` for signIn/signOut/status, `useSession()` for user info (see `src/lib/auth/`)
-- **Theme/Dark mode**: Use `@mongrov/theme` — `useColorScheme()` for dark/light, `useTheme()` for tokens (see `src/lib/theme/`)
+- **Theme/Dark mode**: Use `useColorScheme()` from `@/lib/theme` — returns `{ colorScheme, setColorScheme, isDark }`. No ThemeProvider needed.
 - **Auth adapter**: Implement `AuthAdapter` in `src/lib/auth/adapter.ts` (swap demo for real backend)
 - **Global state**: Use Zustand for non-auth state
 - **Styling**: NativeWind/Tailwind classes (see `src/components/ui/button.tsx`)

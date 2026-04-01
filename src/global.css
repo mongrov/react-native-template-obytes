@@ -2,6 +2,11 @@
 @import 'tailwindcss';
 @import 'uniwind';
 
+/* Scan @mongrov package dist/ for className strings */
+@source './node_modules/@mongrov/ui/dist';
+@source './node_modules/@mongrov/core/dist';
+@source './node_modules/@mongrov/ai/dist';
+
 /* Define your theme in CSS (replaces tailwind.config.js) */
 @theme {
   /* Font families */
@@ -101,6 +106,14 @@
 
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
+
+  /* Semantic aliases — referenced by @mongrov/* package components */
+  --color-primary: #FF6C00;
+  --color-primary-foreground: #FFFFFF;
+  --color-success: #22C55E;
+  --color-success-foreground: #FFFFFF;
+  --color-warning: #F59E0B;
+  --color-warning-foreground: #FFFFFF;
 }
 
 /* Dark mode colors */
@@ -117,6 +130,14 @@
 
     --color-border: #404040;
     --color-input: #404040;
+
+    /* Semantic aliases — dark overrides */
+    --color-primary: #FFA766;
+    --color-primary-foreground: #1E1E1E;
+    --color-success: #4ADE80;
+    --color-success-foreground: #1E1E1E;
+    --color-warning: #FBBF24;
+    --color-warning-foreground: #1E1E1E;
   }
 }
 

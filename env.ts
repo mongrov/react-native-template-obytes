@@ -23,6 +23,9 @@ const envSchema = z.object({
   // Sentry
   EXPO_PUBLIC_SENTRY_DSN: z.string().url().optional(),
 
+  // AI (@mongrov/ai)
+  EXPO_PUBLIC_OPENAI_API_KEY: z.string().optional(),
+
   // only available for app.config.ts usage
   APP_BUILD_ONLY_VAR: z.string().optional(),
 });
@@ -70,6 +73,7 @@ const _env: z.infer<typeof envSchema> = {
   EXPO_PUBLIC_LOG_WEBHOOK_HEADERS: process.env.EXPO_PUBLIC_LOG_WEBHOOK_HEADERS,
   EXPO_PUBLIC_LOG_LEVEL: (process.env.EXPO_PUBLIC_LOG_LEVEL ?? undefined) as 'debug' | 'info' | 'warn' | 'error' | undefined,
   EXPO_PUBLIC_SENTRY_DSN: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  EXPO_PUBLIC_OPENAI_API_KEY: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
   APP_BUILD_ONLY_VAR: process.env.APP_BUILD_ONLY_VAR,
 };
 

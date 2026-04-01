@@ -1,24 +1,43 @@
-import { createTheme } from '@mongrov/theme';
+import { DarkTheme, DefaultTheme } from '@react-navigation/native';
+import { useCallback, useEffect, useState } from 'react';
+import { Appearance } from 'react-native';
+import { Uniwind } from 'uniwind';
+import { storage } from '@/lib/storage';
 
-// App brand overrides — customize per product
-// Using existing primary orange from colors.js
-export const appTheme = createTheme({
-  overrides: {
-    light: {
-      colors: {
-        primary: '#FF6C00',
-        primaryForeground: '#FFFFFF',
-      },
-    },
-    dark: {
-      colors: {
-        primary: '#FFA766',
-        primaryForeground: '#1E1E1E',
-      },
-    },
-  },
-});
+export type ColorScheme = 'light' | 'dark' | 'system';
 
-// Re-export for app consumption
-export { useColorScheme, useTheme } from '@mongrov/theme';
-export type { ColorScheme, Theme } from '@mongrov/theme';
+const STORAGE_KEY = 'color-scheme';
+
+function getPersistedScheme(): ColorScheme {
+  return (storage.getString(STORAGE_KEY) as ColorScheme) ?? 'system';
+}
+
+function resolveScheme(scheme: ColorScheme): 'light' | 'dark' {
+  if (scheme === 'system')
+    return Appearance.getColorScheme() ?? 'light';
+  return scheme;
+}
+
+export function useColorScheme() {
+  const [colorScheme, setColorSchemeState] = useState(getPersistedScheme);
+  const resolved = resolveScheme(colorScheme);
+  const isDark = resolved === 'dark';
+
+  const setColorScheme = useCallback((scheme: ColorScheme) => {
+    storage.set(STORAGE_KEY, scheme);
+    setColorSchemeState(scheme);
+    Uniwind.setTheme(scheme);
+  }, []);
+
+  // Apply persisted theme on mount
+  useEffect(() => {
+    Uniwind.setTheme(colorScheme);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return { colorScheme, setColorScheme, isDark };
+}
+
+export function useNavigationTheme() {
+  const { isDark } = useColorScheme();
+  return isDark ? DarkTheme : DefaultTheme;
+}

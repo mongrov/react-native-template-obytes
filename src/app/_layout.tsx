@@ -1,9 +1,8 @@
 import type { LogEntry, LogTransport } from '@mongrov/core';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { AIProvider } from '@mongrov/ai';
 import { AuthProvider } from '@mongrov/auth';
 import { LoggingProvider } from '@mongrov/core';
-import { ThemeProvider } from '@mongrov/theme';
-import { useNavigationTheme } from '@mongrov/theme/navigation';
 import { ThemeProvider as NavThemeProvider } from '@react-navigation/native';
 import Env from 'env';
 import { Stack } from 'expo-router';
@@ -14,10 +13,11 @@ import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { aiConfig } from '@/lib/ai';
 import { APIProvider } from '@/lib/api';
 import { authConfig } from '@/lib/auth';
 import { initSentry, SentryErrorBoundary } from '@/lib/sentry';
-import { appTheme, useColorScheme } from '@/lib/theme';
+import { useColorScheme, useNavigationTheme } from '@/lib/theme';
 // Import  global CSS file
 import '../global.css';
 // Lazy-load Sentry to avoid crashes in Expo Go
@@ -104,17 +104,15 @@ function Providers({ children }: { children: React.ReactNode }) {
           },
         }}
       >
-        <ThemeProvider theme={appTheme}>
-          <InnerProviders>
-            {children}
-          </InnerProviders>
-        </ThemeProvider>
+        <InnerProviders>
+          {children}
+        </InnerProviders>
       </LoggingProvider>
     </SentryErrorBoundary>
   );
 }
 
-/** Inner providers that need ThemeProvider context (useNavTheme, useColorScheme) */
+/** Inner providers that need hooks (useNavigationTheme, useColorScheme) */
 function InnerProviders({ children }: { children: React.ReactNode }) {
   const navTheme = useNavigationTheme();
   const { isDark } = useColorScheme();
@@ -128,12 +126,25 @@ function InnerProviders({ children }: { children: React.ReactNode }) {
       <KeyboardProvider>
         <NavThemeProvider value={navTheme}>
           <AuthProvider config={authConfig}>
-            <APIProvider>
-              <BottomSheetModalProvider>
-                {children}
-                <FlashMessage position="top" />
-              </BottomSheetModalProvider>
-            </APIProvider>
+            {aiConfig
+              ? (
+                  <AIProvider config={aiConfig}>
+                    <APIProvider>
+                      <BottomSheetModalProvider>
+                        {children}
+                        <FlashMessage position="top" />
+                      </BottomSheetModalProvider>
+                    </APIProvider>
+                  </AIProvider>
+                )
+              : (
+                  <APIProvider>
+                    <BottomSheetModalProvider>
+                      {children}
+                      <FlashMessage position="top" />
+                    </BottomSheetModalProvider>
+                  </APIProvider>
+                )}
           </AuthProvider>
         </NavThemeProvider>
       </KeyboardProvider>
