@@ -2,9 +2,11 @@
 import Svg from 'react-native-svg';
 import { withUniwind } from 'uniwind';
 
-export * from './button';
+// Local components (not in @mongrov/ui yet)
 export * from './checkbox';
+
 export { default as colors } from './colors';
+
 export * from './focus-aware-status-bar';
 export * from './image';
 export * from './input';
@@ -12,8 +14,32 @@ export * from './list';
 export * from './modal';
 export * from './progress-bar';
 export * from './select';
-export * from './text';
 export * from './utils';
+// Re-export primitives from @mongrov/ui
+export {
+  // Button
+  Button,
+  buttonTextVariants,
+  buttonVariants,
+  // Card
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  // Utils
+  cn,
+  // Separator
+  Separator,
+  // Skeleton
+  Skeleton,
+  // Text
+  Text,
+  TextClassContext,
+  textVariants,
+} from '@mongrov/ui';
+export type { ButtonProps, TextProps, TextVariant } from '@mongrov/ui';
 
 // export base components from react-native
 export {

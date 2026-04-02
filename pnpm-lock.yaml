@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@mongrov/ui': link:../mongrov-packages/packages/ui
+
 importers:
 
   .:
@@ -30,8 +33,8 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0(expo-file-system@19.0.21(expo@54.0.32)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0)))(expo-network@8.0.8(expo@54.0.32)(react@19.1.0))(expo-router@6.0.22)(react-native-mmkv@4.1.1(react-native-nitro-modules@0.33.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(uniwind@1.2.4(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.18))
       '@mongrov/ui':
-        specifier: ^0.1.0
-        version: 0.1.0(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(uniwind@1.2.4(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.18))
+        specifier: link:../mongrov-packages/packages/ui
+        version: link:../mongrov-packages/packages/ui
       '@sentry/react-native':
         specifier: ~7.2.0
         version: 7.2.0(expo@54.0.32)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -2004,17 +2007,6 @@ packages:
         optional: true
       react-native-mmkv:
         optional: true
-      uniwind:
-        optional: true
-
-  '@mongrov/ui@0.1.0':
-    resolution: {integrity: sha512-+qB8kCfye5JJPbEXEfaqdTydPetHQ1kqW4Wj687OZcj0iAklI9N0XGXDNvYJWsDxsKDBWueWHHLRdfsA5pU4hQ==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      react: '>=18'
-      react-native: '>=0.74'
-      uniwind: '>=1'
-    peerDependenciesMeta:
       uniwind:
         optional: true
 
@@ -10776,13 +10768,6 @@ snapshots:
       expo-network: 8.0.8(expo@54.0.32)(react@19.1.0)
       expo-router: 6.0.22(4a6017a91b786242661fffb6a6a94848)
       react-native-mmkv: 4.1.1(react-native-nitro-modules@0.33.2(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
-      uniwind: 1.2.4(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.18)
-
-  '@mongrov/ui@0.1.0(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(uniwind@1.2.4(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.18))':
-    dependencies:
-      react: 19.1.0
-      react-native: 0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0)
-    optionalDependencies:
       uniwind: 1.2.4(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(tailwindcss@4.1.18)
 
   '@motionone/animation@10.18.0':

@@ -1,4 +1,5 @@
 import type { PressableProps } from 'react-native';
+import { Text } from '@mongrov/ui';
 import { MotiView } from 'moti';
 import * as React from 'react';
 import { useCallback } from 'react';
@@ -8,11 +9,10 @@ import {
 
   View,
 } from 'react-native';
+
 import Svg, { Path } from 'react-native-svg';
 
 import colors from '@/components/ui/colors';
-
-import { Text } from './text';
 
 const SIZE = 20;
 const WIDTH = 50;

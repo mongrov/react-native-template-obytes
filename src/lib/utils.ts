@@ -1,6 +1,9 @@
 import type { StoreApi, UseBoundStore } from 'zustand';
 import { Linking } from 'react-native';
 
+// cn is now exported from @mongrov/ui
+export { cn } from '@mongrov/ui';
+
 export function openLinkInBrowser(url: string) {
   Linking.canOpenURL(url).then(canOpen => canOpen && Linking.openURL(url));
 }

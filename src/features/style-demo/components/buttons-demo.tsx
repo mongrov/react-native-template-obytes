@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button, View } from '@/components/ui';
+import { Button, Card, CardContent, CardHeader, CardTitle, Text, View } from '@/components/ui';
 
 import { Title } from './title';
 
@@ -8,45 +8,72 @@ export function Buttons() {
   return (
     <>
       <Title text="Buttons" />
-      <View>
-        <View className="flex-row flex-wrap">
-          <Button label="small" size="sm" className="mr-2" />
-          <Button
-            label="small"
-            loading
-            size="sm"
-            className="mr-2 min-w-[60px]"
-          />
-          <Button
-            label="small"
-            size="sm"
-            variant="secondary"
-            className="mr-2"
-          />
-          <Button label="small" size="sm" variant="outline" className="mr-2" />
-          <Button
-            label="small"
-            size="sm"
-            variant="destructive"
-            className="mr-2"
-          />
-          <Button label="small" size="sm" variant="ghost" className="mr-2" />
-          <Button label="small" size="sm" disabled className="mr-2" />
-        </View>
-        <Button label="Default Button" />
-        <Button label="Secondary Button" variant="secondary" />
-        <Button label="Outline Button" variant="outline" />
-        <Button label="Destructive Button" variant="destructive" />
-        <Button label="Ghost Button" variant="ghost" />
-        <Button label="Button" loading={true} />
-        <Button label="Button" loading={true} variant="outline" />
-        <Button label="Default Button Disabled" disabled />
-        <Button
-          label="Secondary Button Disabled"
-          disabled
-          variant="secondary"
-        />
-      </View>
+
+      {/* Variants */}
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>Variants</CardTitle>
+        </CardHeader>
+        <CardContent className="gap-2">
+          <Button label="Default" />
+          <Button label="Secondary" variant="secondary" />
+          <Button label="Outline" variant="outline" />
+          <Button label="Destructive" variant="destructive" />
+          <Button label="Ghost" variant="ghost" />
+          <Button label="Link" variant="link" />
+        </CardContent>
+      </Card>
+
+      {/* Sizes */}
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>Sizes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <View className="flex-row flex-wrap items-center gap-2">
+            <Button label="Small" size="sm" />
+            <Button label="Default" size="default" />
+            <Button label="Large" size="lg" />
+          </View>
+        </CardContent>
+      </Card>
+
+      {/* States */}
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>States</CardTitle>
+        </CardHeader>
+        <CardContent className="gap-2">
+          <View>
+            <Text variant="muted" className="mb-1">Loading</Text>
+            <View className="flex-row flex-wrap gap-2">
+              <Button label="Loading" loading />
+              <Button label="Loading" loading variant="outline" />
+              <Button label="Loading" loading variant="secondary" />
+            </View>
+          </View>
+          <View>
+            <Text variant="muted" className="mb-1">Disabled</Text>
+            <View className="flex-row flex-wrap gap-2">
+              <Button label="Disabled" disabled />
+              <Button label="Disabled" disabled variant="outline" />
+              <Button label="Disabled" disabled variant="secondary" />
+            </View>
+          </View>
+        </CardContent>
+      </Card>
+
+      {/* With Children */}
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>With Children</CardTitle>
+        </CardHeader>
+        <CardContent className="gap-2">
+          <Button variant="outline">
+            <Text>Custom Content</Text>
+          </Button>
+        </CardContent>
+      </Card>
     </>
   );
 }

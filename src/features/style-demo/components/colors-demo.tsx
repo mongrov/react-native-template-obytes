@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text, View } from '@/components/ui';
+import { Card, CardContent, CardHeader, CardTitle, Text, View } from '@/components/ui';
 import colors from '@/components/ui/colors';
 
 import { Title } from './title';
@@ -11,41 +11,43 @@ export function Colors() {
     <>
       <Title text="Colors" />
       {(Object.keys(colors) as ColorName[]).map(name => (
-        <Color name={name} key={name} />
+        <ColorPalette name={name} key={name} />
       ))}
     </>
   );
 }
 
-function Color({ name }: { name: ColorName }) {
+function ColorPalette({ name }: { name: ColorName }) {
   if (typeof colors[name] === 'string')
     return null;
   return (
-    <View className="pt-2">
-      <Text className="font-medium">{name.toUpperCase()}</Text>
-      <View className="flex-row flex-wrap content-between justify-around">
-        {Object.entries(colors[name]).map(([key, value]) => {
-          return (
-            <ColorCard
-              key={`${colors[name]}-${key}`}
-              value={key}
+    <Card className="mb-4">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">{name.charAt(0).toUpperCase() + name.slice(1)}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <View className="flex-row flex-wrap gap-1">
+          {Object.entries(colors[name]).map(([key, value]) => (
+            <ColorSwatch
+              key={`${name}-${key}`}
+              shade={key}
               color={value}
             />
-          );
-        })}
-      </View>
-    </View>
+          ))}
+        </View>
+      </CardContent>
+    </Card>
   );
 }
 
-function ColorCard({ color, value }: { value: string; color: string }) {
+function ColorSwatch({ color, shade }: { shade: string; color: string }) {
   return (
-    <View className="flex-1">
+    <View className="items-center">
       <View
-        className="h-14 w-full rounded-sm"
+        className="size-10 rounded-md border border-neutral-200 dark:border-neutral-700"
         style={{ backgroundColor: color }}
       />
-      <Text className="text-sm">{value}</Text>
+      <Text variant="small" className="mt-1">{shade}</Text>
     </View>
   );
 }

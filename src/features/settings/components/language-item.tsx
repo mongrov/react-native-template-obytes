@@ -7,7 +7,11 @@ import { translate, useSelectedLanguage } from '@/lib/i18n';
 
 import { SettingsItem } from './settings-item';
 
-export function LanguageItem() {
+type Props = {
+  isLast?: boolean;
+};
+
+export function LanguageItem({ isLast }: Props) {
   const { language, setLanguage } = useSelectedLanguage();
   const modal = useModal();
   const onSelect = React.useCallback(
@@ -37,6 +41,7 @@ export function LanguageItem() {
         text="settings.language"
         value={selectedLanguage?.label}
         onPress={modal.present}
+        isLast={isLast}
       />
       <Options
         ref={modal.ref}

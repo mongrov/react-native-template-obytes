@@ -8,7 +8,11 @@ import { useColorScheme } from '@/lib/theme';
 
 import { SettingsItem } from './settings-item';
 
-export function ThemeItem() {
+type Props = {
+  isLast?: boolean;
+};
+
+export function ThemeItem({ isLast }: Props) {
   const { colorScheme, setColorScheme } = useColorScheme();
   const modal = useModal();
 
@@ -40,6 +44,7 @@ export function ThemeItem() {
         text="settings.theme.title"
         value={theme?.label}
         onPress={modal.present}
+        isLast={isLast}
       />
       <Options
         ref={modal.ref}

@@ -1,7 +1,19 @@
 import type { OptionType } from '@/components/ui';
 
 import * as React from 'react';
-import { Checkbox, Input, Radio, Select, Switch, View } from '@/components/ui';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Checkbox,
+  Input,
+  Radio,
+  Select,
+  Separator,
+  Switch,
+  View,
+} from '@/components/ui';
 
 import { Title } from './title';
 
@@ -13,23 +25,52 @@ const options: OptionType[] = [
 
 export function Inputs() {
   const [value, setValue] = React.useState<string | number | undefined>();
+
   return (
     <>
       <Title text="Form" />
-      <View>
-        <Input label="Default" placeholder="Lorem ipsum dolor sit amet" />
-        <Input label="Error" error="This is a message error" />
-        <Input label="Focused" />
-        <Select
-          label="Select"
-          options={options}
-          value={value}
-          onSelect={option => setValue(option)}
-        />
-        <CheckboxExample />
-        <RadioExample />
-        <SwitchExample />
-      </View>
+
+      {/* Text Inputs */}
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>Text Input</CardTitle>
+        </CardHeader>
+        <CardContent className="gap-2">
+          <Input label="Default" placeholder="Enter text..." />
+          <Input label="With Error" error="This field is required" />
+          <Input label="Disabled" placeholder="Disabled input" disabled />
+        </CardContent>
+      </Card>
+
+      {/* Select */}
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>Select</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Select
+            label="Choose a flavor"
+            options={options}
+            value={value}
+            onSelect={option => setValue(option)}
+            placeholder="Select an option..."
+          />
+        </CardContent>
+      </Card>
+
+      {/* Toggle Controls */}
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>Toggle Controls</CardTitle>
+        </CardHeader>
+        <CardContent className="gap-4">
+          <CheckboxExample />
+          <Separator />
+          <RadioExample />
+          <Separator />
+          <SwitchExample />
+        </CardContent>
+      </Card>
     </>
   );
 }
@@ -37,44 +78,47 @@ export function Inputs() {
 function CheckboxExample() {
   const [checked, setChecked] = React.useState(false);
   return (
-    <Checkbox.Root
-      checked={checked}
-      onChange={setChecked}
-      accessibilityLabel="accept terms of condition"
-      className="pb-2"
-    >
-      <Checkbox.Icon checked={checked} />
-      <Checkbox.Label text="checkbox" />
-    </Checkbox.Root>
+    <View>
+      <Checkbox.Root
+        checked={checked}
+        onChange={setChecked}
+        accessibilityLabel="Accept terms of condition"
+      >
+        <Checkbox.Icon checked={checked} />
+        <Checkbox.Label text="I agree to the terms and conditions" />
+      </Checkbox.Root>
+    </View>
   );
 }
 
 function RadioExample() {
   const [selected, setSelected] = React.useState(false);
   return (
-    <Radio.Root
-      checked={selected}
-      onChange={setSelected}
-      accessibilityLabel="radio button"
-      className="pb-2"
-    >
-      <Radio.Icon checked={selected} />
-      <Radio.Label text="radio button" />
-    </Radio.Root>
+    <View>
+      <Radio.Root
+        checked={selected}
+        onChange={setSelected}
+        accessibilityLabel="Radio option"
+      >
+        <Radio.Icon checked={selected} />
+        <Radio.Label text="Enable notifications" />
+      </Radio.Root>
+    </View>
   );
 }
 
 function SwitchExample() {
   const [active, setActive] = React.useState(false);
   return (
-    <Switch.Root
-      checked={active}
-      onChange={setActive}
-      accessibilityLabel="switch"
-      className="pb-2"
-    >
-      <Switch.Icon checked={active} />
-      <Switch.Label text="switch" />
-    </Switch.Root>
+    <View>
+      <Switch.Root
+        checked={active}
+        onChange={setActive}
+        accessibilityLabel="Dark mode toggle"
+      >
+        <Switch.Icon checked={active} />
+        <Switch.Label text="Dark mode" />
+      </Switch.Root>
+    </View>
   );
 }

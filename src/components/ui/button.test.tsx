@@ -1,9 +1,9 @@
+import { Button } from '@mongrov/ui';
 import * as React from 'react';
+
 import { Text } from 'react-native';
 
 import { cleanup, render, screen, setup } from '@/lib/test-utils';
-
-import { Button } from './button';
 
 afterEach(cleanup);
 

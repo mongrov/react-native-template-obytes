@@ -6,18 +6,18 @@ import {
   BottomSheetFlatList,
 
 } from '@gorhom/bottom-sheet';
+import { Text } from '@mongrov/ui';
 import { FlashList } from '@shopify/flash-list';
 import * as React from 'react';
 import { Platform, Pressable, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+
 import { tv } from 'tailwind-variants';
-
 import colors from '@/components/ui/colors';
-import { CaretDown } from '@/components/ui/icons';
 
+import { CaretDown } from '@/components/ui/icons';
 import { useColorScheme } from '@/lib/theme';
 import { Modal, useModal } from './modal';
-import { Text } from './text';
 
 const selectTv = tv({
   slots: {

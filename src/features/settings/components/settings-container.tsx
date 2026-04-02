@@ -1,7 +1,8 @@
 import type { TxKeyPath } from '@/lib/i18n';
 
 import * as React from 'react';
-import { Text, View } from '@/components/ui';
+import { Card, Text, View } from '@/components/ui';
+import { translate } from '@/lib/i18n';
 
 type Props = {
   children: React.ReactNode;
@@ -10,11 +11,11 @@ type Props = {
 
 export function SettingsContainer({ children, title }: Props) {
   return (
-    <>
-      {title && <Text className="pt-4 pb-2 text-lg" tx={title} />}
-      <View className="rounded-md border border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800">
+    <View className="mt-4">
+      {title && <Text className="pb-2 text-lg font-medium">{translate(title)}</Text>}
+      <Card className="gap-0 overflow-hidden py-0">
         {children}
-      </View>
-    </>
+      </Card>
+    </View>
   );
 }

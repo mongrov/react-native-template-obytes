@@ -3,7 +3,15 @@ import type { Post } from '../api';
 import { Link } from 'expo-router';
 import * as React from 'react';
 
-import { Image, Pressable, Text, View } from '@/components/ui';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Image,
+  Pressable,
+} from '@/components/ui';
 
 const images = [
   'https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?auto=format&fit=crop&w=800&q=80',
@@ -19,7 +27,7 @@ export function PostCard({ title, body, id }: Props) {
   return (
     <Link href={`/feed/${id}`} asChild>
       <Pressable>
-        <View className="m-2 overflow-hidden rounded-xl border border-neutral-300 bg-white dark:bg-neutral-900">
+        <Card className="m-2 overflow-hidden py-0">
           <Image
             className="h-56 w-full overflow-hidden rounded-t-xl"
             contentFit="cover"
@@ -28,14 +36,15 @@ export function PostCard({ title, body, id }: Props) {
               uri: images[Math.floor(Math.random() * images.length)],
             }}
           />
-
-          <View className="p-2">
-            <Text className="py-3 text-2xl">{title}</Text>
-            <Text numberOfLines={3} className="leading-snug text-gray-600">
+          <CardHeader className="py-3">
+            <CardTitle className="text-xl">{title}</CardTitle>
+          </CardHeader>
+          <CardContent className="pb-4">
+            <CardDescription numberOfLines={3} className="leading-snug">
               {body}
-            </Text>
-          </View>
-        </View>
+            </CardDescription>
+          </CardContent>
+        </Card>
       </Pressable>
     </Link>
   );

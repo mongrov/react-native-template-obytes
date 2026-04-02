@@ -21,8 +21,7 @@ import { ThemeItem } from './components/theme-item';
 export function SettingsScreen() {
   const { signOut } = useAuth();
   const { isDark } = useColorScheme();
-  const iconColor
-    = isDark ? colors.neutral[400] : colors.neutral[500];
+  const iconColor = isDark ? colors.neutral[400] : colors.neutral[500];
   const router = useRouter();
   const session = useSession();
   const hasPermission = session?.hasPermission ?? (() => false);
@@ -30,12 +29,10 @@ export function SettingsScreen() {
   const tapTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const handleVersionTap = () => {
-    // Allow immediate access in dev mode or if user has dev-tools permission
     if (__DEV__ || hasPermission('dev-tools')) {
       router.push('/(app)/dev-tools');
       return;
     }
-    // In production without permission: require 5 taps
     tapCountRef.current += 1;
     if (tapTimerRef.current)
       clearTimeout(tapTimerRef.current);
@@ -49,18 +46,19 @@ export function SettingsScreen() {
       }, 2000);
     }
   };
+
   return (
     <>
       <FocusAwareStatusBar />
-
-      <ScrollView>
-        <View className="flex-1 px-4 pt-16">
-          <Text className="text-xl font-bold">
+      <ScrollView className="bg-white dark:bg-neutral-950">
+        <View className="flex-1 px-4 pt-16 pb-8">
+          <Text variant="h3" className="mb-2">
             {translate('settings.title')}
           </Text>
+
           <SettingsContainer title="settings.generale">
             <LanguageItem />
-            <ThemeItem />
+            <ThemeItem isLast />
           </SettingsContainer>
 
           <SettingsContainer title="settings.about">
@@ -72,6 +70,7 @@ export function SettingsScreen() {
               text="settings.version"
               value={Env.EXPO_PUBLIC_VERSION}
               onPress={handleVersionTap}
+              isLast
             />
           </SettingsContainer>
 
@@ -90,6 +89,7 @@ export function SettingsScreen() {
               text="settings.support"
               icon={<Support color={iconColor} />}
               onPress={() => {}}
+              isLast
             />
           </SettingsContainer>
 
@@ -105,14 +105,18 @@ export function SettingsScreen() {
               text="settings.website"
               icon={<Website color={iconColor} />}
               onPress={() => {}}
+              isLast
             />
           </SettingsContainer>
 
-          <View className="my-8">
-            <SettingsContainer>
-              <SettingsItem text="settings.logout" onPress={signOut} />
-            </SettingsContainer>
-          </View>
+          <SettingsContainer>
+            <SettingsItem
+              text="settings.logout"
+              onPress={signOut}
+              destructive
+              isLast
+            />
+          </SettingsContainer>
         </View>
       </ScrollView>
     </>
