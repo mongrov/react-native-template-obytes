@@ -116,29 +116,27 @@
   --color-warning-foreground: #FFFFFF;
 }
 
-/* Dark mode colors */
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: #0a0a0a;
-    --color-foreground: #fafafa;
+/* Dark mode colors - triggered by .dark class on root */
+.dark {
+  --color-background: #0a0a0a;
+  --color-foreground: #fafafa;
 
-    --color-card: #171717;
-    --color-card-foreground: #fafafa;
+  --color-card: #171717;
+  --color-card-foreground: #fafafa;
 
-    --color-muted: #262626;
-    --color-muted-foreground: #a3a3a3;
+  --color-muted: #262626;
+  --color-muted-foreground: #a3a3a3;
 
-    --color-border: #404040;
-    --color-input: #404040;
+  --color-border: #404040;
+  --color-input: #404040;
 
-    /* Semantic aliases — dark overrides */
-    --color-primary: #FFA766;
-    --color-primary-foreground: #1E1E1E;
-    --color-success: #4ADE80;
-    --color-success-foreground: #1E1E1E;
-    --color-warning: #FBBF24;
-    --color-warning-foreground: #1E1E1E;
-  }
+  /* Semantic aliases — dark overrides */
+  --color-primary: #FFA766;
+  --color-primary-foreground: #1E1E1E;
+  --color-success: #4ADE80;
+  --color-success-foreground: #1E1E1E;
+  --color-warning: #FBBF24;
+  --color-warning-foreground: #1E1E1E;
 }
 
 /* Custom utilities (if needed) */

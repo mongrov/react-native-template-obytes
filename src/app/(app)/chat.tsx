@@ -34,7 +34,6 @@ type Theme = ReturnType<typeof getTheme>;
 
 export default function Chat() {
   const [inputText, setInputText] = useState('');
-  const { isDark } = useColorScheme();
 
   if (!aiConfig) {
     return (
@@ -52,20 +51,19 @@ export default function Chat() {
     );
   }
 
-  return <ChatContent inputText={inputText} setInputText={setInputText} isDark={isDark} />;
+  return <ChatContent inputText={inputText} setInputText={setInputText} />;
 }
 
 function ChatContent({
   inputText,
   setInputText,
-  isDark,
 }: {
   inputText: string;
   setInputText: (text: string) => void;
-  isDark: boolean;
 }) {
   const { messages, send, isStreaming } = useAIChat();
-  const theme = useMemo(() => getTheme(isDark), [isDark]);
+  const { isDark } = useColorScheme();
+  const theme = getTheme(isDark);
 
   const giftedMessages = useMemo(() => messages.map((msg, idx) => ({
     _id: msg.id || idx,
@@ -116,8 +114,8 @@ function ChatContent({
   return (
     <>
       <FocusAwareStatusBar />
-      <View className="flex-1 bg-background">
-        <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: theme.bg }}>
+        <View style={{ flex: 1, backgroundColor: theme.bg }}>
           <GiftedChat
             messages={giftedMessages}
             onSend={() => {}}
