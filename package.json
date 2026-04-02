@@ -54,6 +54,8 @@
     "@mongrov/auth": "^0.3.0",
     "@mongrov/core": "^0.3.0",
     "@mongrov/ui": "^0.2.0",
+    "@rn-primitives/separator": "^1.4.0",
+    "@rn-primitives/slot": "^1.4.0",
     "@sentry/react-native": "~7.2.0",
     "@shopify/flash-list": "2.0.2",
     "@tanstack/react-form": "^1.27.7",
