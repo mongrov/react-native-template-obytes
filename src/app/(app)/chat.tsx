@@ -1,10 +1,11 @@
 import { useAIChat } from '@mongrov/ai';
 import { useCallback, useMemo, useState } from 'react';
-import { ScrollView, TextInput, TouchableOpacity, useColorScheme } from 'react-native';
+import { ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { Bubble, GiftedChat } from 'react-native-gifted-chat';
 
 import { FocusAwareStatusBar, Text, View } from '@/components/ui';
 import { aiConfig } from '@/lib/ai';
+import { useColorScheme } from '@/lib/theme';
 
 const QUICK_REPLIES = [
   'What can you help me with?',
@@ -33,8 +34,7 @@ type Theme = ReturnType<typeof getTheme>;
 
 export default function Chat() {
   const [inputText, setInputText] = useState('');
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { isDark } = useColorScheme();
 
   if (!aiConfig) {
     return (
