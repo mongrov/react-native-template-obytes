@@ -78,14 +78,14 @@ function ChatContent({
   })).reverse(), [messages]);
 
   const handleSend = useCallback((text?: string) => {
-    const messageText = (text || inputText).trim();
+    const messageText = (text || inputText || '').trim();
     if (!messageText)
       return;
     setInputText('');
     send(messageText);
   }, [inputText, send, setInputText]);
 
-  const canSend = inputText.trim().length > 0 && !isStreaming;
+  const canSend = (inputText || '').trim().length > 0 && !isStreaming;
 
   const renderChatEmpty = useCallback(() => (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', transform: [{ scaleY: -1 }] }}>
