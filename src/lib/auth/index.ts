@@ -8,12 +8,11 @@ export const authConfig: AuthClientConfig = {
 };
 
 export { defaultTenantId, isMultiTenant, tenants } from './tenants';
-// OAuth/SSO hooks
-export { useOAuthFlow, useSocialAuth, useSSOAuth } from './use-oauth-flow';
-
-export type { OAuthConfig, OAuthResult, SSOConfig } from './use-oauth-flow';
 // Tenant management
 export { getTenantById, useTenant } from './use-tenant';
+// OAuth/SSO hooks - uncomment if you install expo-auth-session and expo-web-browser
+// export { useOAuthFlow, useSocialAuth, useSSOAuth } from './use-oauth-flow';
+// export type { OAuthConfig, OAuthResult, SSOConfig } from './use-oauth-flow';
 
 // Re-export for app consumption
 export { useAuth, useSession } from '@mongrov/auth';
