@@ -10,69 +10,77 @@ import {
   Button,
   Input,
   SocialLoginButton,
-  SSOButton,
   Text,
   View,
 } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 
-const schema = z.object({
-  email: z
-    .string({
-      message: 'Email is required',
-    })
-    .min(1, 'Email is required')
-    .email('Invalid email format'),
-  password: z
-    .string({
-      message: 'Password is required',
-    })
-    .min(1, 'Password is required')
-    .min(6, 'Password must be at least 6 characters'),
-});
+const schema = z
+  .object({
+    name: z
+      .string({
+        message: 'Name is required',
+      })
+      .min(1, 'Name is required')
+      .min(2, 'Name must be at least 2 characters'),
+    email: z
+      .string({
+        message: 'Email is required',
+      })
+      .min(1, 'Email is required')
+      .email('Invalid email format'),
+    password: z
+      .string({
+        message: 'Password is required',
+      })
+      .min(1, 'Password is required')
+      .min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z
+      .string({
+        message: 'Please confirm your password',
+      })
+      .min(1, 'Please confirm your password'),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
-export type FormType = z.infer<typeof schema>;
+export type SignUpFormType = z.infer<typeof schema>;
 
-export type LoginFormProps = {
+export type SignUpFormProps = {
   /** Auth method configuration. Default: email-password */
   authConfig?: AuthMethodConfig;
-  /** Called when email/password form is submitted */
-  onSubmit?: (data: FormType) => void;
+  /** Called when form is submitted */
+  onSubmit?: (data: SignUpFormType) => void;
   /** Called when a social provider button is pressed */
-  onSocialLogin?: (provider: SocialProvider) => void;
-  /** Called when SSO button is pressed */
-  onSSOLogin?: () => void;
-  /** Called when "Create account" is pressed */
-  onSignUpPress?: () => void;
-  /** Called when "Forgot password?" is pressed */
-  onForgotPasswordPress?: () => void;
-  /** Whether any auth action is in progress */
+  onSocialSignUp?: (provider: SocialProvider) => void;
+  /** Called when "Already have an account?" is pressed */
+  onLoginPress?: () => void;
+  /** Whether registration is in progress */
   loading?: boolean;
-  /** SSO provider name for display (e.g., "Okta", "Azure AD") */
-  ssoProviderName?: string;
-  /** Custom title. Default: "Sign In" */
+  /** Custom title. Default: "Create Account" */
   title?: string;
   /** Custom subtitle */
   subtitle?: string;
 };
 
 // eslint-disable-next-line max-lines-per-function
-export function LoginForm({
+export function SignUpForm({
   authConfig = { method: 'email-password' },
   onSubmit = () => {},
-  onSocialLogin,
-  onSSOLogin,
-  onSignUpPress,
-  onForgotPasswordPress,
+  onSocialSignUp,
+  onLoginPress,
   loading = false,
-  ssoProviderName,
-  title = 'Sign In',
+  title = 'Create Account',
   subtitle,
-}: LoginFormProps) {
+}: SignUpFormProps) {
   const form = useForm({
     defaultValues: {
+      name: '',
       email: '',
       password: '',
+      confirmPassword: '',
     },
     validators: {
       onChange: schema as any,
@@ -94,12 +102,6 @@ export function LoginForm({
         && (authConfig.primary.method === 'social'
           || authConfig.alternatives.some(a => a.method === 'social')));
 
-  const hasSSO
-    = authConfig.method === 'sso'
-      || (authConfig.method === 'composite'
-        && (authConfig.primary.method === 'sso'
-          || authConfig.alternatives.some(a => a.method === 'sso')));
-
   const socialProviders = React.useMemo((): SocialProvider[] => {
     if (authConfig.method === 'social') {
       return authConfig.providers;
@@ -114,22 +116,6 @@ export function LoginForm({
       }
     }
     return [];
-  }, [authConfig]);
-
-  const ssoConfig = React.useMemo(() => {
-    if (authConfig.method === 'sso') {
-      return authConfig;
-    }
-    if (authConfig.method === 'composite') {
-      const config
-        = authConfig.primary.method === 'sso'
-          ? authConfig.primary
-          : authConfig.alternatives.find(a => a.method === 'sso');
-      if (config && config.method === 'sso') {
-        return config;
-      }
-    }
-    return null;
   }, [authConfig]);
 
   return (
@@ -154,21 +140,7 @@ export function LoginForm({
           )}
         </View>
 
-        {/* SSO Button (shown first if primary) */}
-        {hasSSO
-          && authConfig.method !== 'composite'
-          && authConfig.method === 'sso' && (
-          <View className="mb-4">
-            <SSOButton
-              testID="sso-button"
-              onPress={onSSOLogin ?? (() => {})}
-              loading={loading}
-              providerName={ssoProviderName ?? ssoConfig?.provider}
-            />
-          </View>
-        )}
-
-        {/* Social Buttons - shown at top for social-only or social-primary modes */}
+        {/* Social Sign Up Buttons */}
         {hasSocial
           && socialProviders.length > 0
           && (authConfig.method === 'social'
@@ -180,24 +152,39 @@ export function LoginForm({
                 key={provider}
                 testID={`social-${provider}-button`}
                 provider={provider}
-                onPress={() => onSocialLogin?.(provider)}
+                onPress={() => onSocialSignUp?.(provider)}
                 loading={loading}
+                label={`Sign up with ${provider.charAt(0).toUpperCase() + provider.slice(1)}`}
               />
             ))}
           </View>
         )}
 
-        {/* Divider between social/SSO and email-password */}
-        {((hasSocial
+        {/* Divider */}
+        {hasSocial
           && (authConfig.method === 'social'
             || (authConfig.method === 'composite'
-              && authConfig.primary.method === 'social')))
-            || (hasSSO && authConfig.method === 'sso'))
-          && hasEmailPassword && <AuthDivider text="or sign in with email" />}
+              && authConfig.primary.method === 'social'))
+            && hasEmailPassword && <AuthDivider text="or sign up with email" />}
 
         {/* Email/Password Form */}
         {hasEmailPassword && (
           <>
+            <form.Field
+              name="name"
+              children={field => (
+                <Input
+                  testID="name-input"
+                  label="Full Name"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChangeText={field.handleChange}
+                  error={getFieldError(field)}
+                  autoCapitalize="words"
+                />
+              )}
+            />
+
             <form.Field
               name="email"
               children={field => (
@@ -220,7 +207,7 @@ export function LoginForm({
                 <Input
                   testID="password-input"
                   label="Password"
-                  placeholder="***"
+                  placeholder="At least 8 characters"
                   secureTextEntry={true}
                   value={field.state.value}
                   onBlur={field.handleBlur}
@@ -230,23 +217,28 @@ export function LoginForm({
               )}
             />
 
-            {onForgotPasswordPress && (
-              <View className="mb-2 items-end">
-                <Button
-                  testID="forgot-password-link"
-                  variant="link"
-                  label="Forgot password?"
-                  onPress={onForgotPasswordPress}
+            <form.Field
+              name="confirmPassword"
+              children={field => (
+                <Input
+                  testID="confirm-password-input"
+                  label="Confirm Password"
+                  placeholder="Re-enter your password"
+                  secureTextEntry={true}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChangeText={field.handleChange}
+                  error={getFieldError(field)}
                 />
-              </View>
-            )}
+              )}
+            />
 
             <form.Subscribe
               selector={state => [state.isSubmitting]}
               children={([isSubmitting]) => (
                 <Button
-                  testID="login-button"
-                  label="Login"
+                  testID="signup-button"
+                  label="Create Account"
                   onPress={form.handleSubmit}
                   loading={isSubmitting || loading}
                 />
@@ -255,52 +247,37 @@ export function LoginForm({
           </>
         )}
 
-        {/* Divider between email-password and alternatives */}
-        {hasEmailPassword
-          && authConfig.method === 'composite'
-          && (hasSocial || hasSSO) && <AuthDivider />}
-
         {/* Alternative social buttons (in composite mode after email-password) */}
         {authConfig.method === 'composite'
           && authConfig.primary.method === 'email-password'
           && hasSocial
           && socialProviders.length > 0 && (
-          <View className="mt-4 gap-3">
-            {socialProviders.map(provider => (
-              <SocialLoginButton
-                key={provider}
-                testID={`social-${provider}-button`}
-                provider={provider}
-                onPress={() => onSocialLogin?.(provider)}
-                loading={loading}
-              />
-            ))}
-          </View>
+          <>
+            <AuthDivider />
+            <View className="mt-4 gap-3">
+              {socialProviders.map(provider => (
+                <SocialLoginButton
+                  key={provider}
+                  testID={`social-${provider}-button`}
+                  provider={provider}
+                  onPress={() => onSocialSignUp?.(provider)}
+                  loading={loading}
+                  label={`Sign up with ${provider.charAt(0).toUpperCase() + provider.slice(1)}`}
+                />
+              ))}
+            </View>
+          </>
         )}
 
-        {/* Alternative SSO button (in composite mode after email-password) */}
-        {authConfig.method === 'composite'
-          && authConfig.primary.method === 'email-password'
-          && hasSSO && (
-          <View className="mt-4">
-            <SSOButton
-              testID="sso-button"
-              onPress={onSSOLogin ?? (() => {})}
-              loading={loading}
-              providerName={ssoProviderName ?? ssoConfig?.provider}
-            />
-          </View>
-        )}
-
-        {/* Sign up link */}
-        {onSignUpPress && (
+        {/* Login link */}
+        {onLoginPress && (
           <View className="mt-6 flex-row items-center justify-center gap-1">
-            <Text className="text-gray-500">Don't have an account?</Text>
+            <Text className="text-gray-500">Already have an account?</Text>
             <Button
-              testID="signup-link"
+              testID="login-link"
               variant="link"
-              label="Sign Up"
-              onPress={onSignUpPress}
+              label="Sign In"
+              onPress={onLoginPress}
             />
           </View>
         )}

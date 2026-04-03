@@ -1,7 +1,7 @@
 import type { AIConfig } from '@mongrov/ai';
 import { createOpenAI } from '@ai-sdk/openai';
-import { fetch as expoFetch } from 'expo/fetch';
 import Env from 'env';
+import { fetch as expoFetch } from 'expo/fetch';
 
 /**
  * Create the OpenAI provider with API key from environment.

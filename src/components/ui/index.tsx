@@ -17,6 +17,7 @@ export * from './select';
 export * from './utils';
 // Re-export primitives from @mongrov/ui
 export {
+  AuthDivider,
   // Button
   Button,
   buttonTextVariants,
@@ -34,12 +35,23 @@ export {
   Separator,
   // Skeleton
   Skeleton,
+  // Auth components
+  SocialLoginButton,
+  SSOButton,
   // Text
   Text,
   TextClassContext,
   textVariants,
 } from '@mongrov/ui';
-export type { ButtonProps, TextProps, TextVariant } from '@mongrov/ui';
+export type {
+  AuthDividerProps,
+  ButtonProps,
+  SocialLoginButtonProps,
+  SocialProvider,
+  SSOButtonProps,
+  TextProps,
+  TextVariant,
+} from '@mongrov/ui';
 
 // export base components from react-native
 export {
