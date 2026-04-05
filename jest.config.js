@@ -36,5 +36,7 @@ module.exports = {
   coverageDirectory: '<rootDir>/coverage/',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^@mongrov/db$': '<rootDir>/__mocks__/@mongrov/db.ts',
+    '^@mongrov/types$': '<rootDir>/../mongrov-packages/packages/types/dist/index.js',
   },
 };

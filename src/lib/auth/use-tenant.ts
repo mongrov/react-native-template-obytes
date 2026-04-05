@@ -3,7 +3,7 @@ import type { TenantConfig, TenantContext } from '@mongrov/auth';
 import { useCallback, useEffect, useMemo } from 'react';
 import { create } from 'zustand';
 
-import { getItem, setItem } from '@/lib/storage';
+import { kvStore } from '@/lib/storage';
 
 import { defaultTenantId, isMultiTenant, tenants } from './tenants';
 
@@ -43,7 +43,7 @@ export function useTenant(): TenantContext {
   // Load persisted tenant on mount
   useEffect(() => {
     async function loadTenant() {
-      const storedId = getItem<string>(TENANT_STORAGE_KEY);
+      const storedId = await kvStore.get(TENANT_STORAGE_KEY);
       const validId = tenants.find(t => t.id === storedId)?.id;
 
       // Use stored tenant if valid, otherwise use default
@@ -63,7 +63,7 @@ export function useTenant(): TenantContext {
     (id: string | null) => {
       setTenantId(id);
       if (id) {
-        setItem(TENANT_STORAGE_KEY, id);
+        kvStore.set(TENANT_STORAGE_KEY, id);
       }
     },
     [setTenantId],
