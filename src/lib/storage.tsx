@@ -5,10 +5,10 @@
  * Provides a sync storage wrapper for legacy code (theme, i18n).
  */
 
-import { createKVStore, type KVStore } from '@mongrov/db';
+import { createKVStore, type KVStore } from '@mongrov/db/kv';
 
 // Re-export types from @mongrov/db
-export type { KVStore } from '@mongrov/db';
+export type { KVStore } from '@mongrov/db/kv';
 
 export interface TokenStore {
   getAccessToken(): Promise<string | null>;
