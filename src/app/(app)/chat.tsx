@@ -75,8 +75,10 @@ function ChatContent({
     },
   })).reverse(), [messages]);
 
-  const handleSend = useCallback((text?: string) => {
-    const messageText = (text || inputText || '').trim();
+  const handleSend = useCallback((text?: string | unknown) => {
+    // Handle case where onPress passes event object instead of string
+    const textValue = typeof text === 'string' ? text : undefined;
+    const messageText = (textValue || inputText || '').trim();
     if (!messageText)
       return;
     setInputText('');

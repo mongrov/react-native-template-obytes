@@ -3,10 +3,9 @@ import type { Language, resources } from './resources';
 import type { RecursiveKeyOf } from './types';
 import i18n from 'i18next';
 import memoize from 'lodash.memoize';
-import { useCallback } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 import { I18nManager, NativeModules, Platform } from 'react-native';
 
-import { useMMKVString } from 'react-native-mmkv';
 import RNRestart from 'react-native-restart';
 import { storage } from '../storage';
 
@@ -15,7 +14,7 @@ export type TxKeyPath = RecursiveKeyOf<DefaultLocale>;
 
 export const LOCAL = 'local';
 
-export const getLanguage = () => storage.getString(LOCAL); // 'Marc' getItem<Language | undefined>(LOCAL);
+export const getLanguage = () => storage.getString(LOCAL);
 
 export const translate = memoize(
   (key: TxKeyPath, options = undefined) =>
@@ -42,16 +41,37 @@ export function changeLanguage(lang: Language) {
   }
 }
 
+// Simple external store for language state
+let langListeners: Array<() => void> = [];
+
+function subscribeLang(listener: () => void) {
+  langListeners.push(listener);
+  return () => {
+    langListeners = langListeners.filter(l => l !== listener);
+  };
+}
+
+function getLangSnapshot(): string | undefined {
+  return storage.getString(LOCAL);
+}
+
+function emitLangChange() {
+  for (const listener of langListeners) {
+    listener();
+  }
+}
+
 export function useSelectedLanguage() {
-  const [language, setLang] = useMMKVString(LOCAL);
+  const language = useSyncExternalStore(subscribeLang, getLangSnapshot, getLangSnapshot);
 
   const setLanguage = useCallback(
     (lang: Language) => {
-      setLang(lang);
+      storage.set(LOCAL, lang);
+      emitLangChange();
       if (lang !== undefined)
         changeLanguage(lang as Language);
     },
-    [setLang],
+    [],
   );
 
   return { language: language as Language, setLanguage };
