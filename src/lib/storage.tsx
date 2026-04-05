@@ -1,9 +1,5 @@
 import { MMKV } from 'react-native-mmkv';
 
-// ─── Raw MMKV (sync) ─────────────────────────────────────────────────────────
-// Used by theme for sync initialization at module load.
-export const storage = new MMKV();
-
 // ─── KVStore interface ────────────────────────────────────────────────────────
 export interface KVStore {
   get(key: string): Promise<string | null>;
@@ -22,22 +18,63 @@ export interface TokenStore {
   clearTokens(): Promise<void>;
 }
 
-// ─── MMKV-backed KVStore ──────────────────────────────────────────────────────
-function createMMKVStore(instanceId: string = 'mongrov-kv'): KVStore {
-  const mmkv = new MMKV({ id: instanceId });
+// ─── Lazy MMKV initialization ─────────────────────────────────────────────────
+// Native modules aren't available at module load time, so we defer instantiation.
+let _storage: MMKV | null = null;
+function getStorage(): MMKV {
+  if (!_storage) {
+    _storage = new MMKV();
+  }
+  return _storage;
+}
 
+// Proxy object that lazily initializes MMKV on first access
+export const storage = {
+  getString(key: string): string | undefined {
+    return getStorage().getString(key);
+  },
+  set(key: string, value: string | number | boolean): void {
+    getStorage().set(key, value);
+  },
+  delete(key: string): void {
+    getStorage().delete(key);
+  },
+  contains(key: string): boolean {
+    return getStorage().contains(key);
+  },
+  getAllKeys(): string[] {
+    return getStorage().getAllKeys();
+  },
+  clearAll(): void {
+    getStorage().clearAll();
+  },
+};
+
+// ─── MMKV-backed KVStore ──────────────────────────────────────────────────────
+const mmkvInstances = new Map<string, MMKV>();
+
+function getMMKVInstance(instanceId: string): MMKV {
+  let instance = mmkvInstances.get(instanceId);
+  if (!instance) {
+    instance = new MMKV({ id: instanceId });
+    mmkvInstances.set(instanceId, instance);
+  }
+  return instance;
+}
+
+function createMMKVStore(instanceId: string): KVStore {
   return {
     async get(key: string) {
-      return mmkv.getString(key) ?? null;
+      return getMMKVInstance(instanceId).getString(key) ?? null;
     },
     async set(key: string, value: string) {
-      mmkv.set(key, value);
+      getMMKVInstance(instanceId).set(key, value);
     },
     async delete(key: string) {
-      mmkv.delete(key);
+      getMMKVInstance(instanceId).delete(key);
     },
     async getObject<T>(key: string): Promise<T | null> {
-      const value = mmkv.getString(key);
+      const value = getMMKVInstance(instanceId).getString(key);
       if (value === undefined) return null;
       try {
         return JSON.parse(value) as T;
@@ -46,13 +83,13 @@ function createMMKVStore(instanceId: string = 'mongrov-kv'): KVStore {
       }
     },
     async setObject<T>(key: string, value: T) {
-      mmkv.set(key, JSON.stringify(value));
+      getMMKVInstance(instanceId).set(key, JSON.stringify(value));
     },
     async clear() {
-      mmkv.clearAll();
+      getMMKVInstance(instanceId).clearAll();
     },
     async getAllKeys() {
-      return mmkv.getAllKeys();
+      return getMMKVInstance(instanceId).getAllKeys();
     },
   };
 }
