@@ -1,15 +1,14 @@
-import type { MMKV } from 'react-native-mmkv';
+/**
+ * Storage utilities for the app.
+ *
+ * Uses @mongrov/db for async KVStore instances.
+ * Provides a sync storage wrapper for legacy code (theme, i18n).
+ */
 
-// ─── KVStore interface ────────────────────────────────────────────────────────
-export interface KVStore {
-  get(key: string): Promise<string | null>;
-  set(key: string, value: string): Promise<void>;
-  delete(key: string): Promise<void>;
-  getObject<T>(key: string): Promise<T | null>;
-  setObject<T>(key: string, value: T): Promise<void>;
-  clear(): Promise<void>;
-  getAllKeys(): Promise<string[]>;
-}
+import { createKVStore, type KVStore } from '@mongrov/db';
+
+// Re-export types from @mongrov/db
+export type { KVStore } from '@mongrov/db';
 
 export interface TokenStore {
   getAccessToken(): Promise<string | null>;
@@ -18,11 +17,11 @@ export interface TokenStore {
   clearTokens(): Promise<void>;
 }
 
-// ─── In-memory fallback storage ───────────────────────────────────────────────
-// Used when MMKV native module isn't available yet
-const memoryStore = new Map<string, string>();
+// ─── Sync storage interface (for theme/i18n) ──────────────────────────────────
+// Theme and i18n need synchronous access for initial render.
+// This wrapper provides sync methods with lazy MMKV initialization.
 
-interface StorageLike {
+interface SyncStorage {
   getString(key: string): string | undefined;
   set(key: string, value: string | number | boolean): void;
   delete(key: string): void;
@@ -31,144 +30,61 @@ interface StorageLike {
   clearAll(): void;
 }
 
-function createMemoryStorage(): StorageLike {
+// In-memory fallback
+function createMemoryStorage(): SyncStorage {
+  const store = new Map<string, string>();
   return {
-    getString(key: string): string | undefined {
-      return memoryStore.get(key);
-    },
-    set(key: string, value: string | number | boolean): void {
-      memoryStore.set(key, String(value));
-    },
-    delete(key: string): void {
-      memoryStore.delete(key);
-    },
-    contains(key: string): boolean {
-      return memoryStore.has(key);
-    },
-    getAllKeys(): string[] {
-      return Array.from(memoryStore.keys());
-    },
-    clearAll(): void {
-      memoryStore.clear();
-    },
+    getString: (key: string) => store.get(key),
+    set: (key: string, value: string | number | boolean) => store.set(key, String(value)),
+    delete: (key: string) => store.delete(key),
+    contains: (key: string) => store.has(key),
+    getAllKeys: () => Array.from(store.keys()),
+    clearAll: () => store.clear(),
   };
 }
 
-// ─── Lazy MMKV initialization with fallback ───────────────────────────────────
-let _storage: StorageLike | null = null;
-let _mmkvAvailable: boolean | null = null;
+// Lazy sync storage with MMKV + fallback
+let _syncStorage: SyncStorage | null = null;
 
-function getStorage(): StorageLike {
-  if (_storage) return _storage;
+function getSyncStorage(): SyncStorage {
+  if (_syncStorage) return _syncStorage;
 
-  // Try to load MMKV
-  if (_mmkvAvailable === null) {
-    try {
-      // Dynamic require to avoid module-load-time errors
-      const { MMKV } = require('react-native-mmkv');
-      _storage = new MMKV() as StorageLike;
-      _mmkvAvailable = true;
-      console.log('[storage] MMKV initialized successfully');
-    } catch (e) {
-      console.warn('[storage] MMKV not available, using in-memory fallback:', e);
-      _storage = createMemoryStorage();
-      _mmkvAvailable = false;
-    }
-  } else if (!_mmkvAvailable) {
-    _storage = createMemoryStorage();
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { MMKV } = require('react-native-mmkv');
+    _syncStorage = new MMKV() as SyncStorage;
+  } catch {
+    _syncStorage = createMemoryStorage();
   }
 
-  return _storage!;
+  return _syncStorage;
 }
 
-// Proxy object that lazily initializes storage on first access
-export const storage: StorageLike = {
-  getString(key: string): string | undefined {
-    return getStorage().getString(key);
-  },
-  set(key: string, value: string | number | boolean): void {
-    getStorage().set(key, value);
-  },
-  delete(key: string): void {
-    getStorage().delete(key);
-  },
-  contains(key: string): boolean {
-    return getStorage().contains(key);
-  },
-  getAllKeys(): string[] {
-    return getStorage().getAllKeys();
-  },
-  clearAll(): void {
-    getStorage().clearAll();
-  },
+/**
+ * Synchronous storage for theme and i18n.
+ * Uses MMKV with in-memory fallback.
+ */
+export const storage: SyncStorage = {
+  getString: (key: string) => getSyncStorage().getString(key),
+  set: (key: string, value: string | number | boolean) => getSyncStorage().set(key, value),
+  delete: (key: string) => getSyncStorage().delete(key),
+  contains: (key: string) => getSyncStorage().contains(key),
+  getAllKeys: () => getSyncStorage().getAllKeys(),
+  clearAll: () => getSyncStorage().clearAll(),
 };
 
-// ─── MMKV-backed KVStore with fallback ────────────────────────────────────────
-const storageInstances = new Map<string, StorageLike>();
+// ─── Async KVStore instances (from @mongrov/db) ───────────────────────────────
 
-function getStorageInstance(instanceId: string): StorageLike {
-  let instance = storageInstances.get(instanceId);
-  if (!instance) {
-    try {
-      const { MMKV } = require('react-native-mmkv');
-      instance = new MMKV({ id: instanceId }) as StorageLike;
-    } catch {
-      // Create isolated in-memory store for this instance
-      const store = new Map<string, string>();
-      instance = {
-        getString: (key: string) => store.get(key),
-        set: (key: string, value: string | number | boolean) => store.set(key, String(value)),
-        delete: (key: string) => store.delete(key),
-        contains: (key: string) => store.has(key),
-        getAllKeys: () => Array.from(store.keys()),
-        clearAll: () => store.clear(),
-      };
-    }
-    storageInstances.set(instanceId, instance);
-  }
-  return instance;
-}
+/**
+ * General-purpose async key-value storage for preferences, caches, flags.
+ */
+export const kvStore: KVStore = createKVStore({ instanceId: 'app-prefs' });
 
-function createKVStore(instanceId: string): KVStore {
-  return {
-    async get(key: string) {
-      return getStorageInstance(instanceId).getString(key) ?? null;
-    },
-    async set(key: string, value: string) {
-      getStorageInstance(instanceId).set(key, value);
-    },
-    async delete(key: string) {
-      getStorageInstance(instanceId).delete(key);
-    },
-    async getObject<T>(key: string): Promise<T | null> {
-      const value = getStorageInstance(instanceId).getString(key);
-      if (value === undefined) return null;
-      try {
-        return JSON.parse(value) as T;
-      } catch {
-        return null;
-      }
-    },
-    async setObject<T>(key: string, value: T) {
-      getStorageInstance(instanceId).set(key, JSON.stringify(value));
-    },
-    async clear() {
-      getStorageInstance(instanceId).clearAll();
-    },
-    async getAllKeys() {
-      return getStorageInstance(instanceId).getAllKeys();
-    },
-  };
-}
-
-// ─── KVStore (async) ─────────────────────────────────────────────────────────
-// Unified async key-value storage for preferences, caches, flags.
-export const kvStore: KVStore = createKVStore('app-prefs');
-
-// ─── Secure Store ────────────────────────────────────────────────────────────
-// For tokens and sensitive data. Uses MMKV with encryption.
-// Note: For true security, use expo-secure-store directly.
-export const secureStore: KVStore = createKVStore('secure-store');
+/**
+ * Secure storage for tokens and sensitive data.
+ * Note: For true security, use expo-secure-store via createKVStore({ secure: true }).
+ */
+export const secureStore: KVStore = createKVStore({ instanceId: 'secure-store' });
 
 // ─── Token Store ─────────────────────────────────────────────────────────────
 // For @mongrov/auth integration.
