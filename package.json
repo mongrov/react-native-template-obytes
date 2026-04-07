@@ -56,7 +56,7 @@
     "@mongrov/core": "^0.4.0",
     "@mongrov/db": "^0.2.2",
     "@mongrov/theme": "^0.3.0",
-    "@mongrov/types": "workspace:*",
+    "@mongrov/types": "^0.3.0",
     "@mongrov/ui": "^0.4.2",
     "@rn-primitives/separator": "^1.4.0",
     "@rn-primitives/slot": "^1.4.0",
