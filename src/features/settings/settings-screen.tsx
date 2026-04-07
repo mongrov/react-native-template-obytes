@@ -5,15 +5,18 @@ import { useRef } from 'react';
 import {
   colors,
   FocusAwareStatusBar,
+  Pressable,
   ScrollView,
   Text,
   View,
 } from '@/components/ui';
-import { Github, Rate, Share, Support, Website } from '@/components/ui/icons';
+import { ArrowRight, Github, Rate, Share, Support, Website } from '@/components/ui/icons';
 import { useAuth, useSession } from '@/lib/auth';
 import { translate } from '@/lib/i18n';
 import { useColorScheme } from '@/lib/theme';
+import { BiometricItem } from './components/biometric-item';
 import { LanguageItem } from './components/language-item';
+import { NotificationItem } from './components/notification-item';
 import { SettingsContainer } from './components/settings-container';
 import { SettingsItem } from './components/settings-item';
 import { ThemeItem } from './components/theme-item';
@@ -56,9 +59,17 @@ export function SettingsScreen() {
             {translate('settings.title')}
           </Text>
 
+          {/* Profile Card */}
+          <ProfileCard />
+
           <SettingsContainer title="settings.generale">
             <LanguageItem />
             <ThemeItem isLast />
+          </SettingsContainer>
+
+          <SettingsContainer title="settings.security">
+            <BiometricItem />
+            <NotificationItem isLast />
           </SettingsContainer>
 
           <SettingsContainer title="settings.about">
@@ -121,4 +132,50 @@ export function SettingsScreen() {
       </ScrollView>
     </>
   );
+}
+
+function ProfileCard() {
+  const router = useRouter();
+  const session = useSession();
+  const { isDark } = useColorScheme();
+
+  const user = session?.user;
+  if (!user) return null;
+
+  const initials = getInitials(user.name || user.email || '?');
+
+  return (
+    <Pressable
+      onPress={() => router.push('/(app)/profile')}
+      className="mb-4 flex-row items-center rounded-xl bg-neutral-100 p-4 dark:bg-neutral-800"
+    >
+      {/* Avatar */}
+      <View className="h-14 w-14 items-center justify-center rounded-full bg-primary-500">
+        <Text className="text-xl font-bold text-white">{initials}</Text>
+      </View>
+
+      {/* Info */}
+      <View className="ml-4 flex-1">
+        <Text className="font-semibold text-neutral-900 dark:text-neutral-100">
+          {user.name || 'User'}
+        </Text>
+        {user.email && (
+          <Text className="text-sm text-neutral-500">{user.email}</Text>
+        )}
+      </View>
+
+      {/* Arrow */}
+      <ArrowRight
+        color={isDark ? colors.neutral[500] : colors.neutral[400]}
+      />
+    </Pressable>
+  );
+}
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
 }

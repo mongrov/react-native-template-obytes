@@ -10,12 +10,12 @@ export const authConfig: AuthClientConfig = {
 export { defaultTenantId, isMultiTenant, tenants } from './tenants';
 // Tenant management
 export { getTenantById, useTenant } from './use-tenant';
-// OAuth/SSO hooks - uncomment if you install expo-auth-session and expo-web-browser
-// export { useOAuthFlow, useSocialAuth, useSSOAuth } from './use-oauth-flow';
-// export type { OAuthConfig, OAuthResult, SSOConfig } from './use-oauth-flow';
+// Biometric lock
+export { useBiometricLock } from './use-biometric-lock';
+export type { UseBiometricLockResult } from './use-biometric-lock';
 
 // Re-export for app consumption
-export { useAuth, useSession } from '@mongrov/auth';
+export { useAuth, useSession, useBiometricGate } from '@mongrov/auth';
 export type {
   AuthMethodConfig,
   AuthState,

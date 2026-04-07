@@ -1,6 +1,8 @@
 import type { SocialProvider } from '@mongrov/auth';
+import { useSocialAuth } from '@mongrov/auth';
 import type { LoginFormProps } from './components/login-form';
 
+import Env from 'env';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { showMessage } from 'react-native-flash-message';
@@ -15,6 +17,15 @@ export function LoginScreen() {
   const { signIn } = useAuth();
   const { tenant, isReady } = useTenant();
   const [loading, setLoading] = React.useState(false);
+
+  // Social auth hooks - configure with your OAuth client IDs from env
+  const socialAuth = useSocialAuth({
+    google: {
+      webClientId: Env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+      iosClientId: Env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+      androidClientId: Env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    },
+  });
 
   const onSubmit: LoginFormProps['onSubmit'] = async (data) => {
     setLoading(true);
@@ -35,12 +46,28 @@ export function LoginScreen() {
   const onSocialLogin = async (provider: SocialProvider) => {
     setLoading(true);
     try {
-      // TODO: Implement social login with useOAuthFlow hook
-      // For now, show a message that it's not implemented
-      showMessage({
-        message: `${provider} login is not yet implemented`,
-        type: 'warning',
-      });
+      // Use the native social auth hooks
+      const result = await socialAuth.signInWith(provider);
+
+      if (result) {
+        // Got credentials from native OAuth - pass to your auth adapter
+        // The adapter should validate the token with your backend
+        if (result.provider === 'apple') {
+          await signIn({
+            provider: 'apple',
+            token: result.identityToken,
+            authorizationCode: result.authorizationCode,
+          });
+        } else if (result.provider === 'google') {
+          await signIn({
+            provider: 'google',
+            token: result.idToken,
+            accessToken: result.accessToken,
+          });
+        }
+        router.push('/');
+      }
+      // If result is null, user cancelled - no error to show
     }
     catch (error) {
       const message

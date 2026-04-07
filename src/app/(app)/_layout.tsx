@@ -4,16 +4,19 @@ import { useCallback, useEffect } from 'react';
 
 import { Pressable, Text } from '@/components/ui';
 import {
+  Chat as ChatIcon,
   Feed as FeedIcon,
   Settings as SettingsIcon,
   Style as StyleIcon,
 } from '@/components/ui/icons';
-import { useAuth } from '@/lib/auth';
+import { BiometricLockScreen } from '@/features/auth/components/biometric-lock-screen';
+import { useAuth, useBiometricLock } from '@/lib/auth';
 import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 
 export default function TabLayout() {
-  const { isHydrated, isAuthenticated, status } = useAuth();
+  const { isHydrated, isAuthenticated, status, signOut } = useAuth();
   const [isFirstTime] = useIsFirstTime();
+  const biometricLock = useBiometricLock();
 
   const hideSplash = useCallback(async () => {
     await SplashScreen.hideAsync();
@@ -43,6 +46,19 @@ export default function TabLayout() {
     SplashScreen.hideAsync();
     return <Redirect href="/login" />;
   }
+
+  // Show biometric lock screen if locked
+  if (biometricLock.isLocked) {
+    return (
+      <BiometricLockScreen
+        onUnlock={biometricLock.unlock}
+        isAuthenticating={biometricLock.isAuthenticating}
+        error={biometricLock.error}
+        onSignOut={signOut}
+      />
+    );
+  }
+
   return (
     <Tabs>
       <Tabs.Screen
@@ -52,6 +68,16 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <FeedIcon color={color} />,
           headerRight: () => <CreateNewPostLink />,
           tabBarButtonTestID: 'feed-tab',
+        }}
+      />
+
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: 'Chat',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <ChatIcon color={color} />,
+          tabBarButtonTestID: 'chat-tab',
         }}
       />
 

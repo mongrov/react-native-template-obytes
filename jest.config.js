@@ -37,6 +37,8 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@mongrov/db$': '<rootDir>/__mocks__/@mongrov/db.ts',
+    '^@mongrov/db/kv$': '<rootDir>/__mocks__/@mongrov/db-kv.ts',
     '^@mongrov/types$': '<rootDir>/../mongrov-packages/packages/types/dist/index.js',
+    '^@mongrov/ui$': '<rootDir>/__mocks__/@mongrov/ui.tsx',
   },
 };

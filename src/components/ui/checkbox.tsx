@@ -81,8 +81,11 @@ export function CheckboxIcon({ checked = false }: IconProps) {
         height: SIZE,
         width: SIZE,
         borderColor: color,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 5,
+        borderWidth: 2,
       }}
-      className="items-center justify-center rounded-[5px] border-2"
       from={{ backgroundColor: 'transparent', borderColor: '#CCCFD6' }}
       animate={{
         backgroundColor: checked ? color : 'transparent',
@@ -154,8 +157,12 @@ export function RadioIcon({ checked = false }: IconProps) {
         height: SIZE,
         width: SIZE,
         borderColor: color,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 20,
+        borderWidth: 2,
+        backgroundColor: 'transparent',
       }}
-      className="items-center justify-center rounded-[20px] border-2 bg-transparent"
       from={{ borderColor: '#CCCFD6' }}
       animate={{
         borderColor: color,
@@ -163,7 +170,12 @@ export function RadioIcon({ checked = false }: IconProps) {
       transition={{ borderColor: { duration: 100, type: 'timing' } }}
     >
       <MotiView
-        className={`size-[10px] rounded-[10px] ${checked && 'bg-primary-300'}`}
+        style={{
+          width: 10,
+          height: 10,
+          borderRadius: 10,
+          backgroundColor: checked ? colors.primary[300] : 'transparent',
+        }}
         from={{ opacity: 0 }}
         animate={{ opacity: checked ? 1 : 0 }}
         transition={{ opacity: { duration: 50, type: 'timing' } }}

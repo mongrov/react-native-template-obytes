@@ -48,7 +48,20 @@ When creating this starter kit, we had several guiding principles in mind::
 
 ## 🔧 Mongrov Additions
 
-This fork includes production-ready modules from `@mongrov/core` and additional scaffolding for enterprise apps:
+This fork includes production-ready modules from the `@mongrov/*` packages and additional scaffolding for enterprise apps:
+
+### @mongrov Packages
+
+| Package | Purpose |
+|---------|---------|
+| `@mongrov/core` | Structured logging with ring buffer, file, and webhook transports |
+| `@mongrov/auth` | Authentication state machine, biometric lock, social auth hooks |
+| `@mongrov/collab` | Real-time chat/messaging with RocketChat adapter |
+| `@mongrov/ai` | AI chat integration with streaming support |
+| `@mongrov/ui` | Pre-built UI components (buttons, cards, states) |
+| `@mongrov/theme` | Theme management and dark mode support |
+| `@mongrov/types` | Shared TypeScript types |
+| `@mongrov/db` | Local database utilities |
 
 ### Structured Logging (`@mongrov/core`)
 
@@ -74,16 +87,155 @@ Configuration is driven by environment variables:
 - `useSentryScreenTracking()` — Adds screen-change breadcrumbs via expo-router.
 - Controlled by `EXPO_PUBLIC_SENTRY_DSN` env var — omit to disable entirely.
 
-### Auth Scaffolding (`lib/auth/`)
+### Authentication (`lib/auth/` + `@mongrov/auth`)
 
-- `secure-token.ts` — `expo-secure-store` wrapper for access/refresh token storage.
-- `use-session.ts` — `useSession()` hook that decodes the JWT and returns user, tenant, permissions, and a `hasPermission()` helper.
+Full-featured authentication system with multiple auth methods:
+
+**Core Auth:**
+- `AuthProvider` — Wraps app with authentication state machine
+- `useAuth()` — Access `signIn`, `signOut`, `status` (idle/pending/authenticated/unauthenticated)
+- `useSession()` — Get current user, permissions, and `hasPermission()` helper
+- `secure-token.ts` — Secure storage for access/refresh tokens via `expo-secure-store`
+
+**Biometric Lock (`lib/auth/use-biometric-lock.ts`):**
+- Face ID / Touch ID / Fingerprint authentication
+- Auto-lock after 30 seconds in background
+- Enable/disable toggle in Settings
+- Persisted preference via MMKV
+
+**Social Authentication:**
+- Apple Sign In (iOS native)
+- Google Sign In (native OAuth)
+- Extensible for other providers
+
+```typescript
+// Usage
+const { signIn, signOut, status } = useAuth();
+const session = useSession();
+const biometric = useBiometricLock();
+
+if (session?.hasPermission('admin')) {
+  // Show admin features
+}
+```
 
 ### API Interceptors (`lib/api/interceptors/`)
 
 - **Auth interceptor** — Attaches Bearer token, handles 401 with refresh-token retry, signs out on failure.
 - **Error transform interceptor** — Normalizes error shapes into a consistent `AppError` class.
 - **Logging interceptor** — Logs request/response/error with duration. Automatically wired up in `APIProvider` which has access to the Logger via `LoggingProvider` context.
+
+### Real-Time Chat (`lib/collab/` + `@mongrov/collab`)
+
+Full chat/messaging implementation with RocketChat backend:
+
+**Features:**
+- Conversation list with unread counts and presence indicators
+- Real-time message delivery and typing indicators
+- Message search across all conversations
+- File uploads (images, documents)
+- Read receipts and delivery status
+
+**Screens:**
+- `/chat` — Conversation list with pull-to-refresh
+- `/chat/[id]` — Individual chat with message composer
+- `/chat/search` — Full-text message search
+
+```typescript
+// Usage
+const { adapter } = useCollab();
+const isConnected = useCollabConnected();
+
+// Fetch conversations
+const { conversations } = await adapter.fetchConversations();
+
+// Send a message
+await adapter.sendMessage(conversationId, { type: 'text', text: 'Hello!' });
+
+// Subscribe to real-time updates
+adapter.on('message:received', (message) => { /* handle */ });
+```
+
+**Environment Variables:**
+| Variable | Purpose |
+|----------|---------|
+| `EXPO_PUBLIC_RC_SERVER_URL` | RocketChat server URL |
+| `EXPO_PUBLIC_RC_WS_URL` | WebSocket URL for real-time |
+
+### AI Integration (`lib/ai/` + `@mongrov/ai`)
+
+AI chat capabilities with streaming support:
+
+```typescript
+// Usage with AIProvider
+const { messages, input, handleSubmit, isLoading } = useChat({
+  api: '/api/chat',
+});
+```
+
+**Environment Variables:**
+| Variable | Purpose |
+|----------|---------|
+| `EXPO_PUBLIC_OPENAI_API_KEY` | OpenAI API key (optional) |
+
+### Push Notifications (`lib/notifications/`)
+
+Complete push notification setup with expo-notifications:
+
+**Features:**
+- Permission management with settings toggle
+- Expo push token registration
+- Foreground notification handling
+- Deep link navigation on notification tap
+- Badge count management
+- Android notification channels
+
+```typescript
+// Usage
+const {
+  expoPushToken,
+  isEnabled,
+  requestPermission,
+  scheduleLocalNotification,
+  setBadgeCount,
+} = useNotifications();
+
+// Request permission
+await requestPermission();
+
+// Schedule a local notification
+await scheduleLocalNotification(
+  'New Message',
+  'You have a new message',
+  { type: 'chat', conversationId: '123' }
+);
+```
+
+**Environment Variables:**
+| Variable | Purpose |
+|----------|---------|
+| `EXPO_PUBLIC_PROJECT_ID` | EAS project ID for push tokens |
+
+### Deep Linking (`lib/deep-link/`)
+
+Automatic deep link handling with expo-router:
+
+**Supported URL Formats:**
+- Custom scheme: `obytesApp://chat/123`
+- Universal links: `https://app.example.com/chat/123`
+
+```typescript
+// Usage
+const { lastDeepLink, createLink, openURL } = useDeepLink();
+
+// Create a shareable link
+const link = createLink('chat/123', { ref: 'share' });
+// => "obytesApp://chat/123?ref=share"
+```
+
+**Configuration:**
+- Set `EXPO_PUBLIC_SCHEME` for custom URL scheme
+- Set `EXPO_PUBLIC_ASSOCIATED_DOMAIN` for universal links (iOS associated domains + Android intent filters auto-configured)
 
 ### Utility Modules
 
@@ -99,13 +251,23 @@ Configuration is driven by environment variables:
 | Package | Purpose |
 |---|---|
 | `@mongrov/core` | Structured logging engine |
+| `@mongrov/auth` | Authentication state machine and hooks |
+| `@mongrov/collab` | Real-time chat/messaging adapter |
+| `@mongrov/ai` | AI chat integration |
+| `@mongrov/ui` | Pre-built UI components |
+| `@mongrov/theme` | Theme and dark mode management |
+| `@mongrov/types` | Shared TypeScript types |
+| `@mongrov/db` | Local database utilities |
 | `@sentry/react-native` | Error tracking and performance monitoring |
+| `expo-notifications` | Push notification support |
+| `expo-device` | Device information for notifications |
 | `expo-file-system` | File-based log transport |
 | `expo-network` | Network connectivity monitoring |
 | `expo-secure-store` | Secure token storage |
 | `expo-local-authentication` | Biometric authentication support |
 | `expo-updates` | OTA update checking |
-| `jwt-decode` | JWT token decoding for session management |
+| `expo-linking` | Deep link handling |
+| `react-native-gifted-chat` | Chat UI components |
 
 ### Expo Go Compatibility
 

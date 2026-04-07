@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 export * from './arrow-right';
 export * from './caret-down';
+export * from './chat';
 export * from './feed';
 export * from './github';
 export * from './home';

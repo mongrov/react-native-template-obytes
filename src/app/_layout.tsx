@@ -16,6 +16,7 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { aiConfig } from '@/lib/ai';
 import { APIProvider } from '@/lib/api';
 import { authConfig } from '@/lib/auth';
+import { CollabProvider } from '@/lib/collab';
 import { initSentry, SentryErrorBoundary } from '@/lib/sentry';
 import { useColorScheme, useNavigationTheme } from '@/lib/theme';
 // Import  global CSS file
@@ -126,25 +127,27 @@ function InnerProviders({ children }: { children: React.ReactNode }) {
       <KeyboardProvider>
         <NavThemeProvider value={navTheme}>
           <AuthProvider config={authConfig}>
-            {aiConfig
-              ? (
-                  <AIProvider config={aiConfig}>
+            <CollabProvider>
+              {aiConfig
+                ? (
+                    <AIProvider config={aiConfig}>
+                      <APIProvider>
+                        <BottomSheetModalProvider>
+                          {children}
+                          <FlashMessage position="top" />
+                        </BottomSheetModalProvider>
+                      </APIProvider>
+                    </AIProvider>
+                  )
+                : (
                     <APIProvider>
                       <BottomSheetModalProvider>
                         {children}
                         <FlashMessage position="top" />
                       </BottomSheetModalProvider>
                     </APIProvider>
-                  </AIProvider>
-                )
-              : (
-                  <APIProvider>
-                    <BottomSheetModalProvider>
-                      {children}
-                      <FlashMessage position="top" />
-                    </BottomSheetModalProvider>
-                  </APIProvider>
-                )}
+                  )}
+            </CollabProvider>
           </AuthProvider>
         </NavThemeProvider>
       </KeyboardProvider>

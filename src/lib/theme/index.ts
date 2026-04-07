@@ -41,21 +41,8 @@ type ThemeState = {
   setColorScheme: (scheme: ColorScheme) => void;
 };
 
-const useThemeStore = create<ThemeState>((set, get) => ({
-  get colorScheme() {
-    // Lazily initialize on first access
-    const current = get();
-    if (!_initialized) {
-      const initial = getInitialScheme();
-      if (initial !== 'system') {
-        // Update store with persisted value
-        set({ colorScheme: initial });
-      }
-      return initial;
-    }
-    return current.colorScheme ?? getInitialScheme();
-  },
-  colorScheme: 'system' as ColorScheme,
+const useThemeStore = create<ThemeState>((set) => ({
+  colorScheme: getInitialScheme(),
   setColorScheme: (scheme: ColorScheme) => {
     try {
       storage.set(STORAGE_KEY, scheme);
@@ -70,11 +57,6 @@ const useThemeStore = create<ThemeState>((set, get) => ({
 export function useColorScheme() {
   const colorScheme = useThemeStore(state => state.colorScheme);
   const setColorScheme = useThemeStore(state => state.setColorScheme);
-
-  // Ensure initialization happens
-  if (!_initialized) {
-    getInitialScheme();
-  }
 
   const resolved = resolveScheme(colorScheme);
   const isDark = resolved === 'dark';

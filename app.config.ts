@@ -49,6 +49,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
     },
+    // Configure associated domains for universal links (if domain is set)
+    ...(Env.EXPO_PUBLIC_ASSOCIATED_DOMAIN && {
+      associatedDomains: [
+        `applinks:${new URL(Env.EXPO_PUBLIC_ASSOCIATED_DOMAIN).host}`,
+      ],
+    }),
   },
   experiments: {
     typedRoutes: true,
@@ -59,6 +65,23 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#2E3C4B',
     },
     package: Env.EXPO_PUBLIC_PACKAGE,
+    // Configure intent filters for deep linking (if domain is set)
+    ...(Env.EXPO_PUBLIC_ASSOCIATED_DOMAIN && {
+      intentFilters: [
+        {
+          action: 'VIEW',
+          autoVerify: true,
+          data: [
+            {
+              scheme: 'https',
+              host: new URL(Env.EXPO_PUBLIC_ASSOCIATED_DOMAIN).host,
+              pathPrefix: '/',
+            },
+          ],
+          category: ['BROWSABLE', 'DEFAULT'],
+        },
+      ],
+    }),
   },
   web: {
     favicon: './assets/favicon.png',
@@ -115,6 +138,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-router',
     ['app-icon-badge', appIconBadgeConfig],
     ['react-native-edge-to-edge'],
+    [
+      'expo-notifications',
+      {
+        icon: './assets/notification-icon.png',
+        color: '#FF6B35',
+        sounds: [],
+      },
+    ],
   ],
   extra: {
     eas: {
