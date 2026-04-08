@@ -1,5 +1,4 @@
 import Env from 'env';
-import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -8,15 +7,19 @@ import { Platform } from 'react-native';
 import { storage } from '@/lib/storage';
 
 // Configure how notifications are handled when app is foregrounded
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+try {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+} catch {
+  // Notifications not available (Expo Go)
+}
 
 export interface NotificationData {
   type?: 'chat' | 'message' | 'general';
@@ -56,6 +59,16 @@ export interface UseNotificationsResult {
 }
 
 const PUSH_TOKEN_KEY = 'notifications.push_token';
+
+// Helper to check if running on physical device
+async function isPhysicalDevice(): Promise<boolean> {
+  try {
+    const Device = await import('expo-device');
+    return Device.isDevice;
+  } catch {
+    return false;
+  }
+}
 
 // Helper function to register for push notifications (outside hook to avoid hoisting issues)
 async function registerForPushNotificationsAsync(): Promise<string | null> {
@@ -117,9 +130,13 @@ export function useNotifications(): UseNotificationsResult {
 
   // Check current permission status
   const checkPermission = useCallback(async () => {
-    const { status } = await Notifications.getPermissionsAsync();
-    setIsEnabled(status === 'granted');
-    return status === 'granted';
+    try {
+      const { status } = await Notifications.getPermissionsAsync();
+      setIsEnabled(status === 'granted');
+      return status === 'granted';
+    } catch {
+      return false;
+    }
   }, []);
 
   // Request notification permission
@@ -127,7 +144,8 @@ export function useNotifications(): UseNotificationsResult {
     try {
       setError(null);
 
-      if (!Device.isDevice) {
+      const isDevice = await isPhysicalDevice();
+      if (!isDevice) {
         setError('Push notifications require a physical device');
         return false;
       }
@@ -205,22 +223,27 @@ export function useNotifications(): UseNotificationsResult {
     const init = async () => {
       setIsLoading(true);
 
-      // Check existing permission
-      const hasPermission = await checkPermission();
+      try {
+        // Check existing permission
+        const hasPermission = await checkPermission();
 
-      // Load saved token
-      const savedToken = storage.getString(PUSH_TOKEN_KEY);
-      if (savedToken) {
-        setExpoPushToken(savedToken);
-      }
-
-      // If we have permission but no token, try to get one
-      if (hasPermission && !savedToken && Device.isDevice) {
-        const token = await registerForPushNotificationsAsync();
-        if (token) {
-          setExpoPushToken(token);
-          storage.set(PUSH_TOKEN_KEY, token);
+        // Load saved token
+        const savedToken = storage.getString(PUSH_TOKEN_KEY);
+        if (savedToken) {
+          setExpoPushToken(savedToken);
         }
+
+        // If we have permission but no token, try to get one
+        const isDevice = await isPhysicalDevice();
+        if (hasPermission && !savedToken && isDevice) {
+          const token = await registerForPushNotificationsAsync();
+          if (token) {
+            setExpoPushToken(token);
+            storage.set(PUSH_TOKEN_KEY, token);
+          }
+        }
+      } catch {
+        // Notifications not available
       }
 
       setIsLoading(false);
@@ -229,17 +252,21 @@ export function useNotifications(): UseNotificationsResult {
     init();
 
     // Listen for incoming notifications while app is foregrounded
-    notificationListenerRef.current = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        // You can handle foreground notifications here
-        console.log('Notification received:', notification);
-      }
-    );
+    try {
+      notificationListenerRef.current = Notifications.addNotificationReceivedListener(
+        (notification) => {
+          // You can handle foreground notifications here
+          console.log('Notification received:', notification);
+        }
+      );
 
-    // Listen for notification taps
-    responseListenerRef.current = Notifications.addNotificationResponseReceivedListener(
-      handleNotificationResponse
-    );
+      // Listen for notification taps
+      responseListenerRef.current = Notifications.addNotificationResponseReceivedListener(
+        handleNotificationResponse
+      );
+    } catch {
+      // Notifications not available
+    }
 
     return () => {
       notificationListenerRef.current?.remove();

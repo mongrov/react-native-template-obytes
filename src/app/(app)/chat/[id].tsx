@@ -1,8 +1,6 @@
 import type { Message } from '@mongrov/types';
 import { useSession } from '@mongrov/auth';
-import * as DocumentPicker from 'expo-document-picker';
 import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import * as React from 'react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -243,44 +241,56 @@ export default function ChatRoomScreen() {
 
   // Pick an image from camera roll or camera
   const handlePickImage = useCallback(async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) {
-      Alert.alert('Permission Required', 'Please grant access to your photo library to send images.');
-      return;
-    }
+    try {
+      const ImagePicker = await import('expo-image-picker');
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.8,
-      allowsEditing: false,
-    });
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        Alert.alert('Permission Required', 'Please grant access to your photo library to send images.');
+        return;
+      }
 
-    if (!result.canceled && result.assets[0]) {
-      const asset = result.assets[0];
-      setPendingAttachment({
-        uri: asset.uri,
-        type: 'image',
-        mimeType: asset.mimeType || 'image/jpeg',
-        fileName: asset.fileName || `image-${Date.now()}.jpg`,
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.8,
+        allowsEditing: false,
       });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        setPendingAttachment({
+          uri: asset.uri,
+          type: 'image',
+          mimeType: asset.mimeType || 'image/jpeg',
+          fileName: asset.fileName || `image-${Date.now()}.jpg`,
+        });
+      }
+    } catch {
+      Alert.alert('Not Available', 'Image picker requires a development build.');
     }
   }, []);
 
   // Pick a document
   const handlePickDocument = useCallback(async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: '*/*',
-      copyToCacheDirectory: true,
-    });
+    try {
+      const DocumentPicker = await import('expo-document-picker');
 
-    if (!result.canceled && result.assets[0]) {
-      const asset = result.assets[0];
-      setPendingAttachment({
-        uri: asset.uri,
-        type: 'file',
-        mimeType: asset.mimeType || 'application/octet-stream',
-        fileName: asset.name,
+      const result = await DocumentPicker.getDocumentAsync({
+        type: '*/*',
+        copyToCacheDirectory: true,
       });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        setPendingAttachment({
+          uri: asset.uri,
+          type: 'file',
+          mimeType: asset.mimeType || 'application/octet-stream',
+          fileName: asset.name,
+        });
+      }
+    } catch {
+      Alert.alert('Not Available', 'Document picker requires a development build.');
     }
   }, []);
 
