@@ -11,6 +11,13 @@ import {
 import { useAuth } from '@/lib/auth';
 import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 
+// Simple Bluetooth ring icon using unicode — no extra icon library needed
+function RingIcon({ color }: { color?: string }) {
+  return (
+    <Text style={{ fontSize: 18, color: color ?? '#888' }}>💍</Text>
+  );
+}
+
 export default function TabLayout() {
   const { isHydrated, isAuthenticated, status } = useAuth();
   const [isFirstTime] = useIsFirstTime();
@@ -71,6 +78,15 @@ export default function TabLayout() {
           headerShown: false,
           tabBarIcon: ({ color }) => <SettingsIcon color={color} />,
           tabBarButtonTestID: 'settings-tab',
+        }}
+      />
+      <Tabs.Screen
+        name="ring-debug"
+        options={{
+          title: 'Ring',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <RingIcon color={color} />,
+          tabBarButtonTestID: 'ring-debug-tab',
         }}
       />
     </Tabs>
