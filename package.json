@@ -54,7 +54,7 @@
     "@mongrov/auth": "^0.5.2",
     "@mongrov/collab": "^0.2.1",
     "@mongrov/core": "^0.4.0",
-    "@mongrov/db": "^0.2.2",
+    "@mongrov/db": "^0.2.5",
     "@mongrov/theme": "^0.3.0",
     "@mongrov/types": "^0.3.0",
     "@mongrov/ui": "^0.4.2",
