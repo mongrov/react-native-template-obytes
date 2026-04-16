@@ -31,7 +31,7 @@ export function LoginScreen() {
     setLoading(true);
     try {
       await signIn({ email: data.email, password: data.password });
-      router.push('/');
+      router.replace('/task-list');
     }
     catch (error) {
       const message
@@ -65,7 +65,7 @@ export function LoginScreen() {
             accessToken: result.accessToken,
           });
         }
-        router.push('/');
+        router.replace('/task-list');
       }
       // If result is null, user cancelled - no error to show
     }

@@ -5,12 +5,13 @@ import * as React from 'react';
 import { I18nManager, TextInput as NTextInput, StyleSheet, View } from 'react-native';
 
 import { tv } from 'tailwind-variants';
+import { useTheme } from '@/lib/theme';
 import colors from './colors';
 
 const inputTv = tv({
   slots: {
-    container: 'mb-2',
-    label: 'text-grey-100 mb-1 text-lg dark:text-neutral-100',
+    container: 'mb-4',
+    label: 'text-grey-100 mb-1 text-base dark:text-neutral-100',
     input:
       'font-inter mt-0 rounded-xl border-[0.5px] border-neutral-300 bg-neutral-100 px-4 py-3 text-base/5 font-medium dark:border-neutral-700 dark:bg-neutral-800 dark:text-white',
   },
@@ -47,6 +48,7 @@ export type NInputProps = {
 } & TextInputProps;
 
 export function Input({ ref, ...props }: NInputProps & { ref?: React.Ref<NTextInput | null> }) {
+  const theme = useTheme();
   const { label, error, testID, onBlur: onBlurProp, onFocus: onFocusProp, ...inputProps } = props;
   const [isFocussed, setIsFocussed] = React.useState(false);
 
@@ -78,6 +80,14 @@ export function Input({ ref, ...props }: NInputProps & { ref?: React.Ref<NTextIn
         <Text
           testID={testID ? `${testID}-label` : undefined}
           className={styles.label()}
+          style={StyleSheet.flatten([
+            {
+              fontFamily: theme.fonts.bodySemiBold,
+              fontSize: 16,
+              lineHeight: 20,
+              color: theme.colors.textPrimary,
+            },
+          ])}
         >
           {label}
         </Text>
@@ -93,6 +103,16 @@ export function Input({ ref, ...props }: NInputProps & { ref?: React.Ref<NTextIn
         style={StyleSheet.flatten([
           { writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr' },
           { textAlign: I18nManager.isRTL ? 'right' : 'left' },
+          {
+            fontFamily: theme.fonts.bodyMedium,
+            color: theme.colors.textPrimary,
+            backgroundColor: theme.colors.bgSecondary,
+            borderColor: error
+              ? theme.colors.critical
+              : isFocussed
+                ? theme.colors.borderStrong
+                : theme.colors.borderDefault,
+          },
           inputProps.style,
         ])}
       />

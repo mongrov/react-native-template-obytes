@@ -5,7 +5,7 @@ import type { AppIconBadgeConfig } from 'app-icon-badge/types';
 import 'tsx/cjs';
 
 // adding lint exception as we need to import tsx/cjs before env.ts is imported
-// eslint-disable-next-line perfectionist/sort-imports
+
 import Env from './env';
 
 const EXPO_ACCOUNT_OWNER = 'obytes';
@@ -26,6 +26,36 @@ const appIconBadgeConfig: AppIconBadgeConfig = {
     },
   ],
 };
+
+/** Cabinet Grotesk + Epilogue (LuminX Care) — embedded on iOS/Android via expo-font config plugin. */
+const luminxCustomFontPaths = [
+  './assets/fonts/CabinetGrotesk-Regular.otf',
+  './assets/fonts/CabinetGrotesk-Thin.otf',
+  './assets/fonts/CabinetGrotesk-Extralight.otf',
+  './assets/fonts/CabinetGrotesk-Light.otf',
+  './assets/fonts/CabinetGrotesk-Medium.otf',
+  './assets/fonts/CabinetGrotesk-Bold.otf',
+  './assets/fonts/CabinetGrotesk-Extrabold.otf',
+  './assets/fonts/CabinetGrotesk-Black.otf',
+  './assets/fonts/Epilogue-Regular.otf',
+  './assets/fonts/Epilogue-Thin.otf',
+  './assets/fonts/Epilogue-ThinItalic.otf',
+  './assets/fonts/Epilogue-ExtraLight.otf',
+  './assets/fonts/Epilogue-ExtraLightItalic.otf',
+  './assets/fonts/Epilogue-Light.otf',
+  './assets/fonts/Epilogue-LightItalic.otf',
+  './assets/fonts/Epilogue-Medium.otf',
+  './assets/fonts/Epilogue-MediumItalic.otf',
+  './assets/fonts/Epilogue-SemiBold.otf',
+  './assets/fonts/Epilogue-SemiBoldItalic.otf',
+  './assets/fonts/Epilogue-Bold.otf',
+  './assets/fonts/Epilogue-BoldItalic.otf',
+  './assets/fonts/Epilogue-ExtraBold.otf',
+  './assets/fonts/Epilogue-ExtraBoldItalic.otf',
+  './assets/fonts/Epilogue-Black.otf',
+  './assets/fonts/Epilogue-BlackItalic.otf',
+  './assets/fonts/Epilogue-Italic.otf',
+] as const;
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -99,6 +129,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-font',
       {
+        fonts: [...luminxCustomFontPaths],
         ios: {
           fonts: [
             'node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf',
@@ -141,7 +172,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-notifications',
       {
-        icon: './assets/notification-icon.png',
+        icon: './assets/icon.png',
         color: '#FF6B35',
         sounds: [],
       },

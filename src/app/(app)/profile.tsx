@@ -19,7 +19,7 @@ import { useColorScheme } from '@/lib/theme';
 export default function ProfileScreen() {
   const session = useSession();
   const { signOut } = useAuth();
-  const { isDark } = useColorScheme();
+  useColorScheme();
 
   const user = session?.user;
 
@@ -42,9 +42,9 @@ export default function ProfileScreen() {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         {/* Profile Header */}
-        <View className="items-center bg-primary-500 pb-8 pt-16 dark:bg-primary-700">
+        <View className="items-center bg-primary-500 pt-16 pb-8 dark:bg-primary-700">
           {/* Avatar */}
-          <View className="h-24 w-24 items-center justify-center rounded-full bg-white dark:bg-neutral-800">
+          <View className="size-24 items-center justify-center rounded-full bg-white dark:bg-neutral-800">
             {user.avatarUrl ? (
               <Text className="text-4xl">👤</Text>
             ) : (
@@ -67,7 +67,7 @@ export default function ProfileScreen() {
 
         {/* Profile Info Section */}
         <View className="mt-6 px-4">
-          <Text className="mb-2 text-sm font-medium uppercase text-neutral-500">
+          <Text className="mb-2 text-sm font-medium text-neutral-500 uppercase">
             Account Information
           </Text>
           <View className="rounded-lg bg-neutral-50 dark:bg-neutral-800">
@@ -80,7 +80,7 @@ export default function ProfileScreen() {
         {/* Permissions Section */}
         {session?.permissions && session.permissions.length > 0 && (
           <View className="mt-6 px-4">
-            <Text className="mb-2 text-sm font-medium uppercase text-neutral-500">
+            <Text className="mb-2 text-sm font-medium text-neutral-500 uppercase">
               Permissions
             </Text>
             <View className="flex-row flex-wrap gap-2">

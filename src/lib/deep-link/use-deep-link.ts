@@ -77,7 +77,7 @@ export function useDeepLink(): UseDeepLinkResult {
     (path: string, params?: Record<string, string>): string => {
       const scheme = Env.EXPO_PUBLIC_SCHEME;
       const queryString = params
-        ? '?' + new URLSearchParams(params).toString()
+        ? `?${new URLSearchParams(params).toString()}`
         : '';
       return `${scheme}://${path}${queryString}`;
     },

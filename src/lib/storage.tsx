@@ -10,25 +10,25 @@ import { createKVStore, type KVStore } from '@mongrov/db/kv';
 // Re-export types from @mongrov/db
 export type { KVStore } from '@mongrov/db/kv';
 
-export interface TokenStore {
-  getAccessToken(): Promise<string | null>;
-  getRefreshToken(): Promise<string | null>;
-  setTokens(accessToken: string, refreshToken: string): Promise<void>;
-  clearTokens(): Promise<void>;
-}
+export type TokenStore = {
+  getAccessToken: () => Promise<string | null>;
+  getRefreshToken: () => Promise<string | null>;
+  setTokens: (accessToken: string, refreshToken: string) => Promise<void>;
+  clearTokens: () => Promise<void>;
+};
 
 // ─── Sync storage interface (for theme/i18n) ──────────────────────────────────
 // Theme and i18n need synchronous access for initial render.
 // This wrapper provides sync methods with lazy MMKV initialization.
 
-interface SyncStorage {
-  getString(key: string): string | undefined;
-  set(key: string, value: string | number | boolean): void;
-  delete(key: string): void;
-  contains(key: string): boolean;
-  getAllKeys(): string[];
-  clearAll(): void;
-}
+type SyncStorage = {
+  getString: (key: string) => string | undefined;
+  set: (key: string, value: string | number | boolean) => void;
+  delete: (key: string) => void;
+  contains: (key: string) => boolean;
+  getAllKeys: () => string[];
+  clearAll: () => void;
+};
 
 // In-memory fallback
 function createMemoryStorage(): SyncStorage {
@@ -50,7 +50,6 @@ function getSyncStorage(): SyncStorage {
   if (_syncStorage) return _syncStorage;
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { MMKV } = require('react-native-mmkv');
     _syncStorage = new MMKV() as SyncStorage;
   } catch {

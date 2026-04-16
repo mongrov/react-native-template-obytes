@@ -26,7 +26,7 @@ export function SignUpScreen() {
         message: 'Account created successfully!',
         type: 'success',
       });
-      router.push('/');
+      router.replace('/task-list');
     }
     catch (error) {
       const message
