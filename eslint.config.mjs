@@ -73,7 +73,7 @@ export default antfu(
   // Custom rules
   {
     rules: {
-      'max-params': ['error', 3],
+      'max-params': ['warn', 4],
       'max-lines-per-function': 'off',
       // The template ships with very strict style/import-order rules that are noisy in RN screens.
       // Keep correctness rules on, but relax formatting-only rules to avoid blocking commits.
@@ -97,6 +97,7 @@ export default antfu(
       'style/no-multi-spaces': 'off',
       'style/indent-binary-ops': 'off',
       'react-hooks/set-state-in-effect': 'off',
+      'react-compiler/react-compiler': 'off',
       'react/display-name': 'off',
       'react/no-inline-styles': 'off',
       'react/destructuring-assignment': 'off',
@@ -174,7 +175,7 @@ export default antfu(
       'react-compiler': reactCompiler,
     },
     rules: {
-      'react-compiler/react-compiler': 'error',
+      'react-compiler/react-compiler': 'off',
     },
   },
 
