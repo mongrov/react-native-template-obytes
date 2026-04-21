@@ -11,7 +11,7 @@ import type { TenantConfig } from '@mongrov/auth';
 export const tenants: TenantConfig[] = [
   {
     id: 'default',
-    name: 'Demo App',
+    name: 'Luminx App',
     auth: { method: 'email-password' },
     backend: { type: 'odoo', url: 'https://demo.example.com' },
   },

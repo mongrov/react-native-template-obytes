@@ -2,8 +2,13 @@ import type { AuthMethodConfig, SocialProvider } from '@mongrov/auth';
 
 import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import * as z from 'zod';
+import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import Svg, { Path } from 'react-native-svg';
 
 import {
   AuthDivider,
@@ -11,9 +16,11 @@ import {
   Input,
   SocialLoginButton,
   Text,
+  TouchableOpacity,
   View,
 } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
+import { useColorScheme, useTheme } from '@/lib/theme';
 
 const schema = z
   .object({
@@ -65,7 +72,6 @@ export type SignUpFormProps = {
   subtitle?: string;
 };
 
-// eslint-disable-next-line max-lines-per-function
 export function SignUpForm({
   authConfig = { method: 'email-password' },
   onSubmit = () => {},
@@ -75,6 +81,10 @@ export function SignUpForm({
   title = 'Create Account',
   subtitle,
 }: SignUpFormProps) {
+  const theme = useTheme();
+  const { isDark } = useColorScheme();
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
   const form = useForm({
     defaultValues: {
       name: '',
@@ -89,6 +99,17 @@ export function SignUpForm({
       onSubmit(value);
     },
   });
+
+  const styles = React.useMemo(() => createStyles(theme), [theme]);
+  const gradientColors = React.useMemo(() => {
+    if (isDark)
+      return ['#1C303E', '#0F1A23', '#000000'] as const;
+    return ['#A1D1F8', '#FFFFFF', '#FFFFFF'] as const;
+  }, [isDark]);
+  const gradientLocations = React.useMemo(
+    () => (isDark ? ([0, 0.5, 1] as const) : ([0, 0.7, 0.7] as const)),
+    [isDark],
+  );
 
   const hasEmailPassword
     = authConfig.method === 'email-password'
@@ -124,20 +145,55 @@ export function SignUpForm({
       behavior="padding"
       keyboardVerticalOffset={10}
     >
-      <View className="flex-1 justify-center p-4">
-        <View className="items-center justify-center">
-          <Text
-            testID="form-title"
-            className="pb-6 text-center text-4xl font-bold"
-          >
+      <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+        <LinearGradient
+          colors={[...gradientColors]}
+          locations={[...gradientLocations]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+
+        <View style={[styles.topBar, { paddingTop: Math.max(insets.top, 0) }]}>
+          <View style={styles.topBarRow}>
+            <TouchableOpacity
+              testID="back-button"
+              activeOpacity={0.7}
+              onPress={() => (onLoginPress ? onLoginPress() : router.back())}
+            >
+              <View style={styles.backButton}>
+                <Svg width={18} height={18} viewBox="0 0 24 24">
+                  <Path
+                    d="M15 18l-6-6 6-6"
+                    stroke={theme.colors.textPrimary}
+                    strokeWidth="2"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              </View>
+            </TouchableOpacity>
+
+            {/* <Text style={styles.topBarTitle}>Sign Up</Text> */}
+            <View style={{ width: 44 }} />
+          </View>
+        </View>
+
+        <ScrollView
+          style={styles.screen}
+          contentContainerStyle={[
+            styles.content,
+            { paddingTop: 16 },
+          ]}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+        <View style={styles.header}>
+          <Text testID="form-title" style={styles.title}>
             {title}
           </Text>
-
-          {subtitle && (
-            <Text className="mb-6 max-w-xs text-center text-gray-500">
-              {subtitle}
-            </Text>
-          )}
+          {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
         </View>
 
         {/* Social Sign Up Buttons */}
@@ -146,7 +202,7 @@ export function SignUpForm({
           && (authConfig.method === 'social'
             || (authConfig.method === 'composite'
               && authConfig.primary.method === 'social')) && (
-          <View className="mb-4 gap-3">
+          <View style={styles.socialBlock}>
             {socialProviders.map(provider => (
               <SocialLoginButton
                 key={provider}
@@ -241,6 +297,11 @@ export function SignUpForm({
                   label="Create Account"
                   onPress={form.handleSubmit}
                   loading={isSubmitting || loading}
+                  style={{
+                    marginTop: 8,
+                    backgroundColor: theme.colors.primary500,
+                    borderRadius: theme.borderRadius.md,
+                  }}
                 />
               )}
             />
@@ -254,7 +315,7 @@ export function SignUpForm({
           && socialProviders.length > 0 && (
           <>
             <AuthDivider />
-            <View className="mt-4 gap-3">
+            <View style={styles.socialBlockAlt}>
               {socialProviders.map(provider => (
                 <SocialLoginButton
                   key={provider}
@@ -271,17 +332,104 @@ export function SignUpForm({
 
         {/* Login link */}
         {onLoginPress && (
-          <View className="mt-6 flex-row items-center justify-center gap-1">
-            <Text className="text-gray-500">Already have an account?</Text>
-            <Button
+          <View style={styles.footerRow}>
+            <Text style={styles.footerText}>Already have an account?</Text>
+            <TouchableOpacity
               testID="login-link"
-              variant="link"
-              label="Sign In"
+              activeOpacity={0.7}
               onPress={onLoginPress}
-            />
+            >
+              <Text style={styles.linkText}>Sign In</Text>
+            </TouchableOpacity>
           </View>
         )}
-      </View>
+        </ScrollView>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
+}
+
+function createStyles(theme: ReturnType<typeof useTheme>) {
+  return StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: theme.colors.bgPrimary,
+    },
+    screen: {
+      flex: 1,
+      backgroundColor: 'transparent',
+    },
+    content: {
+      paddingHorizontal: 20,
+      paddingBottom: 24,
+    },
+    topBar: {
+      paddingHorizontal: 20,
+    },
+    topBarRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      height: 44,
+    },
+    topBarTitle: {
+      fontFamily: theme.fonts.bodySemiBold,
+      fontSize: 16,
+      color: theme.colors.textPrimary,
+    },
+    backButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      backgroundColor: theme.colors.gray100,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    header: {
+      alignItems: 'center',
+      paddingBottom: 18,
+    },
+    title: {
+      fontFamily: theme.fonts.displayBold,
+      fontSize: 34,
+      lineHeight: 42,
+      letterSpacing: -0.03,
+      color: theme.colors.textPrimary,
+      textAlign: 'center',
+    },
+    subtitle: {
+      marginTop: 10,
+      maxWidth: 320,
+      fontFamily: theme.fonts.body,
+      fontSize: 15,
+      lineHeight: 20,
+      color: theme.colors.textSecondary,
+      textAlign: 'center',
+    },
+    socialBlock: {
+      marginBottom: 16,
+      gap: 12,
+    },
+    socialBlockAlt: {
+      marginTop: 16,
+      gap: 12,
+    },
+    footerRow: {
+      marginTop: 18,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+    },
+    footerText: {
+      fontFamily: theme.fonts.body,
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+    },
+    linkText: {
+      fontFamily: theme.fonts.bodySemiBold,
+      fontSize: 14,
+      color: theme.colors.primary500,
+    },
+  });
 }

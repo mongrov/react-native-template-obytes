@@ -5,6 +5,7 @@ import { AuthProvider } from '@mongrov/auth';
 import { LoggingProvider } from '@mongrov/core';
 import { ThemeProvider as NavThemeProvider } from '@react-navigation/native';
 import Env from 'env';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import * as React from 'react';
@@ -17,6 +18,7 @@ import { aiConfig } from '@/lib/ai';
 import { APIProvider } from '@/lib/api';
 import { authConfig } from '@/lib/auth';
 import { CollabProvider } from '@/lib/collab';
+import { luminxFontSources } from '@/lib/luminx-fonts';
 import { initSentry, SentryErrorBoundary } from '@/lib/sentry';
 import { useColorScheme, useNavigationTheme } from '@/lib/theme';
 // Import  global CSS file
@@ -51,12 +53,27 @@ SplashScreen.setOptions({
 });
 
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({ ...luminxFontSources });
+
+  React.useEffect(() => {
+    if (fontsLoaded || fontError) {
+      void SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
     <Providers>
       <Stack>
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
+        <Stack.Screen name="task-list" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="sign-up" options={{ headerShown: false }} />
+        <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
       </Stack>
     </Providers>
   );

@@ -6,14 +6,12 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  Checkbox,
   Input,
-  Radio,
   Select,
   Separator,
-  Switch,
   View,
 } from '@/components/ui';
+import { Checkbox, Radio, Switch } from '@/components/ui/checkbox';
 
 import { Title } from './title';
 

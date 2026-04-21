@@ -4,10 +4,10 @@ import { Linking, Platform } from 'react-native';
 import {
   ActivityIndicator,
   Pressable,
-  Switch,
   Text,
   View,
 } from '@/components/ui';
+import { Switch } from '@/components/ui/checkbox';
 import { useNotifications } from '@/lib/notifications';
 
 interface NotificationItemProps {

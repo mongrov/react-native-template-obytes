@@ -4,6 +4,11 @@ import { Uniwind } from 'uniwind';
 import { create } from 'zustand';
 
 import { storage } from '@/lib/storage';
+import {
+  getThemeForScheme,
+  theme,
+  type Theme,
+} from '../../../theme';
 
 export type ColorScheme = 'light' | 'dark' | 'system';
 
@@ -68,3 +73,10 @@ export function useNavigationTheme() {
   const { isDark } = useColorScheme();
   return isDark ? DarkTheme : DefaultTheme;
 }
+
+export function useTheme() {
+  const { isDark } = useColorScheme();
+  return getThemeForScheme(isDark);
+}
+
+export { getThemeForScheme, theme, type Theme };

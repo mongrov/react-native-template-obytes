@@ -2,8 +2,8 @@
 import Svg from 'react-native-svg';
 import { withUniwind } from 'uniwind';
 
-// Local components (not in @mongrov/ui yet)
-export * from './checkbox';
+// Checkbox / Radio / Switch live in `./checkbox` — import from `@/components/ui/checkbox`
+// so screens that only need Button/Text/View don’t load react-native-svg + this module graph.
 
 export { default as colors } from './colors';
 

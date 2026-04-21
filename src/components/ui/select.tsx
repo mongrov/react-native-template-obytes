@@ -2,10 +2,7 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { PressableProps } from 'react-native';
 import type { SvgProps } from 'react-native-svg';
-import {
-  BottomSheetFlatList,
-
-} from '@gorhom/bottom-sheet';
+import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { Text } from '@mongrov/ui';
 import { FlashList } from '@shopify/flash-list';
 import * as React from 'react';
@@ -53,7 +50,7 @@ const selectTv = tv({
   },
 });
 
-const List = Platform.OS === 'web' ? FlashList : BottomSheetFlatList;
+const isWeb = Platform.OS === 'web';
 
 export type OptionType = { label: string; value: string | number };
 
@@ -95,13 +92,21 @@ export function Options({ ref, options, onSelect, value, testID }: OptionsProps 
         backgroundColor: isDark ? colors.neutral[800] : colors.white,
       }}
     >
-      <List
-        data={options}
-        keyExtractor={keyExtractor}
-        renderItem={renderSelectItem}
-        testID={testID ? `${testID}-modal` : undefined}
-        estimatedItemSize={52}
-      />
+      {isWeb ? (
+        <FlashList
+          data={options}
+          keyExtractor={keyExtractor}
+          renderItem={renderSelectItem}
+          testID={testID ? `${testID}-modal` : undefined}
+        />
+      ) : (
+        <BottomSheetFlatList
+          data={options}
+          keyExtractor={keyExtractor}
+          renderItem={renderSelectItem}
+          testID={testID ? `${testID}-modal` : undefined}
+        />
+      )}
     </Modal>
   );
 }

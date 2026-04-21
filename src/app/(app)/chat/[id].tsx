@@ -51,7 +51,7 @@ export default function ChatRoomScreen() {
   const [userPresence, setUserPresence] = useState<Map<string, PresenceState>>(new Map());
 
   const listRef = useRef<FlatList<Message>>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTypingSentRef = useRef<number>(0);
 
   // Load messages

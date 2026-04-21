@@ -4,7 +4,16 @@
  * Schemas for messages and conversations matching @mongrov/types.
  */
 
-import type { RxJsonSchema } from 'rxdb'
+// NOTE: We only need the schema *shape* for type-checking here.
+// Importing RxDB directly makes `tsc` fail if RxDB isn't installed.
+export type RxJsonSchema<T> = {
+  version: number;
+  primaryKey: keyof T | string;
+  type: 'object';
+  properties: Record<string, unknown>;
+  required?: Array<keyof T | string>;
+  indexes?: Array<string | string[]>;
+};
 
 // ─── Message Schema ─────────────────────────────────────────────────────────
 

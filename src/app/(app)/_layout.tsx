@@ -1,19 +1,16 @@
-import { Link, Redirect, SplashScreen, Tabs } from 'expo-router';
+import { Redirect, SplashScreen } from 'expo-router';
 import * as React from 'react';
 import { useCallback, useEffect } from 'react';
 
-import { Pressable, Text } from '@/components/ui';
-import {
-  Chat as ChatIcon,
-  Feed as FeedIcon,
-  Settings as SettingsIcon,
-  Style as StyleIcon,
-} from '@/components/ui/icons';
 import { BiometricLockScreen } from '@/features/auth/components/biometric-lock-screen';
 import { useAuth, useBiometricLock } from '@/lib/auth';
 import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 
-export default function TabLayout() {
+/**
+ * Auth gate + onboarding redirect. Default signed-in destination is `/task-list`.
+ * Tab screens under `(app)/` remain available for future navigation (e.g. `router.push('/(app)/settings')`).
+ */
+export default function AppGateLayout() {
   const { isHydrated, isAuthenticated, status, signOut } = useAuth();
   const [isFirstTime] = useIsFirstTime();
   const biometricLock = useBiometricLock();
@@ -36,18 +33,15 @@ export default function TabLayout() {
     return <Redirect href="/onboarding" />;
   }
 
-  // Before hydrate completes, show nothing (splash is still visible)
   if (!isHydrated) {
     return null;
   }
 
-  // Hydration is done. If not authenticated, redirect to login.
   if (!isAuthenticated) {
     SplashScreen.hideAsync();
     return <Redirect href="/login" />;
   }
 
-  // Show biometric lock screen if locked
   if (biometricLock.isLocked) {
     return (
       <BiometricLockScreen
@@ -59,56 +53,5 @@ export default function TabLayout() {
     );
   }
 
-  return (
-    <Tabs>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Feed',
-          tabBarIcon: ({ color }) => <FeedIcon color={color} />,
-          headerRight: () => <CreateNewPostLink />,
-          tabBarButtonTestID: 'feed-tab',
-        }}
-      />
-
-      <Tabs.Screen
-        name="chat"
-        options={{
-          title: 'Chat',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <ChatIcon color={color} />,
-          tabBarButtonTestID: 'chat-tab',
-        }}
-      />
-
-      <Tabs.Screen
-        name="style"
-        options={{
-          title: 'Style',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <StyleIcon color={color} />,
-          tabBarButtonTestID: 'style-tab',
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <SettingsIcon color={color} />,
-          tabBarButtonTestID: 'settings-tab',
-        }}
-      />
-    </Tabs>
-  );
-}
-
-function CreateNewPostLink() {
-  return (
-    <Link href="/feed/add-post" asChild>
-      <Pressable>
-        <Text className="px-3 text-primary-300">Create</Text>
-      </Pressable>
-    </Link>
-  );
+  return <Redirect href="/task-list" />;
 }
