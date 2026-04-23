@@ -4,12 +4,21 @@
  */
 
 import * as Device from 'expo-device';
-import * as Location from 'expo-location';
 import { PermissionsAndroid, Platform } from 'react-native';
 
 import { storage } from '@/lib/storage';
 
 import { getBleManager } from './ble-manager';
+
+function getExpoLocation(): any | null {
+  try {
+    // Avoid crashing the whole app when the native module isn't in the current runtime
+    // (common when using a custom dev client that wasn't rebuilt).
+    return require('expo-location');
+  } catch {
+    return null;
+  }
+}
 
 export type PermissionStatus
   = | 'granted'
@@ -236,6 +245,12 @@ class BlePermissions {
       return 'granted';
     }
 
+    const Location = getExpoLocation();
+    if (!Location) {
+      // If the native module isn't available in the current runtime, don't crash.
+      return 'undetermined';
+    }
+
     // Use expo-location for cross-platform check (handles iOS and Android)
     try {
       const result = await Location.getForegroundPermissionsAsync();
@@ -265,6 +280,11 @@ class BlePermissions {
     // Simulator Bypass
     if (!Device.isDevice) {
       return true;
+    }
+
+    const Location = getExpoLocation();
+    if (!Location) {
+      return false;
     }
 
     try {

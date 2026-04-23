@@ -8,7 +8,7 @@ import type {
     SQLiteBasics,
     SQLiteDatabaseClass,
     SQLiteQueryWithParams
-} from './sqlite-types.js';
+} from './sqlite-types';
 
 
 const BASICS_BY_SQLITE_LIB = new WeakMap();

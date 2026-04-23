@@ -5,24 +5,24 @@ import {
     RxStorage,
     RxStorageInstanceCreationParams
 } from 'rxdb/plugins/core';
-import { checkVersion } from '../../plugins/shared/version-check.js';
-import { RX_STORAGE_NAME_SQLITE } from './sqlite-helpers.js';
+import { checkVersion } from '../shared/version-check';
+import { RX_STORAGE_NAME_SQLITE } from './sqlite-helpers';
 import {
     createSQLiteStorageInstance,
     RxStorageInstanceSQLite
-} from './sqlite-storage-instance.js';
+} from './sqlite-storage-instance';
 import type {
     SQLiteInternals,
     SQLiteInstanceCreationOptions,
     SQLiteStorageSettings
-} from './sqlite-types.js';
-import { RXDB_PREMIUM_VERSION } from '../shared/rxdb-premium-version.js';
+} from './sqlite-types';
+import { RXDB_PREMIUM_VERSION } from '../shared/rxdb-premium-version';
 
 
-export * from './sqlite-helpers.js';
-export * from './sqlite-types.js';
-export * from './sqlite-storage-instance.js';
-export * from './sqlite-basics-helpers.js';
+export * from './sqlite-helpers';
+export * from './sqlite-types';
+export * from './sqlite-storage-instance';
+export * from './sqlite-basics-helpers';
 
 /**
  * @link https://stackoverflow.com/a/38877890/3443137

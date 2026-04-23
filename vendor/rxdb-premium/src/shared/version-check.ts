@@ -4,7 +4,7 @@ import {
 } from 'rxdb/plugins/utils'
 import {
     RXDB_PREMIUM_VERSION
-} from './rxdb-premium-version.js';
+} from './rxdb-premium-version';
 
 let versionCheckEnabled = true;
 export function disableVersionCheck() {

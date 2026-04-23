@@ -7,7 +7,7 @@ import {
     RxDocumentData,
     RxJsonSchema
 } from 'rxdb/plugins/core';
-import { getJsonExtract, isPlainObject, PARAM_KEY } from './sqlite-helpers.js';
+import { getJsonExtract, isPlainObject, PARAM_KEY } from './sqlite-helpers';
 
 
 const LOGICAL_MANGO_OPERATORS = ['$or', '$and'];

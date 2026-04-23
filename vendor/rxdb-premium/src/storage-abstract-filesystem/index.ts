@@ -8,7 +8,7 @@ import {
     RxStorage,
     RxStorageInstanceCreationParams
 } from 'rxdb/plugins/core';
-import { checkVersion } from '../../plugins/shared/version-check.js';
+import { checkVersion } from '../shared/version-check';
 import {
     RxStorageInstanceAbstractFilesystem,
     createAbstractFilesystemStorageInstance
@@ -19,7 +19,7 @@ import {
 } from './types.js';
 import { AbstractFilesystem, AbstractLock } from './abstract-filesystem.js';
 import { map } from 'rxjs';
-import { RXDB_PREMIUM_VERSION } from '../shared/rxdb-premium-version.js';
+import { RXDB_PREMIUM_VERSION } from '../shared/rxdb-premium-version';
 import { DEFAULT_DOC_JSON_POSITION_SIZE } from './helpers.js';
 
 

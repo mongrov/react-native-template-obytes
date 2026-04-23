@@ -12,7 +12,20 @@ import type { RxJsonSchema } from 'rxdb';
 
 // TODO: re-enable once @mongrov/db is published with RxDBMigrationPlugin fix
 // import { createDatabase, destroyDatabase } from '@mongrov/db';
-import { open } from 'react-native-quick-sqlite';
+
+function getQuickSQLiteOpen(): any {
+  try {
+    // `react-native-quick-sqlite` is a native module.
+    // Avoid crashing the app at import-time when running in a runtime that
+    // doesn't include it (Expo Go / dev client not rebuilt).
+
+    return require('react-native-quick-sqlite').open;
+  } catch {
+    return () => {
+      throw new Error('[RingDB] Base quick-sqlite module not found. Rebuild the app/dev-client.');
+    };
+  }
+}
 
 let rxdbPremiumSQLite: any = null;
 try {
@@ -228,7 +241,7 @@ export async function initializeRingDatabase(): Promise<RingDb> {
     _initPromise = createDatabase({
       name: 'mytestapp_ring',
       storage: getRxStorageSQLite({
-        sqliteBasics: getSQLiteBasicsQuickSQLite(open),
+        sqliteBasics: getSQLiteBasicsQuickSQLite(getQuickSQLiteOpen()),
       }),
       collections: [
         { name: 'ring', schema: ringSchema },

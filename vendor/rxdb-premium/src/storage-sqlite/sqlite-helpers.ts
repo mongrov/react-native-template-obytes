@@ -14,9 +14,9 @@ import type {
     SQLiteDatabaseClass,
     SQLitePreparedQuery,
     SQLiteQueryWithParams
-} from './sqlite-types.js';
-import { mangoQuerySelectorToSQL, mangoQuerySortToSQL } from './sqlite-query.js';
-import { RxStorageInstanceSQLite } from './sqlite-storage-instance.js';
+} from './sqlite-types';
+import { mangoQuerySelectorToSQL, mangoQuerySortToSQL } from './sqlite-query';
+import { RxStorageInstanceSQLite } from './sqlite-storage-instance';
 
 export const NON_IMPLEMENTED_OPERATOR_QUERY_BATCH_SIZE = 50;
 

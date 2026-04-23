@@ -30,7 +30,7 @@ import {
     PreparedQuery
 } from 'rxdb/plugins/core';
 import { Observable, Subject } from 'rxjs';
-import type { RxStorageSQLite } from './index.js';
+import type { RxStorageSQLite } from './index';
 import {
     attachmentRowKey,
     closeDatabaseConnection,
@@ -44,7 +44,7 @@ import {
     sqliteTransaction,
     SQLITE_VARIABLES_LIMIT,
     prepareSQLiteQuery
-} from './sqlite-helpers.js';
+} from './sqlite-helpers';
 import type {
     SQLiteBasics,
     SQLiteChangesCheckpoint,
@@ -53,7 +53,7 @@ import type {
     SQLitePreparedQuery,
     SQLiteQueryWithParams,
     SQLiteStorageSettings
-} from './sqlite-types.js';
+} from './sqlite-types';
 
 let instanceId = 0;
 export class RxStorageInstanceSQLite<RxDocType> implements RxStorageInstance<
