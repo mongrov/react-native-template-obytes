@@ -72,15 +72,15 @@ export type ParsedResponse = {
  * Equivalent to: (int) ((b & 0xff) * Math.pow(256, count))
  */
 function getValue(byte: number, position: number): number {
-  return (byte & 0xff) * Math.pow(256, position);
+  return (byte & 0xFF) * 256 ** position;
 }
 
 /**
  * Helper: Convert BCD byte to string (e.g., 0x24 -> "24")
  */
 function bcd2String(byte: number): string {
-  const high = (byte & 0xf0) >>> 4;
-  const low = byte & 0x0f;
+  const high = (byte & 0xF0) >>> 4;
+  const low = byte & 0x0F;
   return `${high}${low}`;
 }
 
@@ -88,7 +88,7 @@ function bcd2String(byte: number): string {
  * Helper: Convert byte to 2-digit hex string
  */
 function byteToHexString(byte: number): string {
-  const hex = (byte & 0xff).toString(16);
+  const hex = (byte & 0xFF).toString(16);
   return hex.length === 1 ? `0${hex}` : hex;
 }
 
@@ -127,16 +127,18 @@ export const ResponseParser = {
    * Check if the response indicates end of data (0xFF marker)
    */
   isEndMarker(data: Uint8Array): boolean {
-    return data[data.length - 1] === 0xff;
+    return data.at(-1) === 0xFF;
   },
 
   /**
    * Check if the response is an empty data response (command echo + all zeros + CRC)
    */
   isEmptyDataResponse(data: Uint8Array): boolean {
-    if (data.length < 16) return false;
+    if (data.length < 16)
+      return false;
     for (let i = 1; i < 15; i++) {
-      if (data[i] !== 0) return false;
+      if (data[i] !== 0)
+        return false;
     }
     return true;
   },
@@ -157,7 +159,8 @@ export const ResponseParser = {
     let version = '';
     for (let i = 1; i < 5; i++) {
       version += data[i].toString(16).toUpperCase();
-      if (i < 4) version += '.';
+      if (i < 4)
+        version += '.';
     }
     return { version };
   },
@@ -168,7 +171,7 @@ export const ResponseParser = {
   parseDeviceTime(data: Uint8Array): DeviceTimeData {
     const deviceTime
       = `20${byteToHexString(data[1])}-${byteToHexString(data[2])}-${byteToHexString(data[3])} `
-      + `${byteToHexString(data[4])}:${byteToHexString(data[5])}:${byteToHexString(data[6])}`;
+        + `${byteToHexString(data[4])}:${byteToHexString(data[5])}:${byteToHexString(data[6])}`;
 
     const gpsTime = `${byteToHexString(data[9])}.${byteToHexString(data[10])}.${byteToHexString(data[11])}`;
 
@@ -187,7 +190,7 @@ export const ResponseParser = {
       return { items: [], isEnd: true };
     }
 
-    if (data[length - 1] === 0xff && data[length - 2] === CMD.GET_SLEEP_DATA) {
+    if (data[length - 1] === 0xFF && data[length - 2] === CMD.GET_SLEEP_DATA) {
       isEnd = true;
     }
 
@@ -217,11 +220,12 @@ export const ResponseParser = {
         const offset = i * chunkSize;
         const sleepLength = getValue(data[9 + offset], 0);
 
-        if (sleepLength === 0) continue;
+        if (sleepLength === 0)
+          continue;
 
         const startTime
           = `20${bcd2String(data[3 + offset])}-${bcd2String(data[4 + offset])}-${bcd2String(data[5 + offset])} `
-          + `${bcd2String(data[6 + offset])}:${bcd2String(data[7 + offset])}:${bcd2String(data[8 + offset])}`;
+            + `${bcd2String(data[6 + offset])}:${bcd2String(data[7 + offset])}:${bcd2String(data[8 + offset])}`;
 
         const sleepQuality: number[] = [];
 
@@ -257,7 +261,7 @@ export const ResponseParser = {
     }
 
     const numChunks = Math.floor(length / chunkSize);
-    const isEnd = data[length - 1] === 0xff;
+    const isEnd = data[length - 1] === 0xFF;
 
     for (let i = 0; i < numChunks; i++) {
       const offset = i * chunkSize;
@@ -308,7 +312,7 @@ export const ResponseParser = {
     }
 
     const numChunks = Math.floor(length / chunkSize);
-    const isEnd = data[length - 1] === 0xff;
+    const isEnd = data[length - 1] === 0xFF;
 
     for (let i = 0; i < numChunks; i++) {
       const offset = i * chunkSize;
@@ -334,7 +338,7 @@ export const ResponseParser = {
     }
 
     const numChunks = Math.floor(length / chunkSize);
-    const isEnd = data[length - 1] === 0xff;
+    const isEnd = data[length - 1] === 0xFF;
 
     for (let i = 0; i < numChunks; i++) {
       const offset = i * chunkSize;
@@ -367,7 +371,7 @@ export const ResponseParser = {
     }
 
     const numChunks = Math.floor(length / chunkSize);
-    const isEnd = data[length - 1] === 0xff;
+    const isEnd = data[length - 1] === 0xFF;
 
     for (let i = 0; i < numChunks; i++) {
       const offset = i * chunkSize;
@@ -396,7 +400,7 @@ export const ResponseParser = {
     }
 
     const numChunks = Math.floor(length / chunkSize);
-    const isEnd = data[length - 1] === 0xff;
+    const isEnd = data[length - 1] === 0xFF;
 
     for (let i = 0; i < numChunks; i++) {
       const offset = i * chunkSize;

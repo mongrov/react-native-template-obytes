@@ -3,9 +3,9 @@
  * XState v5 machine for managing BLE ring connection lifecycle
  */
 
-import { assign, fromPromise, setup } from 'xstate';
-
 import type { ScannedDevice } from '../ble-scanner';
+
+import { assign, fromPromise, setup } from 'xstate';
 import { bleConnector } from '../ble-connector';
 import { bleScanner } from '../ble-scanner';
 
@@ -94,9 +94,10 @@ export const ringConnectionMachine = setup({
   actions: {
     addDevice: assign({
       discoveredDevices: ({ context, event }) => {
-        if (event.type !== 'DEVICE_FOUND') return context.discoveredDevices;
+        if (event.type !== 'DEVICE_FOUND')
+          return context.discoveredDevices;
         const exists = context.discoveredDevices.some(
-          (d) => d.id === event.device.id,
+          d => d.id === event.device.id,
         );
         if (exists) {
           return context.discoveredDevices;

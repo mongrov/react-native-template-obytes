@@ -9,9 +9,6 @@ import type {
   Subscription,
 } from 'react-native-ble-plx';
 
-import { Buffer } from 'buffer';
-
-import { CMD, MODE, PacketBuilder } from './packet-builder';
 import type {
   ActivityDataItem,
   HeartRateItem,
@@ -20,6 +17,9 @@ import type {
   SpO2DataItem,
   TemperatureDataItem,
 } from './response-parser';
+
+import { Buffer } from 'buffer';
+import { CMD, MODE, PacketBuilder } from './packet-builder';
 import { ResponseParser } from './response-parser';
 
 // JStyle UUIDs (Derived from logs: Service FFF0, Write FFF6, Notify FFF7)
@@ -73,14 +73,16 @@ export class JStyleAdapter {
             this.writeCharacteristic = char;
           }
           else if (char.isWritableWithResponse || char.isWritableWithoutResponse) {
-            if (!this.writeCharacteristic) this.writeCharacteristic = char;
+            if (!this.writeCharacteristic)
+              this.writeCharacteristic = char;
           }
 
           if (charUuid.includes(JSTYLE_NOTIFY_CHAR_UUID)) {
             this.notifyCharacteristic = char;
           }
           else if (char.isNotifiable) {
-            if (!this.notifyCharacteristic) this.notifyCharacteristic = char;
+            if (!this.notifyCharacteristic)
+              this.notifyCharacteristic = char;
           }
         }
 
@@ -176,7 +178,8 @@ export class JStyleAdapter {
    * Set up notification handling
    */
   private async setupNotifications(): Promise<void> {
-    if (!this.notifyCharacteristic) return;
+    if (!this.notifyCharacteristic)
+      return;
 
     if (this.notificationSubscription) {
       console.log('[JStyle] Removing existing notification subscription');
@@ -186,11 +189,14 @@ export class JStyleAdapter {
 
     this.notificationSubscription = this.notifyCharacteristic.monitor(
       (error, char) => {
-        if (!this.notificationSubscription) return;
+        if (!this.notificationSubscription)
+          return;
 
         if (error) {
-          if (error.errorCode === 201) return;
-          if (error.message?.includes('cancelled')) return;
+          if (error.errorCode === 201)
+            return;
+          if (error.message?.includes('cancelled'))
+            return;
           console.error('[JStyle] Notification error:', error);
           return;
         }
@@ -208,7 +214,7 @@ export class JStyleAdapter {
             const isEmpty = ResponseParser.isEmptyDataResponse(packet);
             const metExpectedCount
               = this.expectedResponseCount > 0
-              && this.responseBuffer.length >= this.expectedResponseCount;
+                && this.responseBuffer.length >= this.expectedResponseCount;
 
             if (isEnd || isEmpty || metExpectedCount) {
               this.resolveResponse();
@@ -241,7 +247,7 @@ export class JStyleAdapter {
     try {
       const packet = PacketBuilder.setDeviceTime();
       const responses = await this.sendCommand(packet, 2000, 1);
-      const validResponse = responses.find((r) => r[0] === CMD.SET_TIME);
+      const validResponse = responses.find(r => r[0] === CMD.SET_TIME);
       if (validResponse) {
         console.log('[JStyle] Handshake complete (ACK received)');
       }
@@ -260,7 +266,7 @@ export class JStyleAdapter {
     const packet = PacketBuilder.getBatteryLevel();
     const responses = await this.sendCommand(packet, 2000, 1);
     const validResponse = responses.find(
-      (r) => r[0] === CMD.GET_BATTERY_LEVEL,
+      r => r[0] === CMD.GET_BATTERY_LEVEL,
     );
     if (validResponse) {
       const data = ResponseParser.parseBattery(validResponse);
@@ -272,7 +278,7 @@ export class JStyleAdapter {
   public async getDeviceVersion(): Promise<string> {
     const packet = PacketBuilder.getDeviceVersion();
     const responses = await this.sendCommand(packet, 2000, 1);
-    const validResponse = responses.find((r) => r[0] === CMD.GET_VERSION);
+    const validResponse = responses.find(r => r[0] === CMD.GET_VERSION);
     if (validResponse) {
       const data = ResponseParser.parseDeviceVersion(validResponse);
       return data.version;
@@ -288,12 +294,14 @@ export class JStyleAdapter {
 
     try {
       while (!isEnd) {
-        if (this.isSyncCancelled) throw new Error('Sync cancelled');
+        if (this.isSyncCancelled)
+          throw new Error('Sync cancelled');
 
         const packet = PacketBuilder.getDetailSleepData(mode);
         const responses = await this.sendCommand(packet, 3000);
 
-        if (responses.length === 0) break;
+        if (responses.length === 0)
+          break;
 
         for (const response of responses) {
           const result = ResponseParser.parseSleepData(response);
@@ -322,12 +330,14 @@ export class JStyleAdapter {
 
     try {
       while (!isEnd) {
-        if (this.isSyncCancelled) throw new Error('Sync cancelled');
+        if (this.isSyncCancelled)
+          throw new Error('Sync cancelled');
 
         const packet = PacketBuilder.getDetailActivityData(mode);
         const responses = await this.sendCommand(packet, 3000);
 
-        if (responses.length === 0) break;
+        if (responses.length === 0)
+          break;
 
         const combined = this.concatResponses(responses);
         const result = ResponseParser.parseDetailActivityData(combined);
@@ -352,12 +362,14 @@ export class JStyleAdapter {
 
     try {
       while (!isEnd) {
-        if (this.isSyncCancelled) throw new Error('Sync cancelled');
+        if (this.isSyncCancelled)
+          throw new Error('Sync cancelled');
 
         const packet = PacketBuilder.getStaticHR(mode);
         const responses = await this.sendCommand(packet, 3000);
 
-        if (responses.length === 0) break;
+        if (responses.length === 0)
+          break;
 
         const combined = this.concatResponses(responses);
         const result = ResponseParser.parseStaticHR(combined);
@@ -382,12 +394,14 @@ export class JStyleAdapter {
 
     try {
       while (!isEnd) {
-        if (this.isSyncCancelled) throw new Error('Sync cancelled');
+        if (this.isSyncCancelled)
+          throw new Error('Sync cancelled');
 
         const packet = PacketBuilder.getHRVData(mode);
         const responses = await this.sendCommand(packet, 3000);
 
-        if (responses.length === 0) break;
+        if (responses.length === 0)
+          break;
 
         const combined = this.concatResponses(responses);
         const result = ResponseParser.parseHRVData(combined);
@@ -412,12 +426,14 @@ export class JStyleAdapter {
 
     try {
       while (!isEnd) {
-        if (this.isSyncCancelled) throw new Error('Sync cancelled');
+        if (this.isSyncCancelled)
+          throw new Error('Sync cancelled');
 
         const packet = PacketBuilder.getSpO2Data(mode);
         const responses = await this.sendCommand(packet, 3000);
 
-        if (responses.length === 0) break;
+        if (responses.length === 0)
+          break;
 
         const combined = this.concatResponses(responses);
         const result = ResponseParser.parseSpO2Data(combined);
@@ -442,12 +458,14 @@ export class JStyleAdapter {
 
     try {
       while (!isEnd) {
-        if (this.isSyncCancelled) throw new Error('Sync cancelled');
+        if (this.isSyncCancelled)
+          throw new Error('Sync cancelled');
 
         const packet = PacketBuilder.getTemperatureData(mode);
         const responses = await this.sendCommand(packet, 3000);
 
-        if (responses.length === 0) break;
+        if (responses.length === 0)
+          break;
 
         const combined = this.concatResponses(responses);
         const result = ResponseParser.parseTemperatureData(combined);
@@ -492,7 +510,8 @@ export class JStyleAdapter {
 
   public async abortSync(): Promise<void> {
     this.isSyncCancelled = true;
-    if (!this.writeCharacteristic) return;
+    if (!this.writeCharacteristic)
+      return;
     console.log('[JStyle] Aborting sync...');
 
     try {

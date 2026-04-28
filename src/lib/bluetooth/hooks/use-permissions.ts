@@ -4,13 +4,13 @@
  * Ported from zivaone_app/src/features/ring/hooks/use-permissions.ts
  */
 
+import type { PermissionStatus } from '../ble-permissions';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
 import { AppState } from 'react-native';
-
-import { blePermissions, type PermissionStatus } from '../ble-permissions';
 import BleManagerSingleton from '../ble-manager';
+import { blePermissions } from '../ble-permissions';
 
-// eslint-disable-next-line max-lines-per-function
 export function usePermissions({
   enabled = true,
   autoRequest = false,
@@ -25,7 +25,8 @@ export function usePermissions({
   const hasAutoRequested = useRef(false);
 
   const checkPermissions = useCallback(async () => {
-    if (!enabled) return;
+    if (!enabled)
+      return;
 
     try {
       const ble = await blePermissions.checkBluetoothStatus();
@@ -35,14 +36,16 @@ export function usePermissions({
       setBleStatus(ble);
       setLocationStatus(loc);
       setIsBluetoothEnabled(bleEnabled);
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   }, [enabled]);
 
   // Listen to BLE state changes (Radio On/Off)
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled)
+      return;
 
     const manager = BleManagerSingleton.getInstance().getManager();
     const subscription = manager.onStateChange((state) => {
@@ -71,7 +74,8 @@ export function usePermissions({
 
   // Auto-request Bluetooth on mount
   useEffect(() => {
-    if (!autoRequest || hasAutoRequested.current || !enabled || loading) return;
+    if (!autoRequest || hasAutoRequested.current || !enabled || loading)
+      return;
 
     if (bleStatus === 'undetermined') {
       blePermissions.requestBluetoothPermission().then(() => {
@@ -82,7 +86,8 @@ export function usePermissions({
 
   // Auto-request Location ONLY after Bluetooth is settled
   useEffect(() => {
-    if (!autoRequest || hasAutoRequested.current || !enabled || loading) return;
+    if (!autoRequest || hasAutoRequested.current || !enabled || loading)
+      return;
 
     if (bleStatus !== 'undetermined' && locationStatus === 'undetermined') {
       hasAutoRequested.current = true;

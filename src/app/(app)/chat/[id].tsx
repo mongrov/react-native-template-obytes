@@ -19,7 +19,8 @@ import {
   View,
 } from '@/components/ui';
 import { useCollab, useCollabConnected } from '@/lib/collab';
-import type { SendMessageParams, PresenceState } from '@/lib/collab/adapters/rocketchat';
+import type { PresenceState } from '@mongrov/collab';
+import type { SendMessageParams } from '@/lib/collab/adapters/rocketchat';
 
 // Attachment type for pending uploads
 interface PendingAttachment {

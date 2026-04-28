@@ -3,26 +3,27 @@
  * Handles device scanning with Ziva ring name filtering
  */
 
-import { type Device, ScanMode } from 'react-native-ble-plx';
+import type { Device } from 'react-native-ble-plx';
+import { ScanMode } from 'react-native-ble-plx';
 
 import BleManagerSingleton, { getBleManager } from './ble-manager';
 
 // Regex pattern for Ziva ring device names
 export const ZIVA_RING_NAMES_REGEX = /^2301B|ZR100|X1B/;
 
-export interface ScannedDevice {
+export type ScannedDevice = {
   id: string;
   name: string | null;
   rssi: number | null;
   device: Device;
-}
+};
 
-export interface ScanOptions {
+export type ScanOptions = {
   timeout?: number;
   allowDuplicates?: boolean;
   onDeviceFound?: (device: ScannedDevice) => void;
   filterZivaOnly?: boolean;
-}
+};
 
 class BleScanner {
   private isScanning: boolean = false;
@@ -40,7 +41,6 @@ class BleScanner {
       onDeviceFound,
       filterZivaOnly = true,
     } = options;
-
 
     if (this.isScanning) {
       console.log('[BLE Scanner] Already scanning, stopping previous scan...');
@@ -79,7 +79,7 @@ class BleScanner {
               if (device) {
                 this.handleScannedDevice(device, filterZivaOnly, onDeviceFound);
               }
-            }
+            },
           );
 
           // Set timeout to stop scanning
@@ -131,7 +131,7 @@ class BleScanner {
   private handleScannedDevice(
     device: Device,
     filterZivaOnly: boolean,
-    onDeviceFound?: (device: ScannedDevice) => void
+    onDeviceFound?: (device: ScannedDevice) => void,
   ) {
     // Apply Ziva ring filter if enabled
     if (filterZivaOnly) {
@@ -152,7 +152,7 @@ class BleScanner {
     if (!this.discoveredDevices.has(device.id)) {
       this.discoveredDevices.set(device.id, scannedDevice);
       console.log(
-        `[BLE Scanner] Found device: ${scannedDevice.name} (${device.id})`
+        `[BLE Scanner] Found device: ${scannedDevice.name} (${device.id})`,
       );
 
       if (onDeviceFound) {

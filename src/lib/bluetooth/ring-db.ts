@@ -8,15 +8,16 @@
  * Call initializeRingDatabase() once at app startup.
  */
 
-import { addRxPlugin, type RxJsonSchema } from 'rxdb';
+import type { RxJsonSchema } from 'rxdb';
+import { createDatabase, destroyDatabase } from '@mongrov/db';
+import { open } from 'react-native-nitro-sqlite';
+
+import { addRxPlugin } from 'rxdb';
+import { getRxStorageSQLite } from 'rxdb-premium/plugins/storage-sqlite';
 import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
 
 // Register external RxDB plugins
 addRxPlugin(RxDBUpdatePlugin);
-
-import { createDatabase, destroyDatabase } from '@mongrov/db';
-import { open } from 'react-native-nitro-sqlite';
-import { getRxStorageSQLite } from 'rxdb-premium/plugins/storage-sqlite';
 
 /**
  * Custom RxDB SQLiteBasics wrapper for react-native-nitro-sqlite
@@ -232,7 +233,7 @@ export async function initializeRingDatabase(): Promise<RingDb> {
 
   if (!_initPromise) {
     _initPromise = createDatabase({
-      name: 'mytestapp_ring',
+      name: 'zivaone_ring',
       storage: getRxStorageSQLite({
         sqliteBasics: getSQLiteBasicsNitroSQLite(open),
       }),

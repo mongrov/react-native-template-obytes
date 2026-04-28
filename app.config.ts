@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import type { ConfigContext, ExpoConfig } from '@expo/config';
 
 import type { AppIconBadgeConfig } from 'app-icon-badge/types';
@@ -46,6 +47,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: true,
     bundleIdentifier: Env.EXPO_PUBLIC_BUNDLE_ID,
+    googleServicesFile: './GoogleService-Info.plist',
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
       NSBluetoothAlwaysUsageDescription: 'Allow ZivaOne to find and connect to your ZivaRing.',
@@ -67,6 +69,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#2E3C4B',
     },
     package: Env.EXPO_PUBLIC_PACKAGE,
+    googleServicesFile: './google-services.json',
     // Configure intent filters for deep linking (if domain is set)
     ...(Env.EXPO_PUBLIC_ASSOCIATED_DOMAIN && {
       intentFilters: [
@@ -138,6 +141,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     'expo-localization',
     'expo-router',
+    'expo-web-browser',
     ['app-icon-badge', appIconBadgeConfig],
     ['react-native-edge-to-edge'],
     [
@@ -151,8 +155,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ['@config-plugins/react-native-ble-plx', {
       isBackgroundEnabled: true,
       modes: ['peripheral', 'central'],
-      bluetoothAlwaysPermission: 'Allow ZivaOne to find and connect to your ZivaRing.'
+      bluetoothAlwaysPermission: 'Allow ZivaOne to find and connect to your ZivaRing.',
     }],
+    '@react-native-google-signin/google-signin',
     [
       'expo-build-properties',
       {

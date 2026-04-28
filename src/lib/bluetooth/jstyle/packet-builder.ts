@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/number-literal-case */
 /**
  * JStyle Packet Builder
  * Constructs 16-byte command packets with CRC for the JStyle ring protocol
