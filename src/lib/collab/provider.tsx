@@ -1,140 +1,95 @@
 /**
- * CollabProvider
+ * ZivaCollabProvider
  *
- * React context provider that manages RocketChat connection lifecycle.
- * Automatically connects when authenticated and disconnects on logout.
+ * Wraps @mongrov/collab's CollabProvider with Ziva-specific auth.
+ * Uses collabStore (authToken from RC REST login) instead of session.accessToken.
+ * CollabProvider from @mongrov/collab owns the XState machine and reconnect logic.
  */
 
-import * as React from 'react'
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import type { CollabConfig } from '@mongrov/collab';
+import { CollabProvider, useCollab } from '@mongrov/collab';
 
-import { useSession } from '@mongrov/auth'
+import * as React from 'react';
+import { useEffect } from 'react';
 
-import {
-  getCollabAdapter,
-  getCollabConfig,
-  connectCollab,
-  disconnectCollab,
-  resetCollabAdapter,
-} from './config'
-import type { RocketChatAdapter, RCConnectionStatus } from './adapters/rocketchat'
+import { getCollabAdapter, getCollabConfig } from './config';
+import { useCollabStore } from './store';
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+// ─── Auto-connect child (must be inside CollabProvider) ─────────────────────
 
-export interface CollabContextValue {
-  /** Whether collab is enabled (has RC config) */
-  enabled: boolean
-  /** Current connection status */
-  status: RCConnectionStatus
-  /** The adapter instance (null if not enabled) */
-  adapter: RocketChatAdapter | null
-  /** Manually trigger reconnect */
-  reconnect: () => Promise<void>
-  /** Disconnect */
-  disconnect: () => Promise<void>
+type AutoConnectProps = {
+  serverUrl: string;
+};
+
+function CollabAutoConnect({ serverUrl }: AutoConnectProps) {
+  const { authToken, userId } = useCollabStore();
+  const { connect, disconnect, isConnected } = useCollab();
+
+  useEffect(() => {
+    if (authToken && userId && !isConnected) {
+      connect({ serverUrl, token: authToken, userId });
+    }
+    else if (!authToken && isConnected) {
+      disconnect();
+    }
+  }, [authToken, userId, isConnected, connect, disconnect, serverUrl]);
+
+  return null;
 }
-
-const CollabContext = createContext<CollabContextValue | null>(null)
 
 // ─── Provider ───────────────────────────────────────────────────────────────
 
-export interface CollabProviderProps {
-  children: React.ReactNode
-}
+export type CollabProviderProps = {
+  children: React.ReactNode;
+};
 
-export function CollabProvider({ children }: CollabProviderProps) {
-  const session = useSession()
-  const config = getCollabConfig()
-  const adapter = getCollabAdapter()
+export function ZivaCollabProvider({ children }: CollabProviderProps) {
+  const config = getCollabConfig();
+  const adapter = getCollabAdapter();
 
-  const [status, setStatus] = useState<RCConnectionStatus>('disconnected')
-
-  // Subscribe to connection status changes
-  useEffect(() => {
-    if (!adapter) return
-
-    const unsubscribe = adapter.on('connection:status', (newStatus) => {
-      setStatus(newStatus)
-    })
-
-    return unsubscribe
-  }, [adapter])
-
-  // Auto-connect when authenticated
-  useEffect(() => {
-    if (!adapter || !session?.accessToken || !session?.user?.id) {
-      return
-    }
-
-    // Don't reconnect if already connected
-    if (status === 'connected' || status === 'connecting') {
-      return
-    }
-
-    connectCollab(session.accessToken, session.user.id).catch((error) => {
-      console.error('[Collab] Failed to connect:', error)
-    })
-  }, [adapter, session?.accessToken, session?.user?.id, status])
-
-  // Disconnect on logout
-  useEffect(() => {
-    if (!session?.accessToken && status === 'connected') {
-      disconnectCollab().catch((error) => {
-        console.error('[Collab] Failed to disconnect:', error)
-      })
-    }
-  }, [session?.accessToken, status])
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      resetCollabAdapter()
-    }
-  }, [])
-
-  const reconnect = useCallback(async () => {
-    if (!adapter || !session?.accessToken || !session?.user?.id) {
-      throw new Error('Cannot reconnect: not authenticated')
-    }
-    await connectCollab(session.accessToken, session.user.id)
-  }, [adapter, session?.accessToken, session?.user?.id])
-
-  const disconnect = useCallback(async () => {
-    await disconnectCollab()
-  }, [])
-
-  const value: CollabContextValue = {
-    enabled: config.enabled,
-    status,
-    adapter,
-    reconnect,
-    disconnect,
+  // If collab is not configured (no server URL), skip
+  if (!config.enabled || !adapter) {
+    return <>{children}</>;
   }
+
+  const collabConfig: CollabConfig = {
+    adapter,
+    autoConnect: false,
+    reconnect: {
+      enabled: true,
+      maxAttempts: 5,
+      baseDelay: 1000,
+      maxDelay: 30_000,
+    },
+    logger: __DEV__
+      ? {
+          debug: (msg, data) => console.log(`[RC] ${msg}`, data),
+          info: (msg, data) => console.log(`[RC] ${msg}`, data),
+          warn: (msg, data) => console.warn(`[RC] ${msg}`, data),
+          error: (msg, data) => console.error(`[RC] ${msg}`, data),
+        }
+      : undefined,
+  };
 
   return (
-    <CollabContext.Provider value={value}>
+    <CollabProvider config={collabConfig}>
+      <CollabAutoConnect serverUrl={config.serverUrl} />
       {children}
-    </CollabContext.Provider>
-  )
+    </CollabProvider>
+  );
 }
 
-// ─── Hook ───────────────────────────────────────────────────────────────────
-
-/**
- * Access collab context.
- */
-export function useCollab(): CollabContextValue {
-  const context = useContext(CollabContext)
-  if (!context) {
-    throw new Error('useCollab must be used within CollabProvider')
-  }
-  return context
-}
+// ─── Convenience hook ────────────────────────────────────────────────────────
 
 /**
  * Check if collab is connected.
+ * Thin wrapper around useCollab().isConnected from @mongrov/collab.
  */
 export function useCollabConnected(): boolean {
-  const { status } = useCollab()
-  return status === 'connected'
+  const { isConnected } = useCollab();
+  return isConnected;
 }
+
+// ─── Re-export for backward compat ──────────────────────────────────────────
+// Consumers import CollabProvider from @/lib/collab — this satisfies that.
+export { ZivaCollabProvider as CollabProvider };

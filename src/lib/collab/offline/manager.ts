@@ -10,28 +10,27 @@
  * - Server wins: Merge conflicts resolved by server timestamp
  */
 
-import type { Message, Conversation } from '@mongrov/types'
-import type { RocketChatAdapter, SendMessageParams } from '../adapters/rocketchat'
-import type { MessageDoc, ConversationDoc } from './schemas'
+import type { Conversation, Message } from '@mongrov/types';
+import type { RocketChatAdapter, SendMessageParams } from '../adapters/rocketchat';
+import type { ConversationDoc, MessageDoc } from './schemas';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-export interface OfflineManagerConfig {
+export type OfflineManagerConfig = {
   /** RocketChat adapter instance */
-  adapter: RocketChatAdapter
+  adapter: RocketChatAdapter;
   /** RxDB database instance */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  db: any
+  db: any;
   /** Optional logger */
-  logger?: OfflineLogger
-}
+  logger?: OfflineLogger;
+};
 
-export interface OfflineLogger {
-  debug(msg: string, data?: Record<string, unknown>): void
-  info(msg: string, data?: Record<string, unknown>): void
-  warn(msg: string, data?: Record<string, unknown>): void
-  error(msg: string, data?: Record<string, unknown>): void
-}
+export type OfflineLogger = {
+  debug: (msg: string, data?: Record<string, unknown>) => void;
+  info: (msg: string, data?: Record<string, unknown>) => void;
+  warn: (msg: string, data?: Record<string, unknown>) => void;
+  error: (msg: string, data?: Record<string, unknown>) => void;
+};
 
 // ─── Converters ─────────────────────────────────────────────────────────────
 
@@ -51,12 +50,12 @@ function messageToDoc(msg: Message): MessageDoc {
     deliveryStatus: msg.deliveryStatus,
     streaming: msg.streaming,
     editedAt: msg.editedAt,
-    editedById: msg.editedBy?.id,
-    updatedAt: msg.updatedAt,
-    systemType: msg.systemType,
+    editedById: (msg.metadata?.editedBy as { id?: string } | undefined)?.id,
+    updatedAt: msg.metadata?.updatedAt as string | undefined,
+    systemType: msg.metadata?.systemType as string | undefined,
     createdAt: msg.createdAt,
     metadata: msg.metadata ? JSON.stringify(msg.metadata) : undefined,
-  }
+  };
 }
 
 function docToMessage(doc: MessageDoc): Message {
@@ -79,14 +78,14 @@ function docToMessage(doc: MessageDoc): Message {
     deliveryStatus: doc.deliveryStatus as Message['deliveryStatus'],
     streaming: doc.streaming,
     editedAt: doc.editedAt,
-    editedBy: doc.editedById
-      ? { id: doc.editedById, name: '', type: 'human' as const }
-      : undefined,
-    updatedAt: doc.updatedAt,
-    systemType: doc.systemType,
     createdAt: doc.createdAt,
-    metadata: doc.metadata ? JSON.parse(doc.metadata) : undefined,
-  }
+    metadata: {
+      ...(doc.metadata ? JSON.parse(doc.metadata) : {}),
+      ...(doc.editedById ? { editedBy: { id: doc.editedById, name: '', type: 'human' } } : {}),
+      ...(doc.updatedAt ? { updatedAt: doc.updatedAt } : {}),
+      ...(doc.systemType ? { systemType: doc.systemType } : {}),
+    },
+  };
 }
 
 function conversationToDoc(conv: Conversation): ConversationDoc {
@@ -99,15 +98,12 @@ function conversationToDoc(conv: Conversation): ConversationDoc {
     unreadCount: conv.unreadCount,
     muted: conv.muted,
     pinned: conv.pinned,
-    topic: conv.topic,
-    description: conv.description,
     lastMessageId: conv.lastMessage?.id,
     lastMessageText: conv.lastMessage?.content.text,
     lastMessageAt: conv.lastMessage?.createdAt,
     createdAt: conv.createdAt,
     updatedAt: conv.updatedAt,
-    metadata: conv.metadata ? JSON.stringify(conv.metadata) : undefined,
-  }
+  };
 }
 
 function docToConversation(doc: ConversationDoc): Conversation {
@@ -121,8 +117,6 @@ function docToConversation(doc: ConversationDoc): Conversation {
     unreadCount: doc.unreadCount,
     muted: doc.muted,
     pinned: doc.pinned,
-    topic: doc.topic,
-    description: doc.description,
     lastMessage: doc.lastMessageId
       ? {
           id: doc.lastMessageId,
@@ -135,38 +129,36 @@ function docToConversation(doc: ConversationDoc): Conversation {
       : undefined,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
-    metadata: doc.metadata ? JSON.parse(doc.metadata) : undefined,
-  }
+  };
 }
 
 // ─── Offline Manager ────────────────────────────────────────────────────────
 
 export class OfflineManager {
-  private adapter: RocketChatAdapter
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private db: any
-  private logger?: OfflineLogger
-  private isOnline = false
+  private adapter: RocketChatAdapter;
+  private db: any;
+  private logger?: OfflineLogger;
+  private isOnline = false;
 
   constructor(config: OfflineManagerConfig) {
-    this.adapter = config.adapter
-    this.db = config.db
-    this.logger = config.logger
+    this.adapter = config.adapter;
+    this.db = config.db;
+    this.logger = config.logger;
 
     // Listen for connection status
     this.adapter.on('connection:status', (status) => {
-      const wasOffline = !this.isOnline
-      this.isOnline = status === 'connected'
+      const wasOffline = !this.isOnline;
+      this.isOnline = status === 'connected';
 
       if (wasOffline && this.isOnline) {
-        this.onReconnect()
+        this.onReconnect();
       }
-    })
+    });
 
     // Listen for real-time messages
     this.adapter.on('message:received', (message) => {
-      this.handleIncomingMessage(message)
-    })
+      this.handleIncomingMessage(message);
+    });
   }
 
   // ─── Message Operations ───────────────────────────────────────────────────
@@ -180,10 +172,10 @@ export class OfflineManager {
   async sendMessage(
     conversationId: string,
     content: Message['content'],
-    parentId?: string
+    parentId?: string,
   ): Promise<Message> {
-    const localId = `local-${Date.now()}-${Math.random().toString(36).slice(2)}`
-    const now = new Date().toISOString()
+    const localId = `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const now = new Date().toISOString();
 
     // Create optimistic message
     const optimisticDoc: MessageDoc = {
@@ -202,11 +194,11 @@ export class OfflineManager {
       createdAt: now,
       _pendingSend: true,
       _localId: localId,
-    }
+    };
 
     // Insert optimistically
-    await this.db.messages.insert(optimisticDoc)
-    this.log('debug', 'Optimistic insert', { localId, conversationId })
+    await this.db.messages.insert(optimisticDoc);
+    this.log('debug', 'Optimistic insert', { localId, conversationId });
 
     try {
       // Send via adapter (cast content type for adapter compatibility)
@@ -214,26 +206,27 @@ export class OfflineManager {
         conversationId,
         content: content as SendMessageParams['content'],
         parentId,
-      })
+      });
 
       // Update with server response
-      await this.db.messages.findOne(localId).remove()
-      await this.db.messages.insert(messageToDoc(result.message))
+      await this.db.messages.findOne(localId).remove();
+      await this.db.messages.insert(messageToDoc(result.message));
 
       this.log('debug', 'Message sent successfully', {
         localId,
         serverId: result.messageId,
-      })
+      });
 
-      return result.message
-    } catch (error) {
+      return result.message;
+    }
+    catch (error) {
       // Mark as failed
       await this.db.messages
         .findOne(localId)
-        .update({ $set: { deliveryStatus: 'failed' } })
+        .update({ $set: { deliveryStatus: 'failed' } });
 
-      this.log('error', 'Failed to send message', { localId, error })
-      throw error
+      this.log('error', 'Failed to send message', { localId, error });
+      throw error;
     }
   }
 
@@ -241,15 +234,15 @@ export class OfflineManager {
    * Retry failed message.
    */
   async retryMessage(localId: string): Promise<Message> {
-    const doc = await this.db.messages.findOne(localId).exec()
+    const doc = await this.db.messages.findOne(localId).exec();
     if (!doc) {
-      throw new Error('Message not found')
+      throw new Error('Message not found');
     }
 
     // Update status to sending
     await this.db.messages
       .findOne(localId)
-      .update({ $set: { deliveryStatus: 'sending' } })
+      .update({ $set: { deliveryStatus: 'sending' } });
 
     try {
       const result = await this.adapter.sendMessage({
@@ -262,18 +255,19 @@ export class OfflineManager {
           fileName: doc.contentFileName,
         },
         parentId: doc.parentId,
-      })
+      });
 
       // Replace with server message
-      await this.db.messages.findOne(localId).remove()
-      await this.db.messages.insert(messageToDoc(result.message))
+      await this.db.messages.findOne(localId).remove();
+      await this.db.messages.insert(messageToDoc(result.message));
 
-      return result.message
-    } catch (error) {
+      return result.message;
+    }
+    catch (error) {
       await this.db.messages
         .findOne(localId)
-        .update({ $set: { deliveryStatus: 'failed' } })
-      throw error
+        .update({ $set: { deliveryStatus: 'failed' } });
+      throw error;
     }
   }
 
@@ -287,17 +281,17 @@ export class OfflineManager {
         sort: [{ createdAt: 'desc' }],
         limit,
       })
-      .exec()
+      .exec();
 
-    return docs.map((doc: MessageDoc) => docToMessage(doc))
+    return docs.map((doc: MessageDoc) => docToMessage(doc));
   }
 
   /**
    * Handle incoming real-time message.
    */
   private async handleIncomingMessage(message: Message): Promise<void> {
-    const doc = messageToDoc(message)
-    await this.db.messages.upsert(doc)
+    const doc = messageToDoc(message);
+    await this.db.messages.upsert(doc);
 
     // Update conversation's last message
     await this.db.conversations
@@ -307,11 +301,11 @@ export class OfflineManager {
           lastMessageId: message.id,
           lastMessageText: message.content.text,
           lastMessageAt: message.createdAt,
-          updatedAt: message.updatedAt ?? message.createdAt,
+          updatedAt: (message.metadata?.updatedAt as string | undefined) ?? message.createdAt,
         },
-      })
+      });
 
-    this.log('debug', 'Stored incoming message', { messageId: message.id })
+    this.log('debug', 'Stored incoming message', { messageId: message.id });
   }
 
   // ─── Conversation Operations ──────────────────────────────────────────────
@@ -324,9 +318,9 @@ export class OfflineManager {
       .find({
         sort: [{ updatedAt: 'desc' }],
       })
-      .exec()
+      .exec();
 
-    return docs.map((doc: ConversationDoc) => docToConversation(doc))
+    return docs.map((doc: ConversationDoc) => docToConversation(doc));
   }
 
   /**
@@ -334,23 +328,24 @@ export class OfflineManager {
    */
   async syncConversations(): Promise<void> {
     if (!this.isOnline) {
-      this.log('warn', 'Cannot sync conversations while offline')
-      return
+      this.log('warn', 'Cannot sync conversations while offline');
+      return;
     }
 
     try {
-      const result = await this.adapter.fetchConversations()
+      const result = await this.adapter.fetchConversations();
 
       for (const conv of result.conversations) {
-        const doc = conversationToDoc(conv)
-        doc._syncedAt = new Date().toISOString()
-        await this.db.conversations.upsert(doc)
+        const doc = conversationToDoc(conv);
+        doc._syncedAt = new Date().toISOString();
+        await this.db.conversations.upsert(doc);
       }
 
-      this.log('info', 'Synced conversations', { count: result.conversations.length })
-    } catch (error) {
-      this.log('error', 'Failed to sync conversations', { error })
-      throw error
+      this.log('info', 'Synced conversations', { count: result.conversations.length });
+    }
+    catch (error) {
+      this.log('error', 'Failed to sync conversations', { error });
+      throw error;
     }
   }
 
@@ -361,53 +356,54 @@ export class OfflineManager {
    */
   async syncMessages(conversationId: string): Promise<void> {
     if (!this.isOnline) {
-      this.log('warn', 'Cannot sync messages while offline')
-      return
+      this.log('warn', 'Cannot sync messages while offline');
+      return;
     }
 
     try {
       // Get high-water mark (last synced updatedAt)
-      const checkpoint = await this.db.syncCheckpoints.findOne(conversationId).exec()
-      const lastUpdatedAt = checkpoint?.updatedAt ?? '1970-01-01T00:00:00.000Z'
+      const checkpoint = await this.db.syncCheckpoints.findOne(conversationId).exec();
+      const lastUpdatedAt = checkpoint?.updatedAt ?? '1970-01-01T00:00:00.000Z';
 
       // Fetch messages since last sync
       const result = await this.adapter.fetchMessages(conversationId, {
         after: lastUpdatedAt,
         limit: 100,
-      })
+      });
 
       // Upsert messages (server wins)
       for (const message of result.messages) {
-        const doc = messageToDoc(message)
-        await this.db.messages.upsert(doc)
+        const doc = messageToDoc(message);
+        await this.db.messages.upsert(doc);
       }
 
       // Update checkpoint
       if (result.messages.length > 0) {
         const latestUpdatedAt = result.messages
-          .map((m) => m.updatedAt ?? m.createdAt)
+          .map(m => (m.metadata?.updatedAt as string | undefined) ?? m.createdAt)
           .sort()
-          .pop()
+          .pop();
 
         await this.db.syncCheckpoints.upsert({
           id: conversationId,
           updatedAt: latestUpdatedAt,
           syncedAt: new Date().toISOString(),
-        })
+        });
       }
 
       this.log('info', 'Synced messages', {
         conversationId,
         count: result.messages.length,
-      })
+      });
 
       // Continue if there are more
       if (result.hasMore) {
-        await this.syncMessages(conversationId)
+        await this.syncMessages(conversationId);
       }
-    } catch (error) {
-      this.log('error', 'Failed to sync messages', { conversationId, error })
-      throw error
+    }
+    catch (error) {
+      this.log('error', 'Failed to sync messages', { conversationId, error });
+      throw error;
     }
   }
 
@@ -415,24 +411,25 @@ export class OfflineManager {
    * Called when reconnecting after being offline.
    */
   private async onReconnect(): Promise<void> {
-    this.log('info', 'Reconnected, starting sync')
+    this.log('info', 'Reconnected, starting sync');
 
     try {
       // 1. Retry failed sends
-      await this.retryFailedSends()
+      await this.retryFailedSends();
 
       // 2. Sync conversations
-      await this.syncConversations()
+      await this.syncConversations();
 
       // 3. Sync messages for active conversations
-      const conversations = await this.db.conversations.find().exec()
+      const conversations = await this.db.conversations.find().exec();
       for (const conv of conversations) {
-        await this.syncMessages(conv.id)
+        await this.syncMessages(conv.id);
       }
 
-      this.log('info', 'Reconnect sync complete')
-    } catch (error) {
-      this.log('error', 'Reconnect sync failed', { error })
+      this.log('info', 'Reconnect sync complete');
+    }
+    catch (error) {
+      this.log('error', 'Reconnect sync failed', { error });
     }
   }
 
@@ -444,14 +441,15 @@ export class OfflineManager {
       .find({
         selector: { deliveryStatus: 'failed', _pendingSend: true },
       })
-      .exec()
+      .exec();
 
-    this.log('debug', 'Retrying failed sends', { count: failedDocs.length })
+    this.log('debug', 'Retrying failed sends', { count: failedDocs.length });
 
     for (const doc of failedDocs) {
       try {
-        await this.retryMessage(doc.id)
-      } catch {
+        await this.retryMessage(doc.id);
+      }
+      catch {
         // Keep as failed, will retry on next reconnect
       }
     }
@@ -462,14 +460,14 @@ export class OfflineManager {
   private log(
     level: 'debug' | 'info' | 'warn' | 'error',
     msg: string,
-    data?: Record<string, unknown>
+    data?: Record<string, unknown>,
   ): void {
-    this.logger?.[level](`[Offline] ${msg}`, data)
+    this.logger?.[level](`[Offline] ${msg}`, data);
   }
 }
 
 // ─── Factory ────────────────────────────────────────────────────────────────
 
 export function createOfflineManager(config: OfflineManagerConfig): OfflineManager {
-  return new OfflineManager(config)
+  return new OfflineManager(config);
 }

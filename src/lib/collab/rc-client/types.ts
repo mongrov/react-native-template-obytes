@@ -7,13 +7,13 @@
 
 // --- RC User ---
 
-export interface RCUser {
+export type RCUser = {
   _id: string
   username: string
   name?: string
 }
 
-export interface RCMention {
+export type RCMention = {
   _id: string
   username: string
   name?: string
@@ -22,7 +22,7 @@ export interface RCMention {
 
 // --- RC Attachments & Files ---
 
-export interface RCAttachment {
+export type RCAttachment = {
   title?: string
   title_link?: string
   text?: string
@@ -33,7 +33,7 @@ export interface RCAttachment {
   description?: string
 }
 
-export interface RCFile {
+export type RCFile = {
   _id: string
   name: string
   type: string
@@ -41,7 +41,7 @@ export interface RCFile {
   url?: string
 }
 
-export interface RCUrlMeta {
+export type RCUrlMeta = {
   url: string
   meta?: Record<string, string>
   headers?: Record<string, string>
@@ -49,7 +49,7 @@ export interface RCUrlMeta {
 
 // --- RC Message ---
 
-export interface RCMessage {
+export type RCMessage = {
   _id: string
   rid: string
   msg: string
@@ -80,7 +80,7 @@ export interface RCMessage {
 
 // --- RC Room ---
 
-export interface RCRoom {
+export type RCRoom = {
   _id: string
   t: 'd' | 'c' | 'p' | 'l' | 'v' // d=DM, c=channel, p=private, l=livechat, v=voip
   name?: string
@@ -107,7 +107,7 @@ export interface RCRoom {
 
 // --- RC Subscription (per-user room state) ---
 
-export interface RCSubscription {
+export type RCSubscription = {
   _id: string
   rid: string
   u: RCUser
@@ -129,34 +129,34 @@ export interface RCSubscription {
 
 // --- RC API Response Wrappers ---
 
-export interface RCApiResponse<T> {
+export type RCApiResponse<T> = {
   success: boolean
   [key: string]: T | boolean | string | undefined
 }
 
-export interface RCRoomsResponse {
+export type RCRoomsResponse = {
   success: boolean
   update: RCRoom[]
   remove: RCRoom[]
 }
 
-export interface RCSubscriptionsResponse {
+export type RCSubscriptionsResponse = {
   success: boolean
   update: RCSubscription[]
   remove: RCSubscription[]
 }
 
-export interface RCMessagesResponse {
+export type RCMessagesResponse = {
   success: boolean
   messages: RCMessage[]
 }
 
-export interface RCSendMessageResponse {
+export type RCSendMessageResponse = {
   success: boolean
   message: RCMessage
 }
 
-export interface RCChannelMembersResponse {
+export type RCChannelMembersResponse = {
   success: boolean
   members: RCUser[]
   count: number

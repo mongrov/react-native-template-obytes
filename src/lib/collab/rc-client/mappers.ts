@@ -165,12 +165,12 @@ export function toMessage(rc: RCMessage): Message {
     deliveryStatus: 'delivered',
     streaming: false,
     editedAt: rc.editedAt,
-    editedBy: rc.editedBy ? toParticipant(rc.editedBy) : undefined,
-    updatedAt: rc._updatedAt,
-    systemType: rc.t,
     createdAt: rc.ts,
     metadata: {
       // RC-specific fields
+      editedBy: rc.editedBy ? toParticipant(rc.editedBy) : undefined,
+      updatedAt: rc._updatedAt,
+      systemType: rc.t,
       starred: rc.starred,
       pinned: rc.pinned,
       pinnedAt: rc.pinnedAt,
@@ -217,31 +217,16 @@ export function toConversation(
     members: [], // Fetched separately via /channels.members
     lastMessage: room.lastMessage ? toMessage(room.lastMessage) : undefined,
     unreadCount: sub?.unread ?? 0,
-    muted: false, // Derived from user's notification prefs
-    pinned: sub?.f ?? false, // RC "favorite" → our "pinned"
-    topic: room.topic,
-    description: room.description,
+    muted: false,
+    pinned: sub?.f ?? false,
     createdAt: room.ts ?? '',
     updatedAt: room.lm ?? room.ts ?? '',
-    metadata: {
-      // RC-specific fields
-      broadcast: room.broadcast,
-      encrypted: room.encrypted,
-      userMentions: sub?.userMentions,
-      groupMentions: sub?.groupMentions,
-      lastSeen: sub?.ls,
-      teamId: room.teamId,
-      teamMain: room.teamMain,
-      prid: room.prid,
-      usersCount: room.usersCount,
-      msgCount: room.msgs,
-    },
   }
 }
 
 // --- Reverse Mappers (for sending) ---
 
-export interface RCSendMessagePayload {
+export type RCSendMessagePayload = {
   rid: string
   msg: string
   tmid?: string
