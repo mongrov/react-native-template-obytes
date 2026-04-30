@@ -1130,7 +1130,11 @@ export default function RingDebugScreen() {
   }, [adapter, addLog]);
 
   if (!permissionsLoading && (bleStatus !== 'granted' || locationStatus !== 'granted' || !isBluetoothEnabled)) {
-    return <Redirect href={{ pathname: '/permissions', params: { returnTo: 'ring-debug' } }} />;
+    return (
+      <Redirect
+        href={{ pathname: '/permissions' as any, params: { returnTo: 'ring-debug' } }}
+      />
+    );
   }
 
   return (

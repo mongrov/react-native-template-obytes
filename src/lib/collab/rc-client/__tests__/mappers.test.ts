@@ -502,6 +502,7 @@ describe('Mapper edge cases', () => {
   it('should handle participant with null name and username', () => {
     const userWithoutIdentifier: RCUser = {
       _id: 'user-789',
+      username: '',
     }
 
     const result = toParticipant(userWithoutIdentifier)
@@ -543,7 +544,7 @@ describe('Mapper edge cases', () => {
   it('should handle message with null updatedAt', () => {
     const messageWithoutUpdatedAt: RCMessage = {
       ...mockTextMessage,
-      _updatedAt: undefined,
+      _updatedAt: undefined as any,
     }
 
     const result = toMessage(messageWithoutUpdatedAt)

@@ -4,7 +4,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@env": ["env.ts"]
+      "@env": ["env.ts"],
+      "@mongrov/types": ["./node_modules/@mongrov/types"],
+      "@mongrov/types/*": ["./node_modules/@mongrov/types/*"]
     },
     "checkJs": true,
     "strict": true,
@@ -27,6 +29,7 @@
     "android",
     "ios",
     "lint-staged.config.js",
+    "src/lib/rxdb/rxdb-premium",
     "vendor"
   ]
 }

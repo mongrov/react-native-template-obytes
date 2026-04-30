@@ -13,6 +13,12 @@ function RingIcon({ color }: { color?: string }) {
   );
 }
 
+function TabIcon({ symbol, color }: { symbol: string; color?: string }) {
+  return (
+    <Text style={{ fontSize: 18, color: color ?? '#888' }}>{symbol}</Text>
+  );
+}
+
 export default function TabLayout() {
   const { isHydrated, isAuthenticated, status, signOut } = useAuth();
   const [isFirstTime] = useIsFirstTime();

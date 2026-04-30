@@ -53,6 +53,8 @@ export default antfu(
       'node_modules',
       'vendor',
       'vendor/**',
+      'src/lib/rxdb/rxdb-premium',
+      'src/lib/rxdb/rxdb-premium/**',
       '__tests__/',
       '__mocks__/',
       'coverage',

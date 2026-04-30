@@ -48,6 +48,8 @@ export function usePermissions({
       return;
 
     const manager = BleManagerSingleton.getInstance().getManager();
+    if (!manager)
+      return;
     const subscription = manager.onStateChange((state) => {
       setIsBluetoothEnabled(state === 'PoweredOn');
       checkPermissions();

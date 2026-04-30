@@ -81,6 +81,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       ITSAppUsesNonExemptEncryption: false,
       NSBluetoothAlwaysUsageDescription: 'Allow ZivaOne to find and connect to your ZivaRing.',
       NSBluetoothPeripheralUsageDescription: 'Allow ZivaOne to communicate with your ZivaRing.',
+      UIStatusBarHidden: true,
+      UIViewControllerBasedStatusBarAppearance: false,
     },
     // Configure associated domains for universal links (if domain is set)
     ...(Env.EXPO_PUBLIC_ASSOCIATED_DOMAIN && {
@@ -125,9 +127,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-splash-screen',
       {
-        backgroundColor: '#2E3C4B',
+        backgroundColor: '#0076FF',
         image: './assets/splash-icon.png',
-        imageWidth: 150,
+        resizeMode: 'proper',
+
       },
     ],
     [

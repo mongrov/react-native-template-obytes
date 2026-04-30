@@ -6,7 +6,8 @@ settings:
 
 overrides:
   '@types/react': ~19.1.17
-  '@mongrov/types': 0.2.0
+  '@mongrov/types': 0.3.0
+  '@mongrov/ui>@mongrov/types': 0.3.0
 
 importers:
 
@@ -43,8 +44,8 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0(react-native-mmkv@4.3.1(react-native-nitro-modules@0.35.6(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(zustand@5.0.12(@types/react@19.1.17)(react@19.1.0)(use-sync-external-store@1.6.0(react@19.1.0)))
       '@mongrov/types':
-        specifier: 0.2.0
-        version: 0.2.0
+        specifier: 0.3.0
+        version: 0.3.0
       '@mongrov/ui':
         specifier: ^0.4.2
         version: 0.4.2(984bd7afaefb58b002b5f99f58a6bdd5)
@@ -135,6 +136,9 @@ importers:
       expo-image-picker:
         specifier: ~17.0.11
         version: 17.0.11(expo@54.0.33)
+      expo-linear-gradient:
+        specifier: ~15.0.8
+        version: 15.0.8(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       expo-linking:
         specifier: ~8.0.11
         version: 8.0.11(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -2446,8 +2450,8 @@ packages:
       react-native-mmkv:
         optional: true
 
-  '@mongrov/types@0.2.0':
-    resolution: {integrity: sha512-xIPAtZcYyxHkVmusCvWUD6h02IE2S5mr8T/qWvGrva3maf+Aa1HrU1uqm+sb/Hvm9oa07OMUhqOP4I7VPWtjMQ==}
+  '@mongrov/types@0.3.0':
+    resolution: {integrity: sha512-6BR2+MpWtDy8fqtcasfxG/lE3gFcj3Q+LbuorYhlH7mg9sAHHp0tmdFkczYOQDztTTcO89xX3xPs/PowAY2KSQ==}
     engines: {node: '>=18'}
 
   '@mongrov/ui@0.4.2':
@@ -5689,6 +5693,13 @@ packages:
     peerDependencies:
       expo: '*'
       react: '*'
+
+  expo-linear-gradient@15.0.8:
+    resolution: {integrity: sha512-V2d8Wjn0VzhPHO+rrSBtcl+Fo+jUUccdlmQ6OoL9/XQB7Qk3d9lYrqKDJyccwDxmQT10JdST3Tmf2K52NLc3kw==}
+    peerDependencies:
+      expo: '*'
+      react: '*'
+      react-native: '*'
 
   expo-linking@8.0.11:
     resolution: {integrity: sha512-+VSaNL5om3kOp/SSKO5qe6cFgfSIWnnQDSbA7XLs3ECkYzXRquk5unxNS3pg7eK5kNUmQ4kgLI7MhTggAEUBLA==}
@@ -12999,7 +13010,7 @@ snapshots:
 
   '@mongrov/collab@0.2.1(react@19.1.0)':
     dependencies:
-      '@mongrov/types': 0.2.0
+      '@mongrov/types': 0.3.0
       react: 19.1.0
       xstate: 5.30.0
 
@@ -13031,11 +13042,11 @@ snapshots:
     optionalDependencies:
       react-native-mmkv: 4.3.1(react-native-nitro-modules@0.35.6(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
 
-  '@mongrov/types@0.2.0': {}
+  '@mongrov/types@0.3.0': {}
 
   '@mongrov/ui@0.4.2(984bd7afaefb58b002b5f99f58a6bdd5)':
     dependencies:
-      '@mongrov/types': 0.2.0
+      '@mongrov/types': 0.3.0
       class-variance-authority: 0.7.1
       clsx: 2.1.1
       react: 19.1.0
@@ -16729,6 +16740,12 @@ snapshots:
     dependencies:
       expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(graphql@15.8.0)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react: 19.1.0
+
+  expo-linear-gradient@15.0.8(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
+    dependencies:
+      expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(graphql@15.8.0)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0)
 
   expo-linking@8.0.11(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.84.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
     dependencies:

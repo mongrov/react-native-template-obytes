@@ -37,6 +37,8 @@ function escapeSqlString(value: string) {
 export class TimonDataStore {
   private initialized = false;
   private fallbackInitialized = false;
+  private fallbackMode: 'quick-sqlite' | 'memory' = 'quick-sqlite';
+  private memoryRows = new Map<string, TimonTaskRow>();
 
   private getQuickSQLiteOpen(): any {
     try {
@@ -51,9 +53,12 @@ export class TimonDataStore {
     if (this.fallbackInitialized) return;
     const open = this.getQuickSQLiteOpen();
     if (!open) {
-      throw new Error(
-        '[TimonDataStore] Neither Timon nor quick-sqlite is available. Rebuild the app/dev-client with native modules.',
+      this.fallbackMode = 'memory';
+      this.fallbackInitialized = true;
+      console.warn(
+        '[TimonDataStore] Neither Timon nor quick-sqlite is available. Falling back to in-memory store (data will not persist).',
       );
+      return;
     }
 
     const db = open({ name: FALLBACK_DB });
@@ -107,7 +112,13 @@ export class TimonDataStore {
     }
 
     await this.ensureFallbackReady();
+    if (this.fallbackMode === 'memory') {
+      for (const r of rows) this.memoryRows.set(r.id, r);
+      return;
+    }
+
     const open = this.getQuickSQLiteOpen();
+    if (!open) return;
     const db = open({ name: FALLBACK_DB });
     for (const r of rows) {
       db.execute(
@@ -134,7 +145,14 @@ export class TimonDataStore {
     }
 
     await this.ensureFallbackReady();
+    if (this.fallbackMode === 'memory') {
+      return [...this.memoryRows.values()]
+        .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
+        .slice(0, n);
+    }
+
     const open = this.getQuickSQLiteOpen();
+    if (!open) return [];
     const db = open({ name: FALLBACK_DB });
     const res: any = db.execute(
       `SELECT id, title, status, updatedAt FROM ${TASKS_TABLE} ORDER BY updatedAt DESC LIMIT ${n};`,
@@ -159,7 +177,13 @@ export class TimonDataStore {
     }
 
     await this.ensureFallbackReady();
+    if (this.fallbackMode === 'memory') {
+      this.memoryRows.delete(id);
+      return;
+    }
+
     const open = this.getQuickSQLiteOpen();
+    if (!open) return;
     const db = open({ name: FALLBACK_DB });
     db.execute(`DELETE FROM ${TASKS_TABLE} WHERE id=?;`, [id]);
   }
@@ -176,7 +200,13 @@ export class TimonDataStore {
     }
 
     await this.ensureFallbackReady();
+    if (this.fallbackMode === 'memory') {
+      this.memoryRows.clear();
+      return;
+    }
+
     const open = this.getQuickSQLiteOpen();
+    if (!open) return;
     const db = open({ name: FALLBACK_DB });
     db.execute(`DELETE FROM ${TASKS_TABLE};`);
   }
@@ -211,7 +241,20 @@ export class TimonDataStore {
     }
 
     await this.ensureFallbackReady();
+    if (this.fallbackMode === 'memory') {
+      const current = this.memoryRows.get(id);
+      if (!current) return;
+      this.memoryRows.set(id, {
+        ...current,
+        title: title ?? current.title,
+        status: status ?? current.status,
+        updatedAt,
+      });
+      return;
+    }
+
     const open = this.getQuickSQLiteOpen();
+    if (!open) return;
     const db = open({ name: FALLBACK_DB });
 
     // Build a parameterized query for SQLite
