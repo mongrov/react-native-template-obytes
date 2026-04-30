@@ -487,6 +487,36 @@ export function TaskListScreen() {
         <View style={listStyles.headerTop}>
           <Text style={listStyles.headerTitle}>Today's Tasks</Text>
           <View style={listStyles.headerActions}>
+            <TouchableOpacity
+              style={listStyles.iconButton}
+              activeOpacity={0.7}
+              onPress={() => router.push('/task-list/bluetooth')}
+            >
+              <Svg width={20} height={20} viewBox="0 0 24 24">
+                <Path
+                  d="M7 7l10 10-5 4V3l5 4L7 17"
+                  stroke={theme.colors.textTertiary}
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={listStyles.iconButton}
+              activeOpacity={0.7}
+              onPress={() => router.push('/task-list/timon-data')}
+            >
+              <Svg width={20} height={20} viewBox="0 0 24 24">
+                <Path
+                  d="M4 7c0-2 4-4 8-4s8 2 8 4-4 4-8 4-8-2-8-4zm0 0v10c0 2 4 4 8 4s8-2 8-4V7"
+                  stroke={theme.colors.textTertiary}
+                  strokeWidth="2"
+                  fill="none"
+                />
+              </Svg>
+            </TouchableOpacity>
             <TouchableOpacity style={listStyles.iconButton} activeOpacity={0.7}>
               <Svg width={20} height={20} viewBox="0 0 24 24">
                 <Path

@@ -51,6 +51,8 @@ export default antfu(
       '**/*.md',
       'dist/*',
       'node_modules',
+      'vendor',
+      'vendor/**',
       '__tests__/',
       '__mocks__/',
       'coverage',

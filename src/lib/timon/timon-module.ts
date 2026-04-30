@@ -17,6 +17,14 @@ export function setCurrentDataViewUser(user: any) {
   currentDataViewUser.current = user;
 }
 
+function requireTimonModule() {
+  if (!TimonModule) {
+    // Keep this exact message — callers (e.g. TimonDataStore) use it to decide fallback behavior.
+    throw new Error('NativeModules.TimonModule is null');
+  }
+  return TimonModule;
+}
+
 function parseJson(obj: any) {
   try {
     if (!obj) throw new Error('Null response');
@@ -33,7 +41,8 @@ export async function initTimon(
   userId: string
 ) {
   try {
-    const result = await TimonModule.initTimon(
+    const mod = requireTimonModule();
+    const result = await mod.initTimon(
       storagePath,
       bucketInterval,
       userId
@@ -53,7 +62,8 @@ export async function initBucket(
   bucketRegion: string
 ) {
   try {
-    const result = await TimonModule.initBucket(
+    const mod = requireTimonModule();
+    const result = await mod.initBucket(
       bucketEndPoint,
       bucketName,
       accessKeyId,
@@ -69,43 +79,47 @@ export async function initBucket(
 
 export async function createDatabase(dbName: string) {
   try {
-    const result = await TimonModule.createDatabase(dbName);
+    const mod = requireTimonModule();
+    const result = await mod.createDatabase(dbName);
     return parseJson(result);
   } catch (error) {
     handleCatch(error, 'createDatabase error', true, { dbName });
-    return error;
+    throw error;
   }
 }
 
 export async function createTable(dbName: string,  tableName: string,  schema: any) {
   try {
-    const result = await TimonModule.createTable(dbName, tableName, schema);
+    const mod = requireTimonModule();
+    const result = await mod.createTable(dbName, tableName, schema);
     return parseJson(result);
   } catch (error) {
     handleCatch(error, 'createTable error', true, { dbName, tableName });
-    return error;
+    throw error;
   }
 }
 
 export async function listDatabases() {
   try {
-    const result = await TimonModule.listDatabases();
+    const mod = requireTimonModule();
+    const result = await mod.listDatabases();
     const jsonValue = parseJson(result)?.json_value;
     return jsonValue;
   } catch (error) {
     handleCatch(error, 'listDatabases error');
-    return error;
+    throw error;
   }
 }
 
 export async function listTables(dbName: string) {
   try {
-    const result = await TimonModule.listTables(dbName);
+    const mod = requireTimonModule();
+    const result = await mod.listTables(dbName);
     const json_value = parseJson(result).json_value;
     return json_value;
   } catch (error) {
     handleCatch(error, 'listTables error', true, { dbName });
-    return error;
+    throw error;
   }
 }
 
@@ -131,32 +145,34 @@ export async function deleteTable(dbName: string, tableName: string) {
 
 export async function query(dbName: string,  sqlQuery: string,  limitPartitions: number = 0) {
   try {
+    const mod = requireTimonModule();
     const userNameId = currentDataViewUser?.current
       ? `${currentDataViewUser?.current?._id}_${currentDataViewUser?.current?.username}`
       : null;
     let result;
     if (IS_ANDROID) {
-      result = await TimonModule.query(
+      result = await mod.query(
         dbName,
         sqlQuery,
         userNameId,
         limitPartitions
       );
     } else {
-      result = await TimonModule.query(dbName, sqlQuery, userNameId);
+      result = await mod.query(dbName, sqlQuery, userNameId);
     }
 
     const jsonValue = parseJson(result).json_value;
     return jsonValue;
   } catch (error) {
     handleCatch(error, 'query error', true, { dbName, sqlQuery });
-    return error;
+    throw error;
   }
 }
 
 export async function insert(dbName: string,  tableName: string,  jsonData: object[]) {
   try {
-    const result = await TimonModule.insert(
+    const mod = requireTimonModule();
+    const result = await mod.insert(
       dbName,
       tableName,
       JSON.stringify(jsonData)
@@ -164,7 +180,7 @@ export async function insert(dbName: string,  tableName: string,  jsonData: obje
     return parseJson(result);
   } catch (error) {
     handleCatch(error, 'insert error', true, { dbName, tableName, jsonData });
-    return error;
+    throw error;
   }
 }
 

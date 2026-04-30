@@ -17,6 +17,8 @@ export default function TaskListStackLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
+      <Stack.Screen name="bluetooth" />
+      <Stack.Screen name="timon-data" />
       <Stack.Screen name="[id]" />
     </Stack>
   );

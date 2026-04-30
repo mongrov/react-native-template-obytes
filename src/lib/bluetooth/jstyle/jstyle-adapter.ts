@@ -9,7 +9,8 @@ import type {
   Subscription,
 } from 'react-native-ble-plx';
 
-import { Buffer } from 'node:buffer';
+// eslint-disable-next-line unicorn/prefer-node-protocol
+import { Buffer } from 'buffer';
 
 import { CMD, MODE, PacketBuilder } from './packet-builder';
 import type {
