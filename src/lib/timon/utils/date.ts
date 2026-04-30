@@ -11,7 +11,7 @@ dayjs.extend(customParseFormat);
 
 export const FULL_DATE_24_HOUR_TIME_FORMAT = 'YYYY.MM.DD HH:mm:ss';
 
-export function addNumberOfMinutes(date: string,  format: string,  numberOfMinutes: number) {
+export function addNumberOfMinutes(date: string, format: string, numberOfMinutes: number) {
   return dayjs(date, format).add(numberOfMinutes, 'minutes').format(format);
 }
 

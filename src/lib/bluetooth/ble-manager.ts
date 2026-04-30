@@ -8,7 +8,6 @@ import { BleManager, LogLevel, State } from 'react-native-ble-plx';
 
 // Check if running on a physical device (BLE requires physical hardware)
 export const isPhysicalDevice = Device.isDevice;
-
 class BleManagerSingleton {
   private static instance: BleManagerSingleton;
   private manager: BleManager | null = null;
@@ -29,7 +28,6 @@ class BleManagerSingleton {
       console.warn('[BLE] Running on simulator/emulator - BLE is disabled');
       return null;
     }
-
     if (!this.manager) {
       console.log('[BLE] Initializing new BleManager instance');
       this.manager = new BleManager();
@@ -46,15 +44,17 @@ class BleManagerSingleton {
    * Check if BLE is available (physical device only)
    */
   public isAvailable(): boolean {
-    return this.manager !== null;
+    return isPhysicalDevice;
   }
 
   /**
    * Check if Bluetooth is powered on
    */
   public async isBluetoothEnabled(): Promise<boolean> {
-    if (!this.manager) return false;
-    const state = await this.manager.state();
+    const manager = this.getManager();
+    if (!manager)
+      return false;
+    const state = await manager.state();
     return state === State.PoweredOn;
   }
 
@@ -64,12 +64,13 @@ class BleManagerSingleton {
    */
   public waitForPoweredOn(timeout: number = 10000): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!this.manager) {
+      const manager = this.getManager();
+      if (!manager) {
         reject(new Error('BLE not available on simulator'));
         return;
       }
 
-      const subscription = this.manager.onStateChange((state) => {
+      const subscription = manager.onStateChange((state) => {
         if (state === State.PoweredOn) {
           subscription.remove();
           resolve();
@@ -92,8 +93,6 @@ class BleManagerSingleton {
 }
 
 // Export singleton getter
-export function getBleManager() {
-  return BleManagerSingleton.getInstance().getManager();
-}
+export const getBleManager = () => BleManagerSingleton.getInstance().getManager();
 
 export default BleManagerSingleton;

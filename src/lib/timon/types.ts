@@ -4,27 +4,27 @@
  * without depending on the full ring/protocols module.
  */
 
-export interface SleepDataItem {
+export type SleepDataItem = {
   startTime: string;
   totalSleepTime: number;
   sleepQuality: number[];
   unitLength: number; // 1 = 1 minute, 5 = 5 minutes
-}
+};
 
-export interface ActivityDataItem {
+export type ActivityDataItem = {
   date: string;
   steps: number;
   calories: number;
   distance: number;
   stepsArray: number[];
-}
+};
 
-export interface HeartRateItem {
+export type HeartRateItem = {
   date: string;
   heartRate: number;
-}
+};
 
-export interface HRVDataItem {
+export type HRVDataItem = {
   date: string;
   hrv: number;
   vascularAging: number;
@@ -32,14 +32,14 @@ export interface HRVDataItem {
   heartRate: number;
   highBP: number;
   lowBP: number;
-}
+};
 
-export interface SpO2DataItem {
+export type SpO2DataItem = {
   date: string;
   bloodOxygen: number;
-}
+};
 
-export interface TemperatureDataItem {
+export type TemperatureDataItem = {
   date: string;
   temperature: number;
-}
+};

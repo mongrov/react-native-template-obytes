@@ -11,7 +11,7 @@ import {
   View,
 } from '@/components/ui';
 import { useCollab, useCollabConnected } from '@/lib/collab';
-import type { PresenceState } from '@/lib/collab/adapters/rocketchat';
+import type { PresenceState } from '@mongrov/collab';
 
 export default function ConversationsScreen() {
   const router = useRouter();

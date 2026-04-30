@@ -1,10 +1,19 @@
 import { act } from '@testing-library/react-native';
 
 // Mock ble-manager module
-jest.mock('../ble-manager', () => ({
-  getBleManager: jest.fn(),
-  isPhysicalDevice: true,
-}));
+jest.mock('../ble-manager', () => {
+  const mockInstance = {
+    waitForPoweredOn: jest.fn().mockResolvedValue(undefined),
+  };
+  return {
+    __esModule: true,
+    default: {
+      getInstance: jest.fn().mockReturnValue(mockInstance),
+    },
+    getBleManager: jest.fn(),
+    isPhysicalDevice: true,
+  };
+});
 
 describe('bleScanner', () => {
   let mockBleManager: any;
@@ -14,7 +23,6 @@ describe('bleScanner', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     bleManagerModule = require('../ble-manager');
-
     mockBleManager = {
       startDeviceScan: jest.fn(),
       stopDeviceScan: jest.fn(),
@@ -41,6 +49,11 @@ describe('bleScanner', () => {
 
       const scanPromise = scanner.startScan({ timeout: 1000 });
 
+      // Wait for microtasks (waitForPoweredOn)
+      await act(async () => {
+        await Promise.resolve();
+      });
+
       expect(mockBleManager.startDeviceScan).toHaveBeenCalled();
 
       await act(async () => {
@@ -53,8 +66,20 @@ describe('bleScanner', () => {
     });
 
     it('returns empty array on simulator', async () => {
+      jest.useFakeTimers();
       bleManagerModule.isPhysicalDevice = false;
-      const devices = await scanner.startScan();
+      const scanPromise = scanner.startScan({ timeout: 100 });
+
+      // Wait for microtasks (waitForPoweredOn)
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        jest.advanceTimersByTime(150);
+      });
+
+      const devices = await scanPromise;
       expect(devices).toEqual([]);
     });
 
@@ -81,7 +106,7 @@ describe('bleScanner', () => {
   });
 
   describe('getDiscoveredDevices', () => {
-    it('returns unique devices', () => {
+    it('returns unique devices', async () => {
       mockBleManager.startDeviceScan.mockImplementation(
         (uuids: any, options: any, callback: any) => {
           callback(null, { id: '1', name: 'ZR100', rssi: -60 });
@@ -89,6 +114,11 @@ describe('bleScanner', () => {
       );
 
       scanner.startScan();
+      // Wait for the waitForPoweredOn promise to resolve and trigger the scan
+      await act(async () => {
+        await Promise.resolve();
+      });
+
       expect(scanner.getDiscoveredDevices().length).toBe(1);
       scanner.stopScan();
     });

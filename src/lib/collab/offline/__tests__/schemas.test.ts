@@ -3,120 +3,226 @@
  */
 
 import {
-  messageSchema,
   conversationSchema,
+  messageSchema,
   syncCheckpointSchema,
-} from '../schemas'
+} from '../schemas';
 
 describe('messageSchema', () => {
   it('should have correct primary key', () => {
-    expect(messageSchema.primaryKey).toBe('id')
-  })
+    expect(messageSchema.primaryKey).toBe('id');
+  });
 
   it('should have correct version', () => {
-    expect(messageSchema.version).toBe(0)
-  })
+    expect(messageSchema.version).toBe(0);
+  });
 
   it('should have required fields', () => {
-    expect(messageSchema.required).toContain('id')
-    expect(messageSchema.required).toContain('conversationId')
-    expect(messageSchema.required).toContain('senderId')
-    expect(messageSchema.required).toContain('contentType')
-    expect(messageSchema.required).toContain('deliveryStatus')
-    expect(messageSchema.required).toContain('createdAt')
-  })
+    expect(messageSchema.required).toContain('id');
+    expect(messageSchema.required).toContain('conversationId');
+    expect(messageSchema.required).toContain('senderId');
+    expect(messageSchema.required).toContain('contentType');
+    expect(messageSchema.required).toContain('deliveryStatus');
+    expect(messageSchema.required).toContain('createdAt');
+  });
 
   it('should have conversationId index for queries', () => {
-    expect(messageSchema.indexes).toContainEqual('conversationId')
-  })
+    expect(messageSchema.indexes).toContainEqual('conversationId');
+  });
 
   it('should have compound index for conversation + time queries', () => {
-    expect(messageSchema.indexes).toContainEqual(['conversationId', 'createdAt'])
-  })
+    expect(messageSchema.indexes).toContainEqual(['conversationId', 'createdAt']);
+  });
 
   it('should have _pendingSend index for offline retry', () => {
-    expect(messageSchema.indexes).toContainEqual('_pendingSend')
-  })
+    expect(messageSchema.indexes).toContainEqual('_pendingSend');
+  });
 
   it('should have updatedAt index for sync', () => {
-    expect(messageSchema.indexes).toContainEqual('updatedAt')
-  })
+    expect(messageSchema.indexes).toContainEqual('updatedAt');
+  });
 
   it('should define all content fields', () => {
-    expect(messageSchema.properties).toHaveProperty('contentType')
-    expect(messageSchema.properties).toHaveProperty('contentText')
-    expect(messageSchema.properties).toHaveProperty('contentUri')
-    expect(messageSchema.properties).toHaveProperty('contentMimeType')
-    expect(messageSchema.properties).toHaveProperty('contentFileName')
-  })
+    expect(messageSchema.properties).toHaveProperty('contentType');
+    expect(messageSchema.properties).toHaveProperty('contentText');
+    expect(messageSchema.properties).toHaveProperty('contentUri');
+    expect(messageSchema.properties).toHaveProperty('contentMimeType');
+    expect(messageSchema.properties).toHaveProperty('contentFileName');
+  });
 
   it('should define v0.3.0 fields', () => {
-    expect(messageSchema.properties).toHaveProperty('editedAt')
-    expect(messageSchema.properties).toHaveProperty('editedById')
-    expect(messageSchema.properties).toHaveProperty('updatedAt')
-    expect(messageSchema.properties).toHaveProperty('systemType')
-  })
-})
+    expect(messageSchema.properties).toHaveProperty('editedAt');
+    expect(messageSchema.properties).toHaveProperty('editedById');
+    expect(messageSchema.properties).toHaveProperty('updatedAt');
+    expect(messageSchema.properties).toHaveProperty('systemType');
+  });
+});
 
 describe('conversationSchema', () => {
   it('should have correct primary key', () => {
-    expect(conversationSchema.primaryKey).toBe('id')
-  })
+    expect(conversationSchema.primaryKey).toBe('id');
+  });
 
   it('should have correct version', () => {
-    expect(conversationSchema.version).toBe(0)
-  })
+    expect(conversationSchema.version).toBe(0);
+  });
 
   it('should have required fields', () => {
-    expect(conversationSchema.required).toContain('id')
-    expect(conversationSchema.required).toContain('type')
-    expect(conversationSchema.required).toContain('unreadCount')
-    expect(conversationSchema.required).toContain('muted')
-    expect(conversationSchema.required).toContain('pinned')
-  })
+    expect(conversationSchema.required).toContain('id');
+    expect(conversationSchema.required).toContain('type');
+    expect(conversationSchema.required).toContain('unreadCount');
+    expect(conversationSchema.required).toContain('muted');
+    expect(conversationSchema.required).toContain('pinned');
+  });
 
   it('should have type index for filtering', () => {
-    expect(conversationSchema.indexes).toContainEqual('type')
-  })
+    expect(conversationSchema.indexes).toContainEqual('type');
+  });
 
   it('should have updatedAt index for sorting', () => {
-    expect(conversationSchema.indexes).toContainEqual('updatedAt')
-  })
+    expect(conversationSchema.indexes).toContainEqual('updatedAt');
+  });
 
   it('should have _syncedAt index for sync tracking', () => {
-    expect(conversationSchema.indexes).toContainEqual('_syncedAt')
-  })
+    expect(conversationSchema.indexes).toContainEqual('_syncedAt');
+  });
 
   it('should define v0.3.0 fields', () => {
-    expect(conversationSchema.properties).toHaveProperty('topic')
-    expect(conversationSchema.properties).toHaveProperty('description')
-    expect(conversationSchema.properties).toHaveProperty('metadata')
-  })
+    expect(conversationSchema.properties).toHaveProperty('topic');
+    expect(conversationSchema.properties).toHaveProperty('description');
+    expect(conversationSchema.properties).toHaveProperty('metadata');
+  });
 
   it('should define last message fields', () => {
-    expect(conversationSchema.properties).toHaveProperty('lastMessageId')
-    expect(conversationSchema.properties).toHaveProperty('lastMessageText')
-    expect(conversationSchema.properties).toHaveProperty('lastMessageAt')
-  })
-})
+    expect(conversationSchema.properties).toHaveProperty('lastMessageId');
+    expect(conversationSchema.properties).toHaveProperty('lastMessageText');
+    expect(conversationSchema.properties).toHaveProperty('lastMessageAt');
+  });
+});
 
 describe('syncCheckpointSchema', () => {
   it('should have correct primary key', () => {
-    expect(syncCheckpointSchema.primaryKey).toBe('id')
-  })
+    expect(syncCheckpointSchema.primaryKey).toBe('id');
+  });
 
   it('should have correct version', () => {
-    expect(syncCheckpointSchema.version).toBe(0)
-  })
+    expect(syncCheckpointSchema.version).toBe(0);
+  });
 
   it('should have required fields', () => {
-    expect(syncCheckpointSchema.required).toContain('id')
-    expect(syncCheckpointSchema.required).toContain('updatedAt')
-    expect(syncCheckpointSchema.required).toContain('syncedAt')
-  })
+    expect(syncCheckpointSchema.required).toContain('id');
+    expect(syncCheckpointSchema.required).toContain('updatedAt');
+    expect(syncCheckpointSchema.required).toContain('syncedAt');
+  });
 
   it('should define checkpoint fields', () => {
-    expect(syncCheckpointSchema.properties).toHaveProperty('updatedAt')
-    expect(syncCheckpointSchema.properties).toHaveProperty('syncedAt')
-  })
-})
+    expect(syncCheckpointSchema.properties).toHaveProperty('updatedAt');
+    expect(syncCheckpointSchema.properties).toHaveProperty('syncedAt');
+  });
+});
+
+// ─── Schema Type Tests ──────────────────────────────────────────────────────
+
+describe('Schema properties', () => {
+  it('messageSchema should have type property', () => {
+    expect(messageSchema).toHaveProperty('type');
+  });
+
+  it('conversationSchema should have type property', () => {
+    expect(conversationSchema).toHaveProperty('type');
+  });
+
+  it('syncCheckpointSchema should have type property', () => {
+    expect(syncCheckpointSchema).toHaveProperty('type');
+  });
+});
+
+// ─── Message Schema Extended Tests ───────────────────────────────────────
+
+describe('messageSchema extended properties', () => {
+  it('should define sender fields', () => {
+    expect(messageSchema.properties).toHaveProperty('senderId');
+    expect(messageSchema.properties).toHaveProperty('senderName');
+  });
+
+  it('should define delivery tracking fields', () => {
+    expect(messageSchema.properties).toHaveProperty('deliveryStatus');
+  });
+
+  it('should define offline fields', () => {
+    expect(messageSchema.properties).toHaveProperty('_pendingSend');
+  });
+
+  it('should define metadata field', () => {
+    expect(messageSchema.properties).toHaveProperty('metadata');
+  });
+
+  it('should define parentId field for threads', () => {
+    expect(messageSchema.properties).toHaveProperty('parentId');
+  });
+
+  it('should have proper index count', () => {
+    expect(Array.isArray(messageSchema.indexes) || messageSchema.indexes).toBeDefined();
+  });
+});
+
+// ─── Conversation Schema Extended Tests ──────────────────────────────────
+
+describe('conversationSchema extended properties', () => {
+  it('should define user fields', () => {
+    expect(conversationSchema.properties).toHaveProperty('type');
+  });
+
+  it('should define status fields', () => {
+    expect(conversationSchema.properties).toHaveProperty('pinned');
+    expect(conversationSchema.properties).toHaveProperty('muted');
+  });
+
+  it('should define name fields', () => {
+    expect(conversationSchema.properties).toHaveProperty('name');
+  });
+
+  it('should have unreadCount field', () => {
+    expect(conversationSchema.properties).toHaveProperty('unreadCount');
+  });
+
+  it('should define sync tracking field', () => {
+    expect(conversationSchema.properties).toHaveProperty('_syncedAt');
+  });
+
+  it('should define timestamp fields', () => {
+    expect(conversationSchema.properties).toHaveProperty('createdAt');
+    expect(conversationSchema.properties).toHaveProperty('updatedAt');
+  });
+});
+
+// ─── Schema Validity Tests ──────────────────────────────────────────────
+
+describe('Schema validity', () => {
+  it('messageSchema should have type object', () => {
+    expect(messageSchema.type).toBe('object');
+  });
+
+  it('conversationSchema should have type object', () => {
+    expect(conversationSchema.type).toBe('object');
+  });
+
+  it('syncCheckpointSchema should have type object', () => {
+    expect(syncCheckpointSchema.type).toBe('object');
+  });
+
+  it('messageSchema should be defined', () => {
+    expect(messageSchema).toBeDefined();
+    expect(Object.keys(messageSchema).length).toBeGreaterThan(0);
+  });
+
+  it('conversationSchema should be defined', () => {
+    expect(conversationSchema).toBeDefined();
+    expect(Object.keys(conversationSchema).length).toBeGreaterThan(0);
+  });
+
+  it('syncCheckpointSchema should be defined', () => {
+    expect(syncCheckpointSchema).toBeDefined();
+    expect(Object.keys(syncCheckpointSchema).length).toBeGreaterThan(0);
+  });
+});

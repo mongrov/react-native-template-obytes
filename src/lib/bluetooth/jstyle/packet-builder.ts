@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/number-literal-case */
 /**
  * JStyle Packet Builder
  * Constructs 16-byte command packets with CRC for the JStyle ring protocol
@@ -30,9 +31,9 @@ export const CMD = {
 
   // Other commands
   RESET: 0x12, // Reset device
-  MCU_RESET: 0x2E, // MCU Reset
-  SET_AUTO: 0x2A, // Set automatic settings
-  GET_AUTO: 0x2B, // Get automatic settings
+  MCU_RESET: 0x2e, // MCU Reset
+  SET_AUTO: 0x2a, // Set automatic settings
+  GET_AUTO: 0x2b, // Get automatic settings
 
   // Temperature and SpO2
   READ_TEMP_HISTORY: 0x62, // Temperature history
@@ -59,7 +60,7 @@ export function calculateCrc(packet: Uint8Array): number {
   for (let i = 0; i < packet.length - 1; i++) {
     crc += packet[i];
   }
-  return crc & 0xFF;
+  return crc & 0xff;
 }
 
 /**

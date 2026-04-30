@@ -194,4 +194,139 @@ describe('RocketChatAdapter configuration', () => {
 
     expect(adapter).toBeInstanceOf(RocketChatAdapter)
   })
+
+  it('should have id property', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(adapter.id).toBe('rocketchat')
+  })
+
+  it('should have status property', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(adapter.status).toBe('disconnected')
+  })
+})
+
+// ─── Method Availability Tests ──────────────────────────────────────────────
+
+describe('RocketChatAdapter method availability', () => {
+  it('should have disconnect method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.disconnect).toBe('function')
+  })
+
+  it('should have on method for event subscription', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.on).toBe('function')
+  })
+
+  it('should have sendMessage method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.sendMessage).toBe('function')
+  })
+
+  it('should have fetchConversations method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.fetchConversations).toBe('function')
+  })
+
+  it('should have fetchMessages method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.fetchMessages).toBe('function')
+  })
+
+  it('should have editMessage method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.editMessage).toBe('function')
+  })
+
+  it('should have deleteMessage method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.deleteMessage).toBe('function')
+  })
+
+  it('should have addReaction method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.addReaction).toBe('function')
+  })
+
+  it('should have removeReaction method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.removeReaction).toBe('function')
+  })
+
+  it('should have markAsRead method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.markAsRead).toBe('function')
+  })
+
+  it('should have setPresence method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.setPresence).toBe('function')
+  })
+
+  it('should have searchMessages method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.searchMessages).toBe('function')
+  })
+
+  it('should have getUser method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.getUser).toBe('function')
+  })
+
+  it('should have getMembers method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.getMembers).toBe('function')
+  })
+
+  it('should have pinMessage method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.pinMessage).toBe('function')
+  })
+
+  it('should have unpinMessage method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.unpinMessage).toBe('function')
+  })
+
+  it('should have subscribeToConversation method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.subscribeToConversation).toBe('function')
+  })
+
+  it('should have subscribeToPresence method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.subscribeToPresence).toBe('function')
+  })
+
+  it('should have sendTyping method', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(typeof adapter.sendTyping).toBe('function')
+  })
+})
+
+// ─── Factory Tests ──────────────────────────────────────────────────────────
+
+describe('RocketChatAdapter factory', () => {
+  it('should create new instance each time', () => {
+    const adapter1 = createRocketChatAdapter(mockConfig)
+    const adapter2 = createRocketChatAdapter(mockConfig)
+
+    expect(adapter1).not.toBe(adapter2)
+  })
+
+  it('should preserve config in adapter', () => {
+    const customConfig: RCAdapterConfig = {
+      serverUrl: 'https://custom.example.com',
+      wsUrl: 'wss://custom.example.com/websocket',
+    }
+
+    const adapter = createRocketChatAdapter(customConfig)
+    expect(adapter).toBeInstanceOf(RocketChatAdapter)
+  })
+
+  it('should work without optional logger config', () => {
+    const adapter = createRocketChatAdapter(mockConfig)
+    expect(adapter).toBeInstanceOf(RocketChatAdapter)
+  })
 })

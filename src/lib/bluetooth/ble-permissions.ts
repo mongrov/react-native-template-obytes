@@ -69,7 +69,6 @@ class BlePermissions {
   /**
    * Check Bluetooth Permission Status
    */
-
   public async checkBluetoothStatus(): Promise<PermissionStatus> {
     // Simulator Bypass
     if (!Device.isDevice) {
@@ -245,15 +244,14 @@ class BlePermissions {
       return 'granted';
     }
 
-    const Location = getExpoLocation();
-    if (!Location) {
+    const ExpoLocation = getExpoLocation();
+    if (!ExpoLocation) {
       // If the native module isn't available in the current runtime, don't crash.
       return 'undetermined';
     }
-
     // Use expo-location for cross-platform check (handles iOS and Android)
     try {
-      const result = await Location.getForegroundPermissionsAsync();
+      const result = await ExpoLocation.getForegroundPermissionsAsync();
 
       // Both "Allow Once" and "Allow While Using App" return granted status
       // We accept both since they do provide location access (even if temporary)
@@ -282,14 +280,13 @@ class BlePermissions {
       return true;
     }
 
-    const Location = getExpoLocation();
-    if (!Location) {
+    const ExpoLocation = getExpoLocation();
+    if (!ExpoLocation) {
       return false;
     }
-
     try {
       // Use expo-location to force the native popup on iOS and Android
-      const { status } = await Location.requestForegroundPermissionsAsync();
+      const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
       return status === 'granted';
     } catch (err) {
       console.warn(err);

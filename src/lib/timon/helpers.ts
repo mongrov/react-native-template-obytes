@@ -55,7 +55,7 @@ export function transformSleepData(data: any[]) {
         },
         'transformSleepData',
         false,
-        { unitLength, hasQuality: !!sleepQuality, hasStart: !!startTime }
+        { unitLength, hasQuality: !!sleepQuality, hasStart: !!startTime },
       );
       return [];
     }
@@ -67,7 +67,7 @@ export function transformSleepData(data: any[]) {
       date: addNumberOfMinutes(
         normalizedStart,
         FULL_DATE_24_HOUR_TIME_FORMAT,
-        index * unitLength
+        index * unitLength,
       ),
       unitLength,
       quality,
@@ -80,11 +80,13 @@ export function transformSleepData(data: any[]) {
  * Handle insertion of Sleep data with transformation.
  */
 export async function handleDetailSleepData(arrayDetailSleepData: any[]) {
-  if (!arrayDetailSleepData?.length) return;
+  if (!arrayDetailSleepData?.length)
+    return;
 
   const processedSleep = transformSleepData(arrayDetailSleepData);
   const result = await insert(DB_NAME, SLEEP_COLLECTION, processedSleep);
-  if (result instanceof Error) throw result;
+  if (result instanceof Error)
+    throw result;
   return result;
 }
 
@@ -92,27 +94,32 @@ export async function handleDetailSleepData(arrayDetailSleepData: any[]) {
  * Standard handlers for simpler data types.
  */
 export async function handleStaticHR(data: any[]) {
-  if (!data?.length) return;
+  if (!data?.length)
+    return;
   return await insert(DB_NAME, HEART_RATE_COLLECTION, data);
 }
 
 export async function handleHrvData(data: any[]) {
-  if (!data?.length) return;
+  if (!data?.length)
+    return;
   return await insert(DB_NAME, HRV_COLLECTION, data);
 }
 
 export async function handleAutomaticSpo2Data(data: any[]) {
-  if (!data?.length) return;
+  if (!data?.length)
+    return;
   return await insert(DB_NAME, SPO2_COLLECTION, data);
 }
 
 export async function handleTemperatureData(data: any[]) {
-  if (!data?.length) return;
+  if (!data?.length)
+    return;
   return await insert(DB_NAME, TEMPERATURE_COLLECTION, data);
 }
 
 export async function handleActivityDetailsData(data: any[]) {
-  if (!data?.length) return;
+  if (!data?.length)
+    return;
   return await insert(DB_NAME, ACTIVITY_DETAILS_COLLECTION, data);
 }
 
@@ -121,10 +128,11 @@ export async function handleActivityDetailsData(data: any[]) {
  */
 export async function handleBatteryLevel(batteryLevel: number | string) {
   try {
-    if (batteryLevel === undefined || batteryLevel === null) return;
+    if (batteryLevel === undefined || batteryLevel === null)
+      return;
 
     const lastBatteryUpdated = await storage.getItem(
-      LAST_BATTERY_STORED_TIME_STAMP
+      LAST_BATTERY_STORED_TIME_STAMP,
     );
     const today = getTodaysDate();
 
@@ -136,12 +144,14 @@ export async function handleBatteryLevel(batteryLevel: number | string) {
         },
       ]);
 
-      if (result instanceof Error) throw result;
+      if (result instanceof Error)
+        throw result;
       await storage.setItem(LAST_BATTERY_STORED_TIME_STAMP, today);
     }
 
     await ringManager.setBatteryLevel(+batteryLevel);
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'handleBatteryLevel error');
   }
 }

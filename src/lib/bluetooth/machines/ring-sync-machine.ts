@@ -188,10 +188,10 @@ export const ringSyncMachine = setup({
         STAGE_PROGRESS[params.stage],
     }),
     addCompletedStage: assign({
-      completedStages: ({ context }, params: { stage: SyncStage }) => [
-        ...context.completedStages,
-        params.stage,
-      ],
+      completedStages: ({ context }, params: { stage: SyncStage }) =>
+        context.completedStages.includes(params.stage)
+          ? context.completedStages
+          : [...context.completedStages, params.stage],
     }),
     setError: assign({
       error: () => 'Sync failed',
@@ -206,6 +206,18 @@ export const ringSyncMachine = setup({
       console.log('[JStyle] Full sync complete');
     },
     resetContext: assign(initialContext),
+    resetRunContext: assign({
+      completedStages: () => [],
+      progress: () => 0,
+      currentStage: () => 'idle' as SyncStage,
+      sleepData: () => [],
+      activityData: () => [],
+      heartRateData: () => [],
+      hrvData: () => [],
+      spo2Data: () => [],
+      temperatureData: () => [],
+      error: () => null,
+    }),
   },
 }).createMachine({
   id: 'ringSync',
@@ -223,6 +235,7 @@ export const ringSyncMachine = setup({
         START_SYNC: {
           target: 'handshaking',
           actions: [
+            'resetRunContext',
             'setAdapter',
             { type: 'setStage', params: { stage: 'handshaking' as SyncStage } },
           ],
@@ -431,6 +444,7 @@ export const ringSyncMachine = setup({
         START_SYNC: {
           target: 'handshaking',
           actions: [
+            'resetRunContext',
             'setAdapter',
             { type: 'setStage', params: { stage: 'handshaking' as SyncStage } },
           ],
@@ -442,6 +456,7 @@ export const ringSyncMachine = setup({
         RETRY: {
           target: 'handshaking',
           actions: [
+            'resetRunContext',
             'setAdapter',
             { type: 'setStage', params: { stage: 'handshaking' as SyncStage } },
           ],

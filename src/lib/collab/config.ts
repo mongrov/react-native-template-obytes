@@ -1,57 +1,50 @@
-/**
- * Collab Configuration
- *
- * Creates and configures the RocketChat adapter with auth integration.
- */
+import type { RocketChatAdapter } from './adapters/rocketchat';
 
-import Env from 'env'
-import axios from 'axios'
-
+import Env from 'env';
 import {
   createRocketChatAdapter,
-  type RocketChatAdapter,
-  type RCAdapterCredentials,
-} from './adapters/rocketchat'
+} from './adapters/rocketchat';
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+// ─── Config types ─────────────────────────────────────────────────────────────
 
-export interface CollabConfig {
-  /** RC REST API server URL */
-  serverUrl: string
-  /** RC WebSocket URL */
-  wsUrl: string
-  /** Whether collab is enabled */
-  enabled: boolean
-}
+export type CollabConfig = {
+  serverUrl: string;
+  wsUrl: string;
+  enabled: boolean;
+};
 
-// ─── Config ─────────────────────────────────────────────────────────────────
+// ─── Ziva auth constants ──────────────────────────────────────────────────────
 
-/**
- * Get collab configuration from environment.
- */
+export const COLLAB_ADMIN_TOKEN = Env.EXPO_PUBLIC_COLLAB_ADMIN_TOKEN ?? '';
+
+export const APPLE = 'apple' as const;
+export const GOOGLE = 'google' as const;
+export const COLLAB_LOGIN = 'COLLAB_LOGIN';
+export const GOOGLE_LOGIN = 'GOOGLE_LOGIN';
+export const APPLE_LOGIN = 'APPLE_LOGIN';
+
+// ─── Config factory ───────────────────────────────────────────────────────────
+
 export function getCollabConfig(): CollabConfig {
-  const serverUrl = Env.EXPO_PUBLIC_RC_SERVER_URL ?? ''
-  const wsUrl = Env.EXPO_PUBLIC_RC_WS_URL ?? ''
+  const serverUrl = Env.EXPO_PUBLIC_RC_SERVER_URL ?? '';
+  const wsUrl = Env.EXPO_PUBLIC_RC_WS_URL ?? '';
 
   return {
     serverUrl,
     wsUrl,
     enabled: Boolean(serverUrl && wsUrl),
-  }
+  };
 }
 
-// ─── Adapter Factory ────────────────────────────────────────────────────────
+// ─── Adapter singleton ────────────────────────────────────────────────────────
 
-let adapterInstance: RocketChatAdapter | null = null
+let adapterInstance: RocketChatAdapter | null = null;
 
-/**
- * Get or create the RocketChat adapter singleton.
- */
 export function getCollabAdapter(): RocketChatAdapter | null {
-  const config = getCollabConfig()
+  const config = getCollabConfig();
 
   if (!config.enabled) {
-    return null
+    return null;
   }
 
   if (!adapterInstance) {
@@ -66,53 +59,15 @@ export function getCollabAdapter(): RocketChatAdapter | null {
             error: (msg, data) => console.error(`[RC] ${msg}`, data),
           }
         : undefined,
-    })
+    });
   }
 
-  return adapterInstance
+  return adapterInstance;
 }
 
-/**
- * Connect adapter with auth credentials.
- */
-export async function connectCollab(
-  token: string,
-  userId: string
-): Promise<void> {
-  const adapter = getCollabAdapter()
-  if (!adapter) {
-    throw new Error('Collab not enabled')
-  }
-
-  const credentials: RCAdapterCredentials = {
-    token,
-    userId,
-  }
-
-  // Create axios instance for REST calls
-  const axiosInstance = axios.create({
-    timeout: 30000,
-  })
-
-  await adapter.connect(credentials, axiosInstance)
-}
-
-/**
- * Disconnect adapter.
- */
-export async function disconnectCollab(): Promise<void> {
-  const adapter = getCollabAdapter()
-  if (adapter) {
-    await adapter.disconnect()
-  }
-}
-
-/**
- * Reset adapter instance (for logout).
- */
 export function resetCollabAdapter(): void {
   if (adapterInstance) {
-    adapterInstance.disconnect().catch(() => {})
-    adapterInstance = null
+    adapterInstance.disconnect().catch(() => {});
+    adapterInstance = null;
   }
 }

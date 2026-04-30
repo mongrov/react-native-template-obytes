@@ -76,8 +76,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: true,
     bundleIdentifier: Env.EXPO_PUBLIC_BUNDLE_ID,
+    googleServicesFile: './GoogleService-Info.plist',
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
+      NSBluetoothAlwaysUsageDescription: 'Allow ZivaOne to find and connect to your ZivaRing.',
+      NSBluetoothPeripheralUsageDescription: 'Allow ZivaOne to communicate with your ZivaRing.',
     },
     // Configure associated domains for universal links (if domain is set)
     ...(Env.EXPO_PUBLIC_ASSOCIATED_DOMAIN && {
@@ -95,6 +98,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       backgroundColor: '#2E3C4B',
     },
     package: Env.EXPO_PUBLIC_PACKAGE,
+    googleServicesFile: './google-services.json',
     // Configure intent filters for deep linking (if domain is set)
     ...(Env.EXPO_PUBLIC_ASSOCIATED_DOMAIN && {
       intentFilters: [
@@ -167,6 +171,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     'expo-localization',
     'expo-router',
+    'expo-web-browser',
     ['app-icon-badge', appIconBadgeConfig],
     ['react-native-edge-to-edge'],
     [
@@ -175,6 +180,23 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         icon: './assets/icon.png',
         color: '#FF6B35',
         sounds: [],
+      },
+    ],
+    ['@config-plugins/react-native-ble-plx', {
+      isBackgroundEnabled: true,
+      modes: ['peripheral', 'central'],
+      bluetoothAlwaysPermission: 'Allow ZivaOne to find and connect to your ZivaRing.',
+    }],
+    '@react-native-google-signin/google-signin',
+    [
+      'expo-build-properties',
+      {
+        ios: {
+          deploymentTarget: '16.0',
+        },
+        android: {
+          minSdkVersion: 26,
+        },
       },
     ],
   ],

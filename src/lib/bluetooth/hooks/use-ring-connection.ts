@@ -3,11 +3,10 @@
  * React hook wrapping the XState ringConnectionMachine
  */
 
+import type { ConnectionContext, ConnectionStateValue, ScannedDevice } from '@/lib/bluetooth';
+
 import { useMachine } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
-
-import type { ScannedDevice, ConnectionContext, ConnectionStateValue  } from '@/lib/bluetooth';
-
 import { ringConnectionMachine } from '@/lib/bluetooth';
 
 export type UseRingConnectionReturn = {

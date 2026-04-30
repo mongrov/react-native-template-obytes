@@ -2,7 +2,8 @@
  * Lightweight error-catch handler for timon operations.
  * Logs structured error objects; Sentry integration is stubbed for now.
  */
-export function handleCatch(error: any,  name: string,  _shouldLogToSentry = true,  data?: any) {
+
+export function handleCatch(error: any, name: string, _shouldLogToSentry = true, data?: any) {
   const errorObj = {
     error,
     data: JSON.stringify(data || ''),

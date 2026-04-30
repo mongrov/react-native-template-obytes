@@ -3,12 +3,12 @@
  * React hook wrapping the XState ringSyncMachine
  */
 
-import * as React from 'react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import type { JStyleAdapter, SyncContext, SyncStage } from '@/lib/bluetooth';
 
 import { useMachine } from '@xstate/react';
 
-import type { JStyleAdapter, SyncContext, SyncStage } from '@/lib/bluetooth';
+import * as React from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { ringManager, ringSyncMachine } from '@/lib/bluetooth';
 

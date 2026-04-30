@@ -1,4 +1,3 @@
-export { handleCatch } from './handle-catch';
 export {
   addNumberOfMinutes,
   FULL_DATE_24_HOUR_TIME_FORMAT,
@@ -6,3 +5,4 @@ export {
   getTodaysDate,
   getTodaysDateInUtc,
 } from './date';
+export { handleCatch } from './handle-catch';

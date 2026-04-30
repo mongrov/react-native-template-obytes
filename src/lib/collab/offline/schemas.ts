@@ -4,44 +4,35 @@
  * Schemas for messages and conversations matching @mongrov/types.
  */
 
-// NOTE: We only need the schema *shape* for type-checking here.
-// Importing RxDB directly makes `tsc` fail if RxDB isn't installed.
-export type RxJsonSchema<T> = {
-  version: number;
-  primaryKey: keyof T | string;
-  type: 'object';
-  properties: Record<string, unknown>;
-  required?: Array<keyof T | string>;
-  indexes?: Array<string | string[]>;
-};
+import type { RxJsonSchema } from 'rxdb';
 
 // ─── Message Schema ─────────────────────────────────────────────────────────
 
-export interface MessageDoc {
-  id: string
-  conversationId: string
-  senderId: string
-  senderName: string
-  senderType: string
-  contentType: string
-  contentText?: string
-  contentUri?: string
-  contentMimeType?: string
-  contentFileName?: string
-  parentId?: string
-  deliveryStatus: string
-  streaming?: boolean
-  editedAt?: string
-  editedById?: string
-  updatedAt?: string
-  systemType?: string
-  createdAt: string
+export type MessageDoc = {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  senderName: string;
+  senderType: string;
+  contentType: string;
+  contentText?: string;
+  contentUri?: string;
+  contentMimeType?: string;
+  contentFileName?: string;
+  parentId?: string;
+  deliveryStatus: string;
+  streaming?: boolean;
+  editedAt?: string;
+  editedById?: string;
+  updatedAt?: string;
+  systemType?: string;
+  createdAt: string;
   // Metadata stored as JSON string
-  metadata?: string
+  metadata?: string;
   // For offline sync
-  _pendingSend?: boolean
-  _localId?: string
-}
+  _pendingSend?: boolean;
+  _localId?: string;
+};
 
 export const messageSchema: RxJsonSchema<MessageDoc> = {
   version: 0,
@@ -78,31 +69,31 @@ export const messageSchema: RxJsonSchema<MessageDoc> = {
     'updatedAt',
     '_pendingSend',
   ],
-}
+};
 
 // ─── Conversation Schema ────────────────────────────────────────────────────
 
-export interface ConversationDoc {
-  id: string
-  type: string
-  groupState?: string
-  name?: string
-  avatar?: string
-  unreadCount: number
-  muted: boolean
-  pinned: boolean
-  topic?: string
-  description?: string
-  lastMessageId?: string
-  lastMessageText?: string
-  lastMessageAt?: string
-  createdAt: string
-  updatedAt: string
+export type ConversationDoc = {
+  id: string;
+  type: string;
+  groupState?: string;
+  name?: string;
+  avatar?: string;
+  unreadCount: number;
+  muted: boolean;
+  pinned: boolean;
+  topic?: string;
+  description?: string;
+  lastMessageId?: string;
+  lastMessageText?: string;
+  lastMessageAt?: string;
+  createdAt: string;
+  updatedAt: string;
   // Metadata stored as JSON string
-  metadata?: string
+  metadata?: string;
   // High-water mark for sync
-  _syncedAt?: string
-}
+  _syncedAt?: string;
+};
 
 export const conversationSchema: RxJsonSchema<ConversationDoc> = {
   version: 0,
@@ -134,15 +125,15 @@ export const conversationSchema: RxJsonSchema<ConversationDoc> = {
     'pinned',
     '_syncedAt',
   ],
-}
+};
 
 // ─── Sync Checkpoint Schema ─────────────────────────────────────────────────
 
-export interface SyncCheckpointDoc {
-  id: string // conversationId or 'global'
-  updatedAt: string // High-water mark
-  syncedAt: string // When we last synced
-}
+export type SyncCheckpointDoc = {
+  id: string; // conversationId or 'global'
+  updatedAt: string; // High-water mark
+  syncedAt: string; // When we last synced
+};
 
 export const syncCheckpointSchema: RxJsonSchema<SyncCheckpointDoc> = {
   version: 0,
@@ -154,4 +145,4 @@ export const syncCheckpointSchema: RxJsonSchema<SyncCheckpointDoc> = {
     syncedAt: { type: 'string', maxLength: 50 },
   },
   required: ['id', 'updatedAt', 'syncedAt'],
-}
+};

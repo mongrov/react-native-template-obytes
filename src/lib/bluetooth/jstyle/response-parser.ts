@@ -134,9 +134,11 @@ export const ResponseParser = {
    * Check if the response is an empty data response (command echo + all zeros + CRC)
    */
   isEmptyDataResponse(data: Uint8Array): boolean {
-    if (data.length < 16) return false;
+    if (data.length < 16)
+      return false;
     for (let i = 1; i < 15; i++) {
-      if (data[i] !== 0) return false;
+      if (data[i] !== 0)
+        return false;
     }
     return true;
   },
@@ -157,7 +159,8 @@ export const ResponseParser = {
     let version = '';
     for (let i = 1; i < 5; i++) {
       version += data[i].toString(16).toUpperCase();
-      if (i < 4) version += '.';
+      if (i < 4)
+        version += '.';
     }
     return { version };
   },
@@ -168,7 +171,7 @@ export const ResponseParser = {
   parseDeviceTime(data: Uint8Array): DeviceTimeData {
     const deviceTime
       = `20${byteToHexString(data[1])}-${byteToHexString(data[2])}-${byteToHexString(data[3])} `
-      + `${byteToHexString(data[4])}:${byteToHexString(data[5])}:${byteToHexString(data[6])}`;
+        + `${byteToHexString(data[4])}:${byteToHexString(data[5])}:${byteToHexString(data[6])}`;
 
     const gpsTime = `${byteToHexString(data[9])}.${byteToHexString(data[10])}.${byteToHexString(data[11])}`;
 
@@ -217,11 +220,12 @@ export const ResponseParser = {
         const offset = i * chunkSize;
         const sleepLength = getValue(data[9 + offset], 0);
 
-        if (sleepLength === 0) continue;
+        if (sleepLength === 0)
+          continue;
 
         const startTime
           = `20${bcd2String(data[3 + offset])}-${bcd2String(data[4 + offset])}-${bcd2String(data[5 + offset])} `
-          + `${bcd2String(data[6 + offset])}:${bcd2String(data[7 + offset])}:${bcd2String(data[8 + offset])}`;
+            + `${bcd2String(data[6 + offset])}:${bcd2String(data[7 + offset])}:${bcd2String(data[8 + offset])}`;
 
         const sleepQuality: number[] = [];
 

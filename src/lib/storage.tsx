@@ -5,7 +5,8 @@
  * Provides a sync storage wrapper for legacy code (theme, i18n).
  */
 
-import { createKVStore, type KVStore } from '@mongrov/db/kv';
+import type { KVStore } from '@mongrov/db/kv';
+import { createKVStore } from '@mongrov/db/kv';
 
 // Re-export types from @mongrov/db
 export type { KVStore } from '@mongrov/db/kv';
@@ -47,12 +48,14 @@ function createMemoryStorage(): SyncStorage {
 let _syncStorage: SyncStorage | null = null;
 
 function getSyncStorage(): SyncStorage {
-  if (_syncStorage) return _syncStorage;
+  if (_syncStorage)
+    return _syncStorage;
 
   try {
     const { MMKV } = require('react-native-mmkv');
     _syncStorage = new MMKV() as SyncStorage;
-  } catch {
+  }
+  catch {
     _syncStorage = createMemoryStorage();
   }
 

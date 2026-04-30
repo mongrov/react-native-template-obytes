@@ -3,32 +3,45 @@
  * BLE connection, XState sync, and RxDB inspection for the BLE module
  */
 
+import type {
+  ActivityDataItem,
+  ScannedDevice,
+  SleepDataItem,
+} from '@/lib/bluetooth';
+import type { TimonDebugLog } from '@/lib/timon/hooks/use-timon-debug';
+
+import { useCollab } from '@mongrov/collab';
+import { Redirect } from 'expo-router';
 import * as React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+
 import {
   Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { showMessage } from 'react-native-flash-message';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-import type {
-  ActivityDataItem,
-  ScannedDevice,
-  SleepDataItem,
-} from '@/lib/bluetooth';
 
 import {
   bleConnector,
+  blePermissions,
   JStyleAdapter,
   ringManager,
 } from '@/lib/bluetooth';
+import { usePermissions } from '@/lib/bluetooth/hooks/use-permissions';
 import { useRingConnection } from '@/lib/bluetooth/hooks/use-ring-connection';
 import { useRingSync } from '@/lib/bluetooth/hooks/use-ring-sync';
-import type { TimonDebugLog } from '@/lib/timon/hooks/use-timon-debug';
+import { getChannelsList } from '@/lib/collab/groups';
+
+import { useCollabSync } from '@/lib/collab/hooks/use-collab-sync';
+import { useSocialLogin } from '@/lib/collab/hooks/use-social-login';
+import { useWellnessGroups } from '@/lib/collab/hooks/use-wellness-groups';
+import { useCollabStore } from '@/lib/collab/store';
 import { useTimonDebug } from '@/lib/timon/hooks/use-timon-debug';
 
 // ─── Sub-Components ─────────────────────────────────────────────────────────
@@ -186,8 +199,8 @@ function SyncStatusCard({
       )}
       {completedStages.length > 0 && (
         <View style={styles.tagContainer}>
-          {completedStages.map((s) => (
-            <View key={s} style={styles.tag}>
+          {completedStages.map((s, i) => (
+            <View key={`${s}-${i}`} style={styles.tag}>
               <Text style={styles.tagText}>
                 {'✓ '}
                 {s}
@@ -503,11 +516,11 @@ function TimonDebugCard({
       </View>
 
       {initError != null && (
-<Text style={styles.errorText}>
-Error:
-{initError}
-</Text>
-)}
+        <Text style={styles.errorText}>
+          Error:
+          {initError}
+        </Text>
+      )}
 
       {!isInitialized && (
         <TouchableOpacity
@@ -634,10 +647,10 @@ Error:
                   numberOfLines={2}
                 >
                   [
-{log.action}
-]
-{' '}
-{log.message}
+                  {log.action}
+                  ]
+                  {' '}
+                  {log.message}
                 </Text>
               ))}
             </View>
@@ -648,14 +661,299 @@ Error:
   );
 }
 
+// ─── Collab Debug Components ──────────────────────────────────────────────────
+
+function CollabDebugCard() {
+  const { userId, isAuthenticated } = useCollabStore();
+  const { status } = useCollab();
+  const { loginWithGoogle, loginWithApple, isLoading, error } = useSocialLogin();
+  const collabSync = useCollabSync();
+
+  const [pushRingStatus, setPushRingStatus] = React.useState<string | null>(null);
+  const [fetchGlucoseStatus, setFetchGlucoseStatus] = React.useState<string | null>(null);
+  const [registerStatus, setRegisterStatus] = React.useState<string | null>(null);
+  const [appleStatus, setAppleStatus] = React.useState<string | null>(null);
+
+  const notify = (opts: { title: string; ok: boolean; message?: string; details?: unknown }) => {
+    if (opts.details !== undefined) {
+      console.log(`[RingDebug] ${opts.title} details:`, opts.details);
+    }
+    showMessage({
+      message: opts.title,
+      description: opts.message ?? (opts.ok ? 'Success' : 'Failed'),
+      type: 'default',
+      duration: opts.ok ? 3500 : 6000,
+      backgroundColor: opts.ok ? '#16A34A' : '#DC2626',
+      color: '#FFFFFF',
+    });
+  };
+
+  const handlePushRingInfo = async () => {
+    setPushRingStatus('Pushing...');
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const result = await collabSync.pushRingInfo('debug-ring', tz);
+    setPushRingStatus(result.success ? '✅ Success' : `❌ ${result.error}`);
+    notify({
+      title: 'Push Ring Info',
+      ok: result.success,
+      message: result.success ? `Saved ringId=debug-ring, timezone=${tz}` : result.error,
+      details: result,
+    });
+  };
+
+  const handleFetchGlucose = async () => {
+    setFetchGlucoseStatus('Fetching...');
+    const data = await collabSync.fetchGlucoseData();
+    setFetchGlucoseStatus(`✅ ${data.length} records`);
+    notify({
+      title: 'Fetch Glucose Data',
+      ok: true,
+      message: `Fetched ${data.length} records`,
+      details: data,
+    });
+  };
+
+  const handleRegisterUser = async () => {
+    setRegisterStatus('Registering...');
+    const result = await collabSync.registerZivaUser();
+    setRegisterStatus(result.success ? '✅ Registered' : `❌ ${result.error}`);
+    notify({
+      title: 'Register Ziva User',
+      ok: result.success,
+      message: result.success ? 'Registered on collab server' : result.error,
+      details: result,
+    });
+  };
+
+  return (
+    <View style={styles.card}>
+      <Text style={styles.cardTitle}>☁️ Collab Debug</Text>
+
+      <View style={styles.row}>
+        <Text style={styles.label}>DDP Status:</Text>
+        <Text style={[styles.value, status === 'connected' && styles.successText]}>
+          {status.toUpperCase()}
+        </Text>
+      </View>
+
+      <View style={styles.row}>
+        <Text style={styles.label}>Auth:</Text>
+        <Text style={isAuthenticated ? styles.successText : styles.errorText}>
+          {isAuthenticated ? `✅ ${userId}` : '❌ Not logged in'}
+        </Text>
+      </View>
+
+      {error != null && (
+        <Text style={styles.errorText}>
+          {'⚠ '}
+          {error}
+        </Text>
+      )}
+
+      <TouchableOpacity
+        style={[styles.button, styles.buttonPrimary, { marginTop: 8 }, isLoading && styles.buttonDisabled]}
+        onPress={() => {
+          void loginWithGoogle().then((success) => {
+            notify({
+              title: 'Login to Collab (Google)',
+              ok: success,
+              message: success ? 'Logged in successfully' : 'Cancelled or failed',
+            });
+          });
+        }}
+        disabled={isLoading}
+      >
+        <Text style={styles.buttonText}>
+          {isLoading ? '⏳ Logging in...' : '🔑 Login to Collab (Google)'}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[
+          styles.button,
+          { backgroundColor: '#000000' },
+          (isLoading || Platform.OS !== 'ios') && styles.buttonDisabled,
+        ]}
+        onPress={() => {
+          setAppleStatus('Logging in...');
+          void loginWithApple().then((success) => {
+            setAppleStatus(success ? '✅ Apple login success' : '❌ Cancelled or failed');
+            notify({
+              title: 'Apple Sign In',
+              ok: success,
+              message: success ? 'Logged in successfully' : 'Cancelled or failed',
+            });
+          });
+        }}
+        disabled={isLoading || Platform.OS !== 'ios'}
+      >
+        <Text style={styles.buttonText}> Apple Sign In (iOS only)</Text>
+      </TouchableOpacity>
+      {appleStatus != null && <Text style={styles.hintText}>{appleStatus}</Text>}
+
+      <TouchableOpacity
+        style={[styles.button, !isAuthenticated && styles.buttonDisabled]}
+        onPress={() => { void handlePushRingInfo(); }}
+        disabled={!isAuthenticated}
+      >
+        <Text style={styles.buttonText}>💍 Push Ring Info</Text>
+      </TouchableOpacity>
+      {pushRingStatus != null && <Text style={styles.hintText}>{pushRingStatus}</Text>}
+
+      <TouchableOpacity
+        style={[styles.button, !isAuthenticated && styles.buttonDisabled]}
+        onPress={() => { void handleFetchGlucose(); }}
+        disabled={!isAuthenticated}
+      >
+        <Text style={styles.buttonText}>🩸 Fetch Glucose Data</Text>
+      </TouchableOpacity>
+      {fetchGlucoseStatus != null && <Text style={styles.hintText}>{fetchGlucoseStatus}</Text>}
+
+      <TouchableOpacity
+        style={[styles.button, !isAuthenticated && styles.buttonDisabled]}
+        onPress={() => { void handleRegisterUser(); }}
+        disabled={!isAuthenticated}
+      >
+        <Text style={styles.buttonText}>👤 Register Ziva User</Text>
+      </TouchableOpacity>
+      {registerStatus != null && <Text style={styles.hintText}>{registerStatus}</Text>}
+    </View>
+  );
+}
+
+function WellnessGroupsDebugCard() {
+  const { isAuthenticated } = useCollabStore();
+  const groups = useWellnessGroups();
+
+  const [statusMsg, setStatusMsg] = React.useState<string | null>(null);
+  const [isBusy, setIsBusy] = React.useState(false);
+
+  const isApiErrorPayload = (result: unknown): result is {
+    success?: boolean;
+    error?: string;
+    errorType?: string;
+    details?: unknown;
+    message?: string;
+  } => {
+    return typeof result === 'object' && result !== null && 'success' in result;
+  };
+
+  const run = async (action: () => Promise<unknown>, label: string) => {
+    setIsBusy(true);
+    setStatusMsg(`${label}...`);
+    try {
+      const result = await action();
+      if (isApiErrorPayload(result) && result.success === false) {
+        const errorMessage = result.error ?? result.message ?? 'Request failed';
+        throw new Error(errorMessage);
+      }
+      setStatusMsg(`✅ ${label}: ${JSON.stringify(result).slice(0, 120)}`);
+      console.log(`[RingDebug] Wellness Groups ${label} result:`, result);
+      showMessage({
+        message: `Wellness Groups: ${label}`,
+        description: 'Success',
+        type: 'default',
+        duration: 3500,
+        backgroundColor: '#16A34A',
+        color: '#FFFFFF',
+      });
+    }
+    catch (err) {
+      setStatusMsg(`❌ ${label}: ${err instanceof Error ? err.message : String(err)}`);
+      console.warn(`[RingDebug] Wellness Groups ${label} error:`, err);
+      showMessage({
+        message: `Wellness Groups: ${label}`,
+        description: err instanceof Error ? err.message : String(err),
+        type: 'default',
+        duration: 6000,
+        backgroundColor: '#DC2626',
+        color: '#FFFFFF',
+      });
+    }
+    finally {
+      setIsBusy(false);
+    }
+  };
+
+  return (
+    <View style={styles.card}>
+      <Text style={styles.cardTitle}>👥 Wellness Groups</Text>
+
+      <View style={styles.buttonRow}>
+        <TouchableOpacity
+          style={[styles.smallButton, (!isAuthenticated || isBusy) && styles.buttonDisabled]}
+          onPress={() => { void run(() => getChannelsList({}), 'List Joined Channels'); }}
+          disabled={!isAuthenticated || isBusy}
+        >
+          <Text style={styles.smallButtonText}>📋 List</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.smallButton, (!isAuthenticated || isBusy) && styles.buttonDisabled]}
+          onPress={() => {
+            Alert.prompt('Create Group', 'Enter group name:', (name) => {
+              if (name)
+                void run(() => groups.createGroup({ name }), 'Create');
+            });
+          }}
+          disabled={!isAuthenticated || isBusy}
+        >
+          <Text style={styles.smallButtonText}>➕ Create</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.smallButton, (!isAuthenticated || isBusy) && styles.buttonDisabled]}
+          onPress={() => {
+            Alert.prompt('Join Group', 'Enter room ID:', (roomId) => {
+              if (roomId)
+                void run(() => groups.joinGroup({ roomId }), 'Join');
+            });
+          }}
+          disabled={!isAuthenticated || isBusy}
+        >
+          <Text style={styles.smallButtonText}>🚪 Join</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.smallButton, (!isAuthenticated || isBusy) && styles.buttonDisabled]}
+          onPress={() => {
+            Alert.prompt('Members', 'Enter room ID:', (roomId) => {
+              if (roomId)
+                void run(() => groups.getGroupMembers(roomId), 'Members');
+            });
+          }}
+          disabled={!isAuthenticated || isBusy}
+        >
+          <Text style={styles.smallButtonText}>👤 Members</Text>
+        </TouchableOpacity>
+      </View>
+
+      {statusMsg != null && (
+        <View style={[styles.logBox, { marginTop: 8 }]}>
+          <Text style={styles.logEntry} numberOfLines={5}>{statusMsg}</Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function RingDebugScreen() {
+  const {
+    bleStatus,
+    locationStatus,
+    isBluetoothEnabled,
+    loading: permissionsLoading,
+  } = usePermissions();
+
   const conn = useRingConnection();
   const sync = useRingSync();
   const timonDebug = useTimonDebug();
   const { logs, addLog } = useActivityLog();
   const rxdb = useRxDBStatus();
+  const collabStore = useCollabStore();
+  const collabSync = useCollabSync();
   const [adapter, setAdapter] = useState<JStyleAdapter | null>(null);
 
   const syncStatus = sync.isSuccess
@@ -706,9 +1004,8 @@ export default function RingDebugScreen() {
         await ringManager.initRingDocument();
         await ringManager.setBatteryLevel(battery);
         await ringManager.setDeviceVersion(version);
-        if (device.id) {
+        if (device.id)
           await ringManager.setMacAddress(device.id);
-        }
         addLog('💾 Persisted device info to RxDB');
         rxdb.refresh();
       }
@@ -747,12 +1044,23 @@ export default function RingDebugScreen() {
         + `SpO2:${sync.spo2Data.length} Temp:${sync.temperatureData.length}`,
       );
       rxdb.refresh();
+      if (collabStore.isAuthenticated) {
+        const ringId = rxdb.ringMeta?.macAddress ?? 'unknown';
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        collabSync.pushRingInfo(ringId, timezone).catch(console.error);
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sync.isSuccess]);
 
   // Actions
-  const handleScan = useCallback(() => {
+  const handleScan = useCallback(async () => {
+    addLog('🔑 Requesting Bluetooth permission...');
+    const granted = await blePermissions.requestBluetoothPermission();
+    if (!granted) {
+      addLog('❌ Bluetooth permission denied');
+      return;
+    }
     addLog('🔍 Starting scan...');
     conn.startScan();
   }, [conn, addLog]);
@@ -786,7 +1094,8 @@ export default function RingDebugScreen() {
   }, [adapter, sync, addLog]);
 
   const handleSyncSleep = useCallback(async () => {
-    if (adapter == null) return;
+    if (adapter == null)
+      return;
     addLog('🛏 Syncing sleep...');
     const res = await adapter.syncSleepData();
     addLog(
@@ -797,7 +1106,8 @@ export default function RingDebugScreen() {
   }, [adapter, addLog]);
 
   const handleSyncActivity = useCallback(async () => {
-    if (adapter == null) return;
+    if (adapter == null)
+      return;
     addLog('🏃 Syncing activity...');
     const res = await adapter.syncActivityData();
     addLog(
@@ -808,7 +1118,8 @@ export default function RingDebugScreen() {
   }, [adapter, addLog]);
 
   const handleSyncHR = useCallback(async () => {
-    if (adapter == null) return;
+    if (adapter == null)
+      return;
     addLog('❤️ Syncing heart rate...');
     const res = await adapter.syncHeartRateData();
     addLog(
@@ -817,6 +1128,10 @@ export default function RingDebugScreen() {
         : `❌ HR failed: ${res.error}`,
     );
   }, [adapter, addLog]);
+
+  if (!permissionsLoading && (bleStatus !== 'granted' || locationStatus !== 'granted' || !isBluetoothEnabled)) {
+    return <Redirect href={{ pathname: '/permissions', params: { returnTo: 'ring-debug' } }} />;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -967,6 +1282,14 @@ export default function RingDebugScreen() {
           onClearAll={timonDebug.clearAllTables}
           onRefresh={timonDebug.refreshLists}
         />
+
+        <Text style={styles.sectionHeader}>☁️ Collab Debug</Text>
+
+        <CollabDebugCard />
+
+        <Text style={styles.sectionHeader}>👥 Wellness Groups</Text>
+
+        <WellnessGroupsDebugCard />
 
         <Text style={styles.sectionHeader}>📋 Activity Log</Text>
 

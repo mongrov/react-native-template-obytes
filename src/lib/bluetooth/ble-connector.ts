@@ -28,11 +28,13 @@ class BleConnector {
    */
   public async connect(
     deviceId: string,
-    options: ConnectOptions = {}
+    options: ConnectOptions = {},
   ): Promise<ConnectionResult> {
-    if (!isPhysicalDevice) throw new Error('BLE not available on simulator');
+    if (!isPhysicalDevice)
+      throw new Error('BLE not available on simulator');
     const manager = getBleManager();
-    if (!manager) throw new Error('BLE Manager not available');
+    if (!manager)
+      throw new Error('BLE Manager not available');
 
     const {
       timeout = 15000,
@@ -46,7 +48,7 @@ class BleConnector {
     for (let attempt = 1; attempt <= retryCount; attempt++) {
       try {
         console.log(
-          `[BLE Connector] Connection attempt ${attempt}/${retryCount} to ${deviceId}`
+          `[BLE Connector] Connection attempt ${attempt}/${retryCount} to ${deviceId}`,
         );
 
         const device = await this.performConnection({
@@ -63,29 +65,33 @@ class BleConnector {
 
           this.connectedDevice = device;
           return { device, mtu };
-        } catch (setupError) {
+        }
+        catch (setupError) {
           console.error(
             `[BLE Connector] Post-connection setup failed for ${device.id}:`,
-            setupError
+            setupError,
           );
           // Explicitly disconnect to avoid ghost connections
           try {
             await device.cancelConnection();
-          } catch (disconnectError) {
+          }
+          catch (disconnectError) {
             console.warn(
               `[BLE Connector] Failed to cleanup ghost connection for ${device.id}:`,
-              disconnectError
+              disconnectError,
             );
           }
           throw setupError; // Re-throw to trigger retry loop
         }
-      } catch (error) {
+      }
+      catch (error) {
         lastError = error as Error;
         console.error(
           `[BLE Connector] Connection attempt ${attempt} failed:`,
-          error
+          error,
         );
-        if (attempt < retryCount) await this.delay(1000 * attempt);
+        if (attempt < retryCount)
+          await this.delay(1000 * attempt);
       }
     }
 
@@ -116,7 +122,8 @@ class BleConnector {
 
     try {
       return await Promise.race([connectionPromise, timeoutPromise]);
-    } finally {
+    }
+    finally {
       if (this.connectionTimeout) {
         clearTimeout(this.connectionTimeout);
         this.connectionTimeout = null;
@@ -126,16 +133,17 @@ class BleConnector {
 
   private async negotiateMtu(
     device: Device,
-    requestMtu: number
+    requestMtu: number,
   ): Promise<number> {
     try {
       const mtuResult = await device.requestMTU(requestMtu);
       console.log(`[BLE Connector] MTU negotiated: ${mtuResult.mtu}`);
       return mtuResult.mtu;
-    } catch (mtuError) {
+    }
+    catch (mtuError) {
       console.warn(
         '[BLE Connector] MTU negotiation failed, using default:',
-        mtuError
+        mtuError,
       );
       return 23;
     }
@@ -149,9 +157,11 @@ class BleConnector {
       try {
         await this.connectedDevice.cancelConnection();
         console.log('[BLE Connector] Disconnected');
-      } catch (error) {
+      }
+      catch (error) {
         console.error('[BLE Connector] Disconnect error:', error);
-      } finally {
+      }
+      finally {
         this.connectedDevice = null;
       }
     }
@@ -162,16 +172,19 @@ class BleConnector {
    */
   public async isConnected(deviceId?: string): Promise<boolean> {
     const manager = getBleManager();
-    if (!manager) return false;
+    if (!manager)
+      return false;
 
     const id = deviceId || this.connectedDevice?.id;
 
-    if (!id) return false;
+    if (!id)
+      return false;
 
     try {
       const connected = await manager.isDeviceConnected(id);
       return connected;
-    } catch {
+    }
+    catch {
       return false;
     }
   }
@@ -188,7 +201,7 @@ class BleConnector {
    */
   public onDisconnected(
     deviceId: string,
-    callback: (error: Error | null) => void
+    callback: (error: Error | null) => void,
   ): () => void {
     const manager = getBleManager();
     if (!manager) {
@@ -199,13 +212,13 @@ class BleConnector {
       deviceId,
       (error, device) => {
         console.log(
-          `[BLE Connector] Device disconnected: ${device?.name || deviceId}`
+          `[BLE Connector] Device disconnected: ${device?.name || deviceId}`,
         );
         if (this.connectedDevice?.id === deviceId) {
           this.connectedDevice = null;
         }
         callback(error);
-      }
+      },
     );
 
     return () => subscription.remove();

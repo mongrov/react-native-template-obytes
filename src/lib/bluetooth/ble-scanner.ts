@@ -3,26 +3,27 @@
  * Handles device scanning with Ziva ring name filtering
  */
 
-import { type Device, ScanMode } from 'react-native-ble-plx';
+import type { Device } from 'react-native-ble-plx';
+import { ScanMode } from 'react-native-ble-plx';
 
-import { getBleManager, isPhysicalDevice } from './ble-manager';
+import BleManagerSingleton, { getBleManager, isPhysicalDevice } from './ble-manager';
 
 // Regex pattern for Ziva ring device names
 export const ZIVA_RING_NAMES_REGEX = /^2301B|ZR100|X1B/;
 
-export interface ScannedDevice {
+export type ScannedDevice = {
   id: string;
   name: string | null;
   rssi: number | null;
   device: Device;
-}
+};
 
-export interface ScanOptions {
+export type ScanOptions = {
   timeout?: number;
   allowDuplicates?: boolean;
   onDeviceFound?: (device: ScannedDevice) => void;
   filterZivaOnly?: boolean;
-}
+};
 
 class BleScanner {
   private isScanning: boolean = false;
@@ -47,12 +48,10 @@ class BleScanner {
       return [];
     }
 
-    const manager = getBleManager();
-    if (!manager) {
+    if (!getBleManager()) {
       console.warn('[BLE Scanner] BLE Manager not available');
       return [];
     }
-
     if (this.isScanning) {
       console.log('[BLE Scanner] Already scanning, stopping previous scan...');
       this.stopScan();
@@ -65,30 +64,44 @@ class BleScanner {
       this.scanResolve = resolve;
       console.log('[BLE Scanner] Starting scan...');
 
-      manager.startDeviceScan(
-        null, // Scan for all UUIDs
-        {
-          scanMode: ScanMode.LowLatency,
-          allowDuplicates,
-        },
-        (error, device) => {
-          if (error) {
-            console.error('[BLE Scanner] Scan error:', error);
-            this.stopScan();
-            reject(error);
+      // Wait for Bluetooth to be fully powered on before scanning.
+      // The BleManager starts in 'Unknown' state momentarily — scanning
+      // during that window produces an immediate BleError.
+      BleManagerSingleton.getInstance()
+        .waitForPoweredOn(5000)
+        .then(() => {
+          const mgr = getBleManager();
+          if (!mgr) {
+            reject(new Error('BLE Manager not available after power-on'));
             return;
           }
 
-          if (device) {
-            this.handleScannedDevice(device, filterZivaOnly, onDeviceFound);
-          }
-        }
-      );
+          mgr.startDeviceScan(
+            null,
+            { scanMode: ScanMode.LowLatency, allowDuplicates },
+            (error, device) => {
+              if (error) {
+                console.error('[BLE Scanner] Scan error:', error);
+                this.stopScan();
+                reject(error);
+                return;
+              }
+              if (device) {
+                this.handleScannedDevice(device, filterZivaOnly, onDeviceFound);
+              }
+            },
+          );
 
-      // Set timeout to stop scanning
-      this.scanTimeout = setTimeout(() => {
-        this.stopScan();
-      }, timeout);
+          // Set timeout to stop scanning
+          this.scanTimeout = setTimeout(() => {
+            this.stopScan();
+          }, timeout);
+        })
+        .catch((err) => {
+          this.isScanning = false;
+          this.scanResolve = null;
+          reject(err);
+        });
     });
   }
 
@@ -128,7 +141,7 @@ class BleScanner {
   private handleScannedDevice(
     device: Device,
     filterZivaOnly: boolean,
-    onDeviceFound?: (device: ScannedDevice) => void
+    onDeviceFound?: (device: ScannedDevice) => void,
   ) {
     // Apply Ziva ring filter if enabled
     if (filterZivaOnly) {
@@ -149,7 +162,7 @@ class BleScanner {
     if (!this.discoveredDevices.has(device.id)) {
       this.discoveredDevices.set(device.id, scannedDevice);
       console.log(
-        `[BLE Scanner] Found device: ${scannedDevice.name} (${device.id})`
+        `[BLE Scanner] Found device: ${scannedDevice.name} (${device.id})`,
       );
 
       if (onDeviceFound) {

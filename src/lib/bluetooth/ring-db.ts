@@ -9,47 +9,40 @@
  */
 
 import type { RxJsonSchema } from 'rxdb';
+import { createDatabase, destroyDatabase } from '@mongrov/db';
+import { open } from 'react-native-nitro-sqlite';
 
-// TODO: re-enable once @mongrov/db is published with RxDBMigrationPlugin fix
-// import { createDatabase, destroyDatabase } from '@mongrov/db';
+import { addRxPlugin } from 'rxdb';
+import { getRxStorageSQLite } from 'rxdb-premium/plugins/storage-sqlite';
+import { RxDBUpdatePlugin } from 'rxdb/plugins/update';
 
-function getQuickSQLiteOpen(): any {
-  try {
-    // `react-native-quick-sqlite` is a native module.
-    // Avoid crashing the app at import-time when running in a runtime that
-    // doesn't include it (Expo Go / dev client not rebuilt).
+// Register external RxDB plugins
+addRxPlugin(RxDBUpdatePlugin);
 
-    return require('react-native-quick-sqlite').open;
-  } catch {
-    return () => {
-      throw new Error('[RingDB] Base quick-sqlite module not found. Rebuild the app/dev-client.');
-    };
-  }
+/**
+ * Custom RxDB SQLiteBasics wrapper for react-native-nitro-sqlite
+ */
+function getSQLiteBasicsNitroSQLite(openDB: any) {
+  return {
+    open: async (name: string) => {
+      return openDB({ name });
+    },
+    all: async (db: any, queryWithParams: { query: string; params: any[] }) => {
+      const result = await db.executeAsync(queryWithParams.query, queryWithParams.params);
+      return result.rows._array;
+    },
+    run: async (db: any, queryWithParams: { query: string; params: any[] }) => {
+      return db.executeAsync(queryWithParams.query, queryWithParams.params);
+    },
+    setPragma: async (db: any, key: string, value: string) => {
+      return db.executeAsync(`PRAGMA ${key} = ${value}`, []);
+    },
+    close: async (db: any) => {
+      db.close();
+    },
+    journalMode: '',
+  };
 }
-
-let rxdbPremiumSQLite: any = null;
-try {
-  // rxdb-premium is vendored in `vendor/` and may not have complete type exports.
-  // We load it dynamically so TypeScript can still pass in strict mode.
-  rxdbPremiumSQLite = require('rxdb-premium/plugins/storage-sqlite');
-}
-catch {
-  rxdbPremiumSQLite = null;
-}
-
-const getRxStorageSQLite: any = rxdbPremiumSQLite?.getRxStorageSQLite ?? (() => {
-  throw new Error('[RingDB] rxdb-premium/plugins/storage-sqlite not available');
-});
-const getSQLiteBasicsQuickSQLite: any = rxdbPremiumSQLite?.getSQLiteBasicsQuickSQLite ?? (() => {
-  throw new Error('[RingDB] rxdb-premium/plugins/storage-sqlite not available');
-});
-
-// ── Stubs (remove when @mongrov/db is fixed) ──────────────────────────────────
-const createDatabase: (...args: unknown[]) => Promise<never> = () =>
-  Promise.reject(new Error('[RingDB] @mongrov/db not available — stub active'));
-const destroyDatabase: (...args: unknown[]) => Promise<void> = () =>
-  Promise.resolve();
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type RingDocType = {
@@ -239,9 +232,9 @@ export async function initializeRingDatabase(): Promise<RingDb> {
 
   if (!_initPromise) {
     _initPromise = createDatabase({
-      name: 'mytestapp_ring',
+      name: 'zivaone_ring',
       storage: getRxStorageSQLite({
-        sqliteBasics: getSQLiteBasicsQuickSQLite(getQuickSQLiteOpen()),
+        sqliteBasics: getSQLiteBasicsNitroSQLite(open),
       }),
       collections: [
         { name: 'ring', schema: ringSchema },

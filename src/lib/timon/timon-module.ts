@@ -27,10 +27,13 @@ function requireTimonModule() {
 
 function parseJson(obj: any) {
   try {
-    if (!obj) throw new Error('Null response');
-    if (typeof obj !== 'string') throw new Error(obj);
+    if (!obj)
+      throw new Error('Null response');
+    if (typeof obj !== 'string')
+      throw new Error(obj);
     return JSON.parse(obj);
-  } catch {
+  }
+  catch {
     return {};
   }
 }
@@ -38,17 +41,18 @@ function parseJson(obj: any) {
 export async function initTimon(
   storagePath: string,
   bucketInterval: number,
-  userId: string
+  userId: string,
 ) {
   try {
     const mod = requireTimonModule();
     const result = await mod.initTimon(
       storagePath,
       bucketInterval,
-      userId
+      userId,
     );
     return result;
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'initTimon error', true, { storagePath });
     throw error;
   }
@@ -59,7 +63,7 @@ export async function initBucket(
   bucketName: string,
   accessKeyId: string,
   secretAccessKey: string,
-  bucketRegion: string
+  bucketRegion: string,
 ) {
   try {
     const mod = requireTimonModule();
@@ -68,10 +72,11 @@ export async function initBucket(
       bucketName,
       accessKeyId,
       secretAccessKey,
-      bucketRegion
+      bucketRegion,
     );
     return result;
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'initBucket error', true, { bucketEndPoint });
     throw error;
   }
@@ -82,20 +87,22 @@ export async function createDatabase(dbName: string) {
     const mod = requireTimonModule();
     const result = await mod.createDatabase(dbName);
     return parseJson(result);
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'createDatabase error', true, { dbName });
-    throw error;
+    return error;
   }
 }
 
-export async function createTable(dbName: string,  tableName: string,  schema: any) {
+export async function createTable(dbName: string, tableName: string, schema: any) {
   try {
     const mod = requireTimonModule();
     const result = await mod.createTable(dbName, tableName, schema);
     return parseJson(result);
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'createTable error', true, { dbName, tableName });
-    throw error;
+    return error;
   }
 }
 
@@ -105,9 +112,10 @@ export async function listDatabases() {
     const result = await mod.listDatabases();
     const jsonValue = parseJson(result)?.json_value;
     return jsonValue;
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'listDatabases error');
-    throw error;
+    return error;
   }
 }
 
@@ -117,17 +125,20 @@ export async function listTables(dbName: string) {
     const result = await mod.listTables(dbName);
     const json_value = parseJson(result).json_value;
     return json_value;
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'listTables error', true, { dbName });
-    throw error;
+    return error;
   }
 }
 
 export async function deleteDatabase(dbName: string) {
   try {
-    const result = await TimonModule.deleteDatabase(dbName);
+    const mod = requireTimonModule();
+    const result = await mod.deleteDatabase(dbName);
     return parseJson(result);
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'deleteDatabase error', true, { dbName });
     return error;
   }
@@ -135,15 +146,17 @@ export async function deleteDatabase(dbName: string) {
 
 export async function deleteTable(dbName: string, tableName: string) {
   try {
-    const result = await TimonModule.deleteTable(dbName, tableName);
+    const mod = requireTimonModule();
+    const result = await mod.deleteTable(dbName, tableName);
     return parseJson(result);
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'deleteTable error', true, { dbName, tableName });
     return error;
   }
 }
 
-export async function query(dbName: string,  sqlQuery: string,  limitPartitions: number = 0) {
+export async function query(dbName: string, sqlQuery: string, limitPartitions: number = 0) {
   try {
     const mod = requireTimonModule();
     const userNameId = currentDataViewUser?.current
@@ -155,85 +168,94 @@ export async function query(dbName: string,  sqlQuery: string,  limitPartitions:
         dbName,
         sqlQuery,
         userNameId,
-        limitPartitions
+        limitPartitions,
       );
-    } else {
+    }
+    else {
       result = await mod.query(dbName, sqlQuery, userNameId);
     }
 
     const jsonValue = parseJson(result).json_value;
     return jsonValue;
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'query error', true, { dbName, sqlQuery });
-    throw error;
+    return error;
   }
 }
 
-export async function insert(dbName: string,  tableName: string,  jsonData: object[]) {
+export async function insert(dbName: string, tableName: string, jsonData: object[]) {
   try {
     const mod = requireTimonModule();
     const result = await mod.insert(
       dbName,
       tableName,
-      JSON.stringify(jsonData)
+      JSON.stringify(jsonData),
     );
     return parseJson(result);
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'insert error', true, { dbName, tableName, jsonData });
-    throw error;
+    return error;
   }
 }
 
 export async function cloudSinkParquet(dbName: string, tableName: string) {
   try {
-    const result = await TimonModule.cloudSinkParquet(dbName, tableName);
+    const mod = requireTimonModule();
+    const result = await mod.cloudSinkParquet(dbName, tableName);
     const parsedResult = parseJson(result);
     const jsonValue = parsedResult.json_value;
     if (
       !jsonValue
       && parsedResult?.message?.includes(
-        'The difference between the request time and the current time is too large.'
+        'The difference between the request time and the current time is too large.',
       )
     ) {
       throw parsedResult?.message || 'Unknown error during cloudSinkParquet';
     }
     return jsonValue;
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'cloudSinkParquet error', true, { dbName, tableName });
     return error;
   }
 }
 
-export async function cloudFetchParquet(userName: string[],  dbName: string,  tableName: string,  dateRange: any) {
+export async function cloudFetchParquet(userName: string[], dbName: string, tableName: string, dateRange: any) {
   try {
-    const result = await TimonModule.cloudFetchParquet(
+    const mod = requireTimonModule();
+    const result = await mod.cloudFetchParquet(
       userName,
       dbName,
       tableName,
-      dateRange
+      dateRange,
     );
     const jsonValue = parseJson(result).json_value;
     return jsonValue;
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'cloudFetchParquet error', true, { dbName, tableName });
     return error;
   }
 }
 
-export async function cloudFetchParquetBatch(userNames: string[],  dbNames: string[],  tableNames: string[],  dateRange: any) {
+export async function cloudFetchParquetBatch(userNames: string[], dbNames: string[], tableNames: string[], dateRange: any) {
   try {
     const normalize = <T>(value: T) => (IS_IOS ? JSON.stringify(value) : value);
 
-    const result = await TimonModule.cloudFetchParquetBatch(
+    const mod = requireTimonModule();
+    const result = await mod.cloudFetchParquetBatch(
       normalize(userNames),
       normalize(dbNames),
       normalize(tableNames),
-      dateRange
+      dateRange,
     );
 
     const jsonValue = parseJson(result).json_value;
     return jsonValue;
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'cloudFetchParquetBatch error', true, {
       dbNames,
       tableNames,
@@ -242,17 +264,19 @@ export async function cloudFetchParquetBatch(userNames: string[],  dbNames: stri
   }
 }
 
-export async function cloudSyncParquet(userName: string,  dbName: string,  tableName: string,  dateRange: any) {
+export async function cloudSyncParquet(userName: string, dbName: string, tableName: string, dateRange: any) {
   try {
-    const result = await TimonModule.cloudSyncParquet(
+    const mod = requireTimonModule();
+    const result = await mod.cloudSyncParquet(
       userName,
       dbName,
       tableName,
-      JSON.stringify(dateRange)
+      JSON.stringify(dateRange),
     );
     const jsonValue = parseJson(result).json_value;
     return jsonValue;
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'cloudSyncParquet error', true, {
       userName,
       dbName,
@@ -262,17 +286,19 @@ export async function cloudSyncParquet(userName: string,  dbName: string,  table
   }
 }
 
-export async function queryBucket(userName: string,  dbName: string,  sqlQuery: string,  dateRange: any) {
+export async function queryBucket(userName: string, dbName: string, sqlQuery: string, dateRange: any) {
   try {
-    const result = await TimonModule.queryBucket(
+    const mod = requireTimonModule();
+    const result = await mod.queryBucket(
       userName,
       dbName,
       sqlQuery,
-      dateRange
+      dateRange,
     );
     const jsonValue = JSON.parse(result).json_value;
     return jsonValue;
-  } catch (error) {
+  }
+  catch (error) {
     handleCatch(error, 'queryBucket error', true, {
       userName,
       sqlQuery,
@@ -284,34 +310,40 @@ export async function queryBucket(userName: string,  dbName: string,  sqlQuery: 
 
 export async function getSyncMetadata(dbName: string, tableName: string) {
   try {
-    const result = await TimonModule.getSyncMetadata(dbName, tableName);
+    const mod = requireTimonModule();
+    const result = await mod.getSyncMetadata(dbName, tableName);
     return parseJson(result);
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error calling getSyncMetadata: ', error);
   }
 }
 
 export async function getAllSyncMetadata(dbName: string) {
   try {
-    const result = await TimonModule.getAllSyncMetadata(dbName);
+    const mod = requireTimonModule();
+    const result = await mod.getAllSyncMetadata(dbName);
     const parsedResult = parseJson(result).json_value;
     const tables = parsedResult?.tables;
     return tables;
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error calling getAllSyncMetadata: ', error);
   }
 }
 
-export async function preloadTables(dbName: string,  tableNames: string[],  userName: string | null) {
+export async function preloadTables(dbName: string, tableNames: string[], userName: string | null) {
   try {
-    const result = await TimonModule.nativePreloadTables(
+    const mod = requireTimonModule();
+    const result = await mod.nativePreloadTables(
       dbName,
       tableNames,
-      userName
+      userName,
     );
     const parsedResult = parseJson(result);
     return parsedResult;
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error calling preloadTables: ', error);
   }
 }

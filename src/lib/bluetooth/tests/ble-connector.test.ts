@@ -15,7 +15,6 @@ describe('bleConnector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     bleManagerModule = require('../ble-manager');
-
     mockDevice = {
       id: '123',
       name: 'ZR100',

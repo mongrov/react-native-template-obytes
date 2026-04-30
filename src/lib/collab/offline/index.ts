@@ -4,5 +4,5 @@
  * RxDB schemas and sync manager for offline-first messaging.
  */
 
-export * from './schemas'
-export * from './manager'
+export * from './manager';
+export * from './schemas';

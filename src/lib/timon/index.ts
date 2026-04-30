@@ -10,6 +10,55 @@
  *  - Debug hook
  */
 
+// ── Constants ─────────────────────────────────────────────────────────
+export {
+  ACTIVITY_DETAILS_COLLECTION,
+  BATTERY_COLLECTION,
+  BLOOD_GLUCOSE_COLLECTION,
+  DB_NAME,
+  DEFAULT_BUCKET_INTERVAL,
+  DEFAULT_TIMON_USER,
+  HEART_RATE_COLLECTION,
+  HRV_COLLECTION,
+  IS_ANDROID,
+  IS_IOS,
+  ROOT_DIRECTORY_NAME,
+  ROOT_DIRECTORY_PATH,
+  SLEEP_COLLECTION,
+  SPO2_COLLECTION,
+  TABLES_LIST,
+  TABLES_SCHEMA,
+  TEMPERATURE_COLLECTION,
+} from './constants';
+
+// ── Data helpers ──────────────────────────────────────────────────────
+export {
+  handleActivityDetailsData,
+  handleAutomaticSpo2Data,
+  handleBatteryLevel,
+  handleDetailSleepData,
+  handleHrvData,
+  handleStaticHR,
+  handleTemperatureData,
+  transformSleepData,
+} from './helpers';
+
+// ── Hooks ─────────────────────────────────────────────────────────────
+export { useTimonDebug } from './hooks/use-timon-debug';
+
+export type { TimonDebugLog, TimonDebugState } from './hooks/use-timon-debug';
+
+// ── Schemas ───────────────────────────────────────────────────────────
+export {
+  ActivityDetailsSchema,
+  BatterySchema,
+  BloodGlucoseSchema,
+  HeartRateSchema,
+  HRVSchema,
+  SleepSchema,
+  Spo2Schema,
+  TemperatureSchema,
+} from './schemas';
 // ── Native module bridge ──────────────────────────────────────────────
 export {
   cloudFetchParquet,
@@ -33,52 +82,6 @@ export {
   queryBucket,
   setCurrentDataViewUser,
 } from './timon-module';
-
-// ── Data helpers ──────────────────────────────────────────────────────
-export {
-  handleActivityDetailsData,
-  handleAutomaticSpo2Data,
-  handleBatteryLevel,
-  handleDetailSleepData,
-  handleHrvData,
-  handleStaticHR,
-  handleTemperatureData,
-  transformSleepData,
-} from './helpers';
-
-// ── Schemas ───────────────────────────────────────────────────────────
-export {
-  ActivityDetailsSchema,
-  BatterySchema,
-  BloodGlucoseSchema,
-  HeartRateSchema,
-  HRVSchema,
-  SleepSchema,
-  Spo2Schema,
-  TemperatureSchema,
-} from './schemas';
-
-// ── Constants ─────────────────────────────────────────────────────────
-export {
-  ACTIVITY_DETAILS_COLLECTION,
-  BATTERY_COLLECTION,
-  BLOOD_GLUCOSE_COLLECTION,
-  DB_NAME,
-  DEFAULT_BUCKET_INTERVAL,
-  DEFAULT_TIMON_USER,
-  HEART_RATE_COLLECTION,
-  HRV_COLLECTION,
-  IS_ANDROID,
-  IS_IOS,
-  ROOT_DIRECTORY_NAME,
-  ROOT_DIRECTORY_PATH,
-  SLEEP_COLLECTION,
-  SPO2_COLLECTION,
-  TABLES_LIST,
-  TABLES_SCHEMA,
-  TEMPERATURE_COLLECTION,
-} from './constants';
-
 // ── Types ─────────────────────────────────────────────────────────────
 export type {
   ActivityDataItem,
@@ -88,7 +91,3 @@ export type {
   SpO2DataItem,
   TemperatureDataItem,
 } from './types';
-
-// ── Hooks ─────────────────────────────────────────────────────────────
-export { useTimonDebug } from './hooks/use-timon-debug';
-export type { TimonDebugLog, TimonDebugState } from './hooks/use-timon-debug';
