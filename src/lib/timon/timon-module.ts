@@ -1,9 +1,4 @@
 /* eslint-disable max-params */
-/**
- * Timon Native Module Bridge
- * Wraps the native TimonModule (Rust-backed DB engine) exposed via React Native NativeModules.
- * All database operations go through this file.
- */
 import { NativeModules } from 'react-native';
 
 import { IS_ANDROID, IS_IOS } from './constants';
@@ -11,23 +6,19 @@ import { handleCatch } from './utils/handle-catch';
 
 const { TimonModule } = NativeModules;
 
-export const currentDataViewUser = { current: null as any };
+type User = { _id: string; username: string } | null;
+export const currentDataViewUser = { current: null as User };
 
-export function setCurrentDataViewUser(user: any) {
+export function setCurrentDataViewUser(user: User) {
   currentDataViewUser.current = user;
 }
 
-function parseJson(obj: any) {
-  try {
-    if (!obj)
-      throw new Error('Null response');
-    if (typeof obj !== 'string')
-      throw new Error(obj);
-    return JSON.parse(obj);
-  }
-  catch (_err) {
-    return {};
-  }
+function parseJson(obj: unknown): Record<string, unknown> {
+  if (obj == null)
+    throw new Error('Null response from native module');
+  if (typeof obj !== 'string')
+    throw new Error(`Expected string response, got ${typeof obj}`);
+  return JSON.parse(obj);
 }
 
 export async function initTimon(
@@ -36,12 +27,7 @@ export async function initTimon(
   userId: string,
 ) {
   try {
-    const result = await TimonModule.initTimon(
-      storagePath,
-      bucketInterval,
-      userId,
-    );
-    return result;
+    return await TimonModule.initTimon(storagePath, bucketInterval, userId);
   }
   catch (error) {
     handleCatch(error, 'initTimon error', true, { storagePath });
@@ -57,14 +43,13 @@ export async function initBucket(
   bucketRegion: string,
 ) {
   try {
-    const result = await TimonModule.initBucket(
+    return await TimonModule.initBucket(
       bucketEndPoint,
       bucketName,
       accessKeyId,
       secretAccessKey,
       bucketRegion,
     );
-    return result;
   }
   catch (error) {
     handleCatch(error, 'initBucket error', true, { bucketEndPoint });
@@ -74,252 +59,219 @@ export async function initBucket(
 
 export async function createDatabase(dbName: string) {
   try {
-    const result = await TimonModule.createDatabase(dbName);
-    return parseJson(result);
+    return parseJson(await TimonModule.createDatabase(dbName));
   }
   catch (error) {
     handleCatch(error, 'createDatabase error', true, { dbName });
-    return error;
+    throw error;
   }
 }
 
-export async function createTable(dbName: string, tableName: string, schema: any) {
+export async function createTable(dbName: string, tableName: string, schema: string) {
   try {
-    const result = await TimonModule.createTable(dbName, tableName, schema);
-    return parseJson(result);
+    return parseJson(await TimonModule.createTable(dbName, tableName, schema));
   }
   catch (error) {
     handleCatch(error, 'createTable error', true, { dbName, tableName });
-    return error;
+    throw error;
   }
 }
 
 export async function listDatabases() {
   try {
-    const result = await TimonModule.listDatabases();
-    const jsonValue = parseJson(result)?.json_value;
-    return jsonValue;
+    return parseJson(await TimonModule.listDatabases()).json_value as string[] | undefined;
   }
   catch (error) {
     handleCatch(error, 'listDatabases error');
-    return error;
+    throw error;
   }
 }
 
 export async function listTables(dbName: string) {
   try {
-    const result = await TimonModule.listTables(dbName);
-    const json_value = parseJson(result).json_value;
-    return json_value;
+    return parseJson(await TimonModule.listTables(dbName)).json_value as string[] | undefined;
   }
   catch (error) {
     handleCatch(error, 'listTables error', true, { dbName });
-    return error;
+    throw error;
   }
 }
 
 export async function deleteDatabase(dbName: string) {
   try {
-    // eslint-disable-next-line prefer-const
-    let result = await TimonModule.deleteDatabase(dbName);
+    const result = await TimonModule.deleteDatabase(dbName);
     return parseJson(result);
   }
   catch (error) {
     handleCatch(error, 'deleteDatabase error', true, { dbName });
-    return error;
+    throw error;
   }
 }
 
 export async function deleteTable(dbName: string, tableName: string) {
   try {
-    // eslint-disable-next-line prefer-const
-    let result = await TimonModule.deleteTable(dbName, tableName);
+    const result = await TimonModule.deleteTable(dbName, tableName);
     return parseJson(result);
   }
   catch (error) {
     handleCatch(error, 'deleteTable error', true, { dbName, tableName });
-    return error;
+    throw error;
   }
 }
 
 export async function query(dbName: string, sqlQuery: string, limitPartitions: number = 0) {
   try {
-    const userNameId = currentDataViewUser?.current
-      ? `${currentDataViewUser?.current?._id}_${currentDataViewUser?.current?.username}`
+    const userNameId = currentDataViewUser.current
+      ? `${currentDataViewUser.current._id}_${currentDataViewUser.current.username}`
       : null;
-    let result;
-    if (IS_ANDROID) {
-      result = await TimonModule.query(
-        dbName,
-        sqlQuery,
-        userNameId,
-        limitPartitions,
-      );
-    }
-    else {
-      result = await TimonModule.query(dbName, sqlQuery, userNameId);
-    }
 
-    const jsonValue = parseJson(result).json_value;
-    return jsonValue;
+    const result = IS_ANDROID
+      ? await TimonModule.query(dbName, sqlQuery, userNameId, limitPartitions)
+      : await TimonModule.query(dbName, sqlQuery, userNameId);
+
+    return parseJson(result).json_value;
   }
   catch (error) {
     handleCatch(error, 'query error', true, { dbName, sqlQuery });
-    return error;
+    throw error;
   }
 }
 
 export async function insert(dbName: string, tableName: string, jsonData: object[]) {
   try {
-    const result = await TimonModule.insert(
-      dbName,
-      tableName,
-      JSON.stringify(jsonData),
-    );
-    return parseJson(result);
+    return parseJson(await TimonModule.insert(dbName, tableName, JSON.stringify(jsonData)));
   }
   catch (error) {
     handleCatch(error, 'insert error', true, { dbName, tableName, jsonData });
-    return error;
+    throw error;
   }
 }
 
 export async function cloudSinkParquet(dbName: string, tableName: string) {
   try {
-    const result = await TimonModule.cloudSinkParquet(dbName, tableName);
-    const parsedResult = parseJson(result);
+    const parsedResult = parseJson(await TimonModule.cloudSinkParquet(dbName, tableName));
     const jsonValue = parsedResult.json_value;
     if (
       !jsonValue
-      && parsedResult?.message?.includes(
+      && (parsedResult?.message as string)?.includes(
         'The difference between the request time and the current time is too large.',
       )
     ) {
-      throw parsedResult?.message || 'Unknown error during cloudSinkParquet';
+      throw new Error((parsedResult?.message as string) ?? 'Unknown error during cloudSinkParquet');
     }
     return jsonValue;
   }
   catch (error) {
     handleCatch(error, 'cloudSinkParquet error', true, { dbName, tableName });
-    return error;
+    throw error;
   }
 }
 
-export async function cloudFetchParquet(userName: string[], dbName: string, tableName: string, dateRange: any) {
+export async function cloudFetchParquet(
+  userName: string[],
+  dbName: string,
+  tableName: string,
+  dateRange: unknown,
+) {
   try {
-    const result = await TimonModule.cloudFetchParquet(
-      userName,
-      dbName,
-      tableName,
-      dateRange,
-    );
-    const jsonValue = parseJson(result).json_value;
-    return jsonValue;
+    return parseJson(
+      await TimonModule.cloudFetchParquet(userName, dbName, tableName, dateRange),
+    ).json_value;
   }
   catch (error) {
     handleCatch(error, 'cloudFetchParquet error', true, { dbName, tableName });
-    return error;
+    throw error;
   }
 }
 
-export async function cloudFetchParquetBatch(userNames: string[], dbNames: string[], tableNames: string[], dateRange: any) {
+export async function cloudFetchParquetBatch(
+  userNames: string[],
+  dbNames: string[],
+  tableNames: string[],
+  dateRange: unknown,
+) {
   try {
     const normalize = <T>(value: T) => (IS_IOS ? JSON.stringify(value) : value);
 
-    const result = await TimonModule.cloudFetchParquetBatch(
-      normalize(userNames),
-      normalize(dbNames),
-      normalize(tableNames),
-      dateRange,
-    );
-
-    const jsonValue = parseJson(result).json_value;
-    return jsonValue;
+    return parseJson(
+      await TimonModule.cloudFetchParquetBatch(
+        normalize(userNames),
+        normalize(dbNames),
+        normalize(tableNames),
+        dateRange,
+      ),
+    ).json_value;
   }
   catch (error) {
-    handleCatch(error, 'cloudFetchParquetBatch error', true, {
-      dbNames,
-      tableNames,
-    });
-    return error;
+    handleCatch(error, 'cloudFetchParquetBatch error', true, { dbNames, tableNames });
+    throw error;
   }
 }
 
-export async function cloudSyncParquet(userName: string, dbName: string, tableName: string, dateRange: any) {
+export async function cloudSyncParquet(
+  userName: string,
+  dbName: string,
+  tableName: string,
+  dateRange: unknown,
+) {
   try {
-    const result = await TimonModule.cloudSyncParquet(
-      userName,
-      dbName,
-      tableName,
-      JSON.stringify(dateRange),
-    );
-    const jsonValue = parseJson(result).json_value;
-    return jsonValue;
+    return parseJson(
+      await TimonModule.cloudSyncParquet(userName, dbName, tableName, JSON.stringify(dateRange)),
+    ).json_value;
   }
   catch (error) {
-    handleCatch(error, 'cloudSyncParquet error', true, {
-      userName,
-      dbName,
-      tableName,
-    });
-    return error;
+    handleCatch(error, 'cloudSyncParquet error', true, { userName, dbName, tableName });
+    throw error;
   }
 }
 
-export async function queryBucket(userName: string, dbName: string, sqlQuery: string, dateRange: any) {
+export async function queryBucket(
+  userName: string,
+  dbName: string,
+  sqlQuery: string,
+  dateRange: unknown,
+) {
   try {
-    const result = await TimonModule.queryBucket(
-      userName,
-      dbName,
-      sqlQuery,
-      dateRange,
-    );
-    const jsonValue = JSON.parse(result).json_value;
-    return jsonValue;
+    return parseJson(
+      await TimonModule.queryBucket(userName, dbName, sqlQuery, dateRange),
+    ).json_value;
   }
   catch (error) {
-    handleCatch(error, 'queryBucket error', true, {
-      userName,
-      sqlQuery,
-      dateRange,
-    });
-    return error;
+    handleCatch(error, 'queryBucket error', true, { userName, sqlQuery, dateRange });
+    throw error;
   }
 }
 
 export async function getSyncMetadata(dbName: string, tableName: string) {
   try {
-    const result = await TimonModule.getSyncMetadata(dbName, tableName);
-    return parseJson(result);
+    return parseJson(await TimonModule.getSyncMetadata(dbName, tableName));
   }
   catch (error) {
-    console.error('Error calling getSyncMetadata: ', error);
+    handleCatch(error, 'getSyncMetadata error', true, { dbName, tableName });
   }
 }
 
 export async function getAllSyncMetadata(dbName: string) {
   try {
-    const result = await TimonModule.getAllSyncMetadata(dbName);
-    const parsedResult = parseJson(result).json_value;
-    const tables = parsedResult?.tables;
-    return tables;
+    const jsonValue = parseJson(await TimonModule.getAllSyncMetadata(dbName)).json_value as
+      | { tables?: unknown }
+      | undefined;
+    return jsonValue?.tables;
   }
   catch (error) {
-    console.error('Error calling getAllSyncMetadata: ', error);
+    handleCatch(error, 'getAllSyncMetadata error', true, { dbName });
   }
 }
 
-export async function preloadTables(dbName: string, tableNames: string[], userName: string | null) {
+export async function preloadTables(
+  dbName: string,
+  tableNames: string[],
+  userName: string | null,
+) {
   try {
-    const result = await TimonModule.nativePreloadTables(
-      dbName,
-      tableNames,
-      userName,
-    );
-    const parsedResult = parseJson(result);
-    return parsedResult;
+    return parseJson(await TimonModule.nativePreloadTables(dbName, tableNames, userName));
   }
   catch (error) {
-    console.error('Error calling preloadTables: ', error);
+    handleCatch(error, 'preloadTables error', true, { dbName, tableNames });
   }
 }

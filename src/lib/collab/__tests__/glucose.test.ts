@@ -13,7 +13,7 @@ jest.mock('../store', () => ({
 const mockZivaFetch = jest.requireMock('../client').zivaFetch as jest.Mock;
 const mockUseCollabStore = jest.requireMock('../store').useCollabStore as any;
 
-describe('Collab Glucose', () => {
+describe('collab Glucose', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -39,7 +39,7 @@ describe('Collab Glucose', () => {
           userId: 'user123',
           value: 120,
           time: '2026-04-24T10:30:00Z',
-        }
+        },
       );
     });
 
@@ -67,7 +67,7 @@ describe('Collab Glucose', () => {
           time: '2026-04-24T14:00:00Z',
           analyse: 'normal',
           notes: 'After meal',
-        })
+        }),
       );
     });
 
@@ -110,7 +110,7 @@ describe('Collab Glucose', () => {
       expect(mockZivaFetch).toHaveBeenCalledWith(
         'POST',
         '/ziva.glucose',
-        { userId: 'user123' }
+        { userId: 'user123' },
       );
     });
   });
@@ -139,7 +139,7 @@ describe('Collab Glucose', () => {
           endDate: '2026-04-24',
           asc: '-1',
           sortBy: 'day',
-        })
+        }),
       );
     });
 
@@ -157,7 +157,7 @@ describe('Collab Glucose', () => {
         undefined,
         expect.objectContaining({
           endDate: '',
-        })
+        }),
       );
     });
 
@@ -205,7 +205,7 @@ describe('Collab Glucose', () => {
       const { getGlucoseReports } = require('../glucose');
 
       await expect(
-        getGlucoseReports('2026-04-01', '2026-04-24')
+        getGlucoseReports('2026-04-01', '2026-04-24'),
       ).rejects.toThrow('Network failed');
     });
 
@@ -222,7 +222,7 @@ describe('Collab Glucose', () => {
         undefined,
         expect.objectContaining({
           userId: '',
-        })
+        }),
       );
     });
   });

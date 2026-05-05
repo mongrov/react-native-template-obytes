@@ -16,6 +16,8 @@ import type {
 
 import { assign, fromPromise, setup } from 'xstate';
 
+import { handleBatteryLevel } from '@/lib/timon/helpers';
+
 import { bleConnector } from '../ble-connector';
 import { ringManager } from '../ring-db';
 
@@ -88,10 +90,9 @@ const syncBattery = fromPromise<
   const battery = await input.adapter.getBatteryLevel();
   const version = await input.adapter.getDeviceVersion();
 
-  // Persist to RxDB
+  // Persist to RxDB + Timon DB
   try {
     await ringManager.initRingDocument();
-    await ringManager.setBatteryLevel(battery);
     await ringManager.setDeviceVersion(version);
 
     // Persist MAC address / device UUID
@@ -104,6 +105,8 @@ const syncBattery = fromPromise<
   catch (e) {
     console.warn('[RingSyncMachine] Failed to persist device info to RxDB:', e);
   }
+
+  await handleBatteryLevel(battery);
 
   return { battery, version };
 });
@@ -194,9 +197,15 @@ export const ringSyncMachine = setup({
           : [...context.completedStages, params.stage],
     }),
     setError: assign({
-      error: () => 'Sync failed',
+      error: ({ event }) => {
+        const err = (event as { error?: unknown }).error;
+        return err instanceof Error ? err.message : String(err ?? 'Sync failed');
+      },
       currentStage: 'error' as SyncStage,
     }),
+    cleanupAdapter: ({ context }) => {
+      context.adapter?.cleanup();
+    },
     setSuccess: assign({
       currentStage: 'success' as SyncStage,
       progress: 100,
@@ -226,7 +235,7 @@ export const ringSyncMachine = setup({
   on: {
     RESET: {
       target: '.idle',
-      actions: 'resetContext',
+      actions: ['cleanupAdapter', 'resetContext'],
     },
   },
   states: {
@@ -440,10 +449,11 @@ export const ringSyncMachine = setup({
     },
     success: {
       on: {
-        RESET: { target: 'idle', actions: 'resetContext' },
+        RESET: { target: 'idle', actions: ['cleanupAdapter', 'resetContext'] },
         START_SYNC: {
           target: 'handshaking',
           actions: [
+            'resetRunContext',
             'setAdapter',
             { type: 'setStage', params: { stage: 'handshaking' as SyncStage } },
           ],
@@ -455,11 +465,12 @@ export const ringSyncMachine = setup({
         RETRY: {
           target: 'handshaking',
           actions: [
+            'resetRunContext',
             'setAdapter',
             { type: 'setStage', params: { stage: 'handshaking' as SyncStage } },
           ],
         },
-        RESET: { target: 'idle', actions: 'resetContext' },
+        RESET: { target: 'idle', actions: ['cleanupAdapter', 'resetContext'] },
       },
     },
     aborting: {
@@ -467,8 +478,8 @@ export const ringSyncMachine = setup({
         id: 'abortSync',
         src: 'abortSync',
         input: ({ context }) => ({ adapter: context.adapter }),
-        onDone: { target: 'idle', actions: 'resetContext' },
-        onError: { target: 'idle', actions: 'resetContext' },
+        onDone: { target: 'idle', actions: ['cleanupAdapter', 'resetContext'] },
+        onError: { target: 'idle', actions: ['cleanupAdapter', 'resetContext'] },
       },
     },
   },

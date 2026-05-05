@@ -12,9 +12,9 @@ import { useBiometricLock } from '@/lib/auth';
 import { useColorScheme } from '@/lib/theme';
 import { cn } from '@/lib/utils';
 
-interface BiometricItemProps {
+type BiometricItemProps = {
   isLast?: boolean;
-}
+};
 
 export function BiometricItem({ isLast = false }: BiometricItemProps) {
   const { isAvailable, isEnabled, enable, disable, isAuthenticating } = useBiometricLock();
@@ -28,7 +28,8 @@ export function BiometricItem({ isLast = false }: BiometricItemProps) {
   const handleToggle = async (value: boolean) => {
     if (value) {
       await enable();
-    } else {
+    }
+    else {
       disable();
     }
   };
@@ -39,7 +40,7 @@ export function BiometricItem({ isLast = false }: BiometricItemProps) {
       className={cn(
         'flex-row items-center justify-between px-4 py-3',
         !isLast && 'border-b border-neutral-200 dark:border-neutral-700',
-        isAuthenticating && 'opacity-50'
+        isAuthenticating && 'opacity-50',
       )}
     >
       <View className="flex-1">

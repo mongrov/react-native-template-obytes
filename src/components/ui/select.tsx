@@ -100,7 +100,7 @@ export function Options({ ref, options, onSelect, value, testID }: OptionsProps 
         keyExtractor={keyExtractor}
         renderItem={renderSelectItem}
         testID={testID ? `${testID}-modal` : undefined}
-        estimatedItemSize={52}
+        {...(Platform.OS === 'web' ? { estimatedItemSize: 52 } : {})}
       />
     </Modal>
   );

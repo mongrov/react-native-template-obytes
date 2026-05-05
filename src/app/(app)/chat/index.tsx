@@ -1,9 +1,10 @@
+import type { PresenceState } from '@mongrov/collab';
 import type { Conversation } from '@mongrov/types';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, RefreshControl } from 'react-native';
 
+import { FlatList, RefreshControl } from 'react-native';
 import {
   ActivityIndicator,
   Pressable,
@@ -11,8 +12,8 @@ import {
   View,
 } from '@/components/ui';
 import { useCollab, useCollabConnected } from '@/lib/collab';
-import type { PresenceState } from '@mongrov/collab';
 
+// eslint-disable-next-line max-lines-per-function
 export default function ConversationsScreen() {
   const router = useRouter();
   const { adapter } = useCollab();
@@ -31,7 +32,8 @@ export default function ConversationsScreen() {
     }
 
     try {
-      if (!isRefresh) setLoading(true);
+      if (!isRefresh)
+        setLoading(true);
       setError(null);
       const result = await adapter.fetchConversations({ limit: 50 });
       // Sort by last message time, most recent first
@@ -41,27 +43,31 @@ export default function ConversationsScreen() {
         return bTime.localeCompare(aTime);
       });
       setConversations(sorted);
-    } catch (err) {
+    }
+    catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load conversations');
-    } finally {
+    }
+    finally {
       setLoading(false);
       setRefreshing(false);
     }
   }, [adapter, isConnected]);
 
   // Initial load
+
   useEffect(() => {
     loadConversations();
   }, [loadConversations]);
 
   // Subscribe to real-time conversation updates
   useEffect(() => {
-    if (!adapter || !isConnected) return;
+    if (!adapter || !isConnected)
+      return;
 
     // Handle conversation updates (new messages, etc.)
     const unsubConversationUpdated = adapter.on('conversation:updated', (updatedConv) => {
       setConversations((prev) => {
-        const index = prev.findIndex((c) => c.id === updatedConv.id);
+        const index = prev.findIndex(c => c.id === updatedConv.id);
         if (index >= 0) {
           const updated = [...prev];
           updated[index] = updatedConv;
@@ -79,7 +85,8 @@ export default function ConversationsScreen() {
     // Handle new conversations
     const unsubConversationJoined = adapter.on('conversation:joined', (newConv) => {
       setConversations((prev) => {
-        if (prev.some((c) => c.id === newConv.id)) return prev;
+        if (prev.some(c => c.id === newConv.id))
+          return prev;
         return [newConv, ...prev];
       });
     });
@@ -110,8 +117,20 @@ export default function ConversationsScreen() {
     (conversation: Conversation) => {
       router.push(`/chat/${conversation.id}`);
     },
-    [router]
+    [router],
   );
+
+  // Get presence status for a direct conversation
+  const getPresenceForConversation = useCallback((conv: Conversation): PresenceState | undefined => {
+    if (conv.type !== '1:1' || !conv.members)
+      return undefined;
+    // Find the other member in a direct conversation
+    const otherMember = conv.members.find(m => m.user.id !== adapter?.id);
+    if (otherMember) {
+      return userPresence.get(otherMember.user.id);
+    }
+    return undefined;
+  }, [adapter?.id, userPresence]);
 
   if (!isConnected) {
     return (
@@ -143,22 +162,11 @@ export default function ConversationsScreen() {
     );
   }
 
-  // Get presence status for a direct conversation
-  const getPresenceForConversation = useCallback((conv: Conversation): PresenceState | undefined => {
-    if (conv.type !== '1:1' || !conv.members) return undefined;
-    // Find the other member in a direct conversation
-    const otherMember = conv.members.find(m => m.user.id !== adapter?.id);
-    if (otherMember) {
-      return userPresence.get(otherMember.user.id);
-    }
-    return undefined;
-  }, [adapter?.id, userPresence]);
-
   return (
     <View className="flex-1">
       <FlatList
         data={conversations}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <ConversationItem
             conversation={item}
@@ -169,21 +177,21 @@ export default function ConversationsScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        ListEmptyComponent={
+        ListEmptyComponent={(
           <View className="flex-1 items-center justify-center p-8">
             <Text className="text-neutral-500">No conversations yet</Text>
           </View>
-        }
+        )}
       />
     </View>
   );
 }
 
-interface ConversationItemProps {
+type ConversationItemProps = {
   conversation: Conversation;
   onPress: (conversation: Conversation) => void;
   presenceStatus?: PresenceState;
-}
+};
 
 function ConversationItem({ conversation, onPress, presenceStatus }: ConversationItemProps) {
   const handlePress = useCallback(() => {
@@ -198,17 +206,17 @@ function ConversationItem({ conversation, onPress, presenceStatus }: Conversatio
   return (
     <Pressable
       onPress={handlePress}
-      className={`flex-row items-center border-b border-neutral-200 px-4 py-3 dark:border-neutral-700 ${hasUnread ? 'bg-primary-50 dark:bg-primary-950' : ''}`}
+      className={`flex-row items-center border-b border-neutral-200 px-4 py-3 dark:border-neutral-700 ${hasUnread ? 'dark:bg-primary-950 bg-primary-50' : ''}`}
     >
       {/* Avatar with online indicator */}
       <View className="relative">
-        <View className="h-12 w-12 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
+        <View className="size-12 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
           <Text className="text-lg font-semibold text-primary-600 dark:text-primary-300">
             {displayName.charAt(0).toUpperCase()}
           </Text>
         </View>
         {presenceStatus === 'online' && (
-          <View className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500 dark:border-neutral-900" />
+          <View className="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-white bg-green-500 dark:border-neutral-900" />
         )}
       </View>
 
@@ -250,10 +258,11 @@ function ConversationItem({ conversation, onPress, presenceStatus }: Conversatio
 
 // Get message preview text based on content type
 function getMessagePreview(message?: Conversation['lastMessage']): string {
-  if (!message) return 'No messages yet';
+  if (!message)
+    return 'No messages yet';
 
   const content = message.content;
-  switch (content.type) {
+  switch (content.type as string) {
     case 'text':
       return content.text || '';
     case 'image':
@@ -279,11 +288,14 @@ function formatTime(isoString: string): string {
 
   if (diffDays === 0) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  } else if (diffDays === 1) {
+  }
+  else if (diffDays === 1) {
     return 'Yesterday';
-  } else if (diffDays < 7) {
+  }
+  else if (diffDays < 7) {
     return date.toLocaleDateString([], { weekday: 'short' });
-  } else {
+  }
+  else {
     return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
   }
 }

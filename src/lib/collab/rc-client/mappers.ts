@@ -6,34 +6,36 @@
  */
 
 import type {
-  Message,
-  Participant,
-  MessageContent,
-  Reaction,
+  Attachment,
   Conversation,
   ConversationType,
   GroupState,
-  Attachment,
-} from '@mongrov/types'
+  Message,
+  MessageContent,
+  Participant,
+  Reaction,
+} from '@mongrov/types';
 
 import type {
+  RCAttachment,
+  RCFile,
   RCMessage,
-  RCUser,
   RCRoom,
   RCSubscription,
-  RCFile,
-  RCAttachment,
-} from './types'
+  RCUser,
+} from './types';
+
+const RC_EMOJI_COLON_RE = /:/g;
 
 // --- Participant Mapping ---
 
 export function toParticipant(u: RCUser): Participant {
   return {
     id: u._id,
-    name: u.name ?? u.username,
+    name: u.name ?? u.username ?? '',
     avatar: undefined, // RC avatar fetched separately via /avatar/{username}
     type: 'human',
-  }
+  };
 }
 
 // --- Message Content Mapping ---
@@ -41,59 +43,63 @@ export function toParticipant(u: RCUser): Participant {
 export function toMessageContent(rc: RCMessage): MessageContent {
   // File/media message
   if (rc.files?.length) {
-    const file = rc.files[0]
-    const type = getContentTypeFromMime(file.type)
+    const file = rc.files[0];
+    const type = getContentTypeFromMime(file.type);
     return {
       type,
       text: rc.msg || undefined,
       uri: file.url,
       fileName: file.name,
       mimeType: file.type,
-    }
+    };
   }
 
   // Attachment-based media (legacy RC format)
   if (rc.attachments?.length) {
-    const att = rc.attachments[0]
+    const att = rc.attachments[0];
     if (att.image_url) {
       return {
         type: 'image',
         text: rc.msg || undefined,
         uri: att.image_url,
-      }
+      };
     }
     if (att.audio_url) {
       return {
         type: 'audio',
         text: rc.msg || undefined,
         uri: att.audio_url,
-      }
+      };
     }
     if (att.video_url) {
       return {
         type: 'video',
         text: rc.msg || undefined,
         uri: att.video_url,
-      }
+      };
     }
   }
 
   // Text message (default)
-  return { type: 'text', text: rc.msg }
+  return { type: 'text', text: rc.msg };
 }
 
 function getContentTypeFromMime(mimeType: string | undefined): MessageContent['type'] {
-  if (!mimeType) return 'file'
-  if (mimeType.startsWith('image/')) return 'image'
-  if (mimeType.startsWith('audio/')) return 'audio'
-  if (mimeType.startsWith('video/')) return 'video'
-  return 'file'
+  if (!mimeType)
+    return 'file';
+  if (mimeType.startsWith('image/'))
+    return 'image';
+  if (mimeType.startsWith('audio/'))
+    return 'audio';
+  if (mimeType.startsWith('video/'))
+    return 'video';
+  return 'file';
 }
 
 // --- Attachments Mapping ---
 
 export function toAttachments(files: RCFile[] | undefined, attachments: RCAttachment[] | undefined): Attachment[] | undefined {
-  const result: Attachment[] = []
+  const result: Attachment[] = [];
 
   // Map RC files
   if (files?.length) {
@@ -105,14 +111,14 @@ export function toAttachments(files: RCFile[] | undefined, attachments: RCAttach
         fileName: file.name,
         mimeType: file.type,
         size: file.size,
-      })
+      });
     }
   }
 
   // Map RC attachments (legacy format)
   if (attachments?.length) {
     for (const att of attachments) {
-      const uri = att.image_url ?? att.audio_url ?? att.video_url ?? att.title_link
+      const uri = att.image_url ?? att.audio_url ?? att.video_url ?? att.title_link;
       if (uri) {
         result.push({
           id: uri, // No ID in RC attachments, use URI
@@ -120,34 +126,39 @@ export function toAttachments(files: RCFile[] | undefined, attachments: RCAttach
           uri,
           fileName: att.title ?? '',
           mimeType: att.type ?? '',
-        })
+        });
       }
     }
   }
 
-  return result.length > 0 ? result : undefined
+  return result.length > 0 ? result : undefined;
 }
 
 function getAttachmentType(mimeType: string | undefined): Attachment['type'] {
-  if (!mimeType) return 'file'
-  if (mimeType.startsWith('image/')) return 'image'
-  if (mimeType.startsWith('audio/')) return 'audio'
-  if (mimeType.startsWith('video/')) return 'video'
-  return 'file'
+  if (!mimeType)
+    return 'file';
+  if (mimeType.startsWith('image/'))
+    return 'image';
+  if (mimeType.startsWith('audio/'))
+    return 'audio';
+  if (mimeType.startsWith('video/'))
+    return 'video';
+  return 'file';
 }
 
 // --- Reactions Mapping ---
 
 export function toReactions(
-  rc: Record<string, { usernames: string[] }> | undefined
+  rc: Record<string, { usernames: string[] }> | undefined,
 ): Reaction[] | undefined {
-  if (!rc) return undefined
+  if (!rc)
+    return undefined;
 
   return Object.entries(rc).map(([emoji, { usernames }]) => ({
-    emoji: emoji.replace(/:/g, ''), // RC uses :emoji: format
+    emoji: emoji.replace(RC_EMOJI_COLON_RE, ''), // RC uses :emoji: format
     userIds: usernames, // RC uses usernames, not IDs
     count: usernames.length,
-  }))
+  }));
 }
 
 // --- Message Mapping ---
@@ -161,7 +172,7 @@ export function toMessage(rc: RCMessage): Message {
     parentId: rc.tmid,
     attachments: toAttachments(rc.files, rc.attachments),
     reactions: toReactions(rc.reactions),
-    mentions: rc.mentions?.map((m) => m._id),
+    mentions: rc.mentions?.map(m => m._id),
     deliveryStatus: 'delivered',
     streaming: false,
     editedAt: rc.editedAt,
@@ -184,27 +195,31 @@ export function toMessage(rc: RCMessage): Message {
       groupable: rc.groupable,
       hidden: rc._hidden,
     },
-  }
+  };
 }
 
 // --- Conversation Mapping ---
 
 function toConversationType(t: string): ConversationType {
-  if (t === 'd') return '1:1'
-  if (t === 'p') return 'group'
-  return 'channel'
+  if (t === 'd')
+    return '1:1';
+  if (t === 'p')
+    return 'group';
+  return 'channel';
 }
 
 function toGroupState(room: RCRoom): GroupState {
-  if (room.archived) return 'archived'
-  if (room.ro) return 'read-only'
-  return 'open'
+  if (room.archived)
+    return 'archived';
+  if (room.ro)
+    return 'read-only';
+  return 'open';
 }
 
 export function toConversation(
   room: RCRoom,
   sub?: RCSubscription,
-  baseUrl?: string
+  baseUrl?: string,
 ): Conversation {
   return {
     id: room._id,
@@ -221,35 +236,35 @@ export function toConversation(
     pinned: sub?.f ?? false,
     createdAt: room.ts ?? '',
     updatedAt: room.lm ?? room.ts ?? '',
-  }
+  };
 }
 
 // --- Reverse Mappers (for sending) ---
 
 export type RCSendMessagePayload = {
-  rid: string
-  msg: string
-  tmid?: string
-}
+  rid: string;
+  msg: string;
+  tmid?: string;
+};
 
 export function fromMessageContent(
   conversationId: string,
   content: MessageContent,
-  parentId?: string
+  parentId?: string,
 ): RCSendMessagePayload {
   return {
     rid: conversationId,
     msg: content.text ?? '',
     tmid: parentId,
-  }
+  };
 }
 
 // --- Utility Exports ---
 
 export function parseRCTimestamp(ts: string): Date {
-  return new Date(ts)
+  return new Date(ts);
 }
 
 export function formatRCTimestamp(date: Date): string {
-  return date.toISOString()
+  return date.toISOString();
 }

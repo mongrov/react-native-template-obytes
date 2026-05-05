@@ -17,25 +17,26 @@ try {
       shouldShowList: true,
     }),
   });
-} catch {
+}
+catch {
   // Notifications not available (Expo Go)
 }
 
-export interface NotificationData {
+export type NotificationData = {
   type?: 'chat' | 'message' | 'general';
   conversationId?: string;
   messageId?: string;
   [key: string]: unknown;
-}
+};
 
-export interface ScheduleNotificationOptions {
+export type ScheduleNotificationOptions = {
   title: string;
   body: string;
   data?: NotificationData;
   trigger?: Notifications.NotificationTriggerInput;
-}
+};
 
-export interface UseNotificationsResult {
+export type UseNotificationsResult = {
   /** The Expo push token for this device */
   expoPushToken: string | null;
   /** Whether notifications are enabled */
@@ -56,7 +57,7 @@ export interface UseNotificationsResult {
   getBadgeCount: () => Promise<number>;
   /** Set the badge count */
   setBadgeCount: (count: number) => Promise<void>;
-}
+};
 
 const PUSH_TOKEN_KEY = 'notifications.push_token';
 
@@ -65,7 +66,8 @@ async function isPhysicalDevice(): Promise<boolean> {
   try {
     const Device = await import('expo-device');
     return Device.isDevice;
-  } catch {
+  }
+  catch {
     return false;
   }
 }
@@ -96,12 +98,14 @@ async function registerForPushNotificationsAsync(): Promise<string | null> {
     });
 
     return tokenData.data;
-  } catch (err) {
+  }
+  catch (err) {
     console.error('Failed to get push token:', err);
     return null;
   }
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function useNotifications(): UseNotificationsResult {
   const router = useRouter();
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
@@ -120,12 +124,13 @@ export function useNotifications(): UseNotificationsResult {
       if (data?.type === 'chat' || data?.type === 'message') {
         if (data.conversationId) {
           router.push(`/chat/${data.conversationId}`);
-        } else {
+        }
+        else {
           router.push('/chat');
         }
       }
     },
-    [router]
+    [router],
   );
 
   // Check current permission status
@@ -134,7 +139,8 @@ export function useNotifications(): UseNotificationsResult {
       const { status } = await Notifications.getPermissionsAsync();
       setIsEnabled(status === 'granted');
       return status === 'granted';
-    } catch {
+    }
+    catch {
       return false;
     }
   }, []);
@@ -174,7 +180,8 @@ export function useNotifications(): UseNotificationsResult {
       }
 
       return true;
-    } catch (err) {
+    }
+    catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to request permission';
       setError(message);
       return false;
@@ -195,7 +202,7 @@ export function useNotifications(): UseNotificationsResult {
         trigger: trigger ?? null,
       });
     },
-    []
+    [],
   );
 
   // Cancel a specific notification
@@ -242,7 +249,8 @@ export function useNotifications(): UseNotificationsResult {
             storage.set(PUSH_TOKEN_KEY, token);
           }
         }
-      } catch {
+      }
+      catch {
         // Notifications not available
       }
 
@@ -257,14 +265,15 @@ export function useNotifications(): UseNotificationsResult {
         (notification) => {
           // You can handle foreground notifications here
           console.log('Notification received:', notification);
-        }
+        },
       );
 
       // Listen for notification taps
       responseListenerRef.current = Notifications.addNotificationResponseReceivedListener(
-        handleNotificationResponse
+        handleNotificationResponse,
       );
-    } catch {
+    }
+    catch {
       // Notifications not available
     }
 

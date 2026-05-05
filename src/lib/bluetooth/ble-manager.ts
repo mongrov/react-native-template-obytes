@@ -44,7 +44,8 @@ class BleManagerSingleton {
    * Check if Bluetooth is powered on
    */
   public async isBluetoothEnabled(): Promise<boolean> {
-    if (!this.manager) return false;
+    if (!this.manager)
+      return false;
     const state = await this.manager.state();
     return state === State.PoweredOn;
   }
@@ -76,11 +77,13 @@ class BleManagerSingleton {
    */
   public destroy(): void {
     this.manager?.destroy();
+    this.manager = null;
   }
 }
 
 // Export singleton getter
-export const getBleManager = () =>
-  BleManagerSingleton.getInstance().getManager();
+export function getBleManager() {
+  return BleManagerSingleton.getInstance().getManager();
+}
 
 export default BleManagerSingleton;

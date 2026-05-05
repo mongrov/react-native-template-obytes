@@ -1,5 +1,5 @@
-import { ringManager, initializeRingDatabase, getRingDatabase, closeRingDatabase } from '../ring-db';
-import { createDatabase, destroyDatabase } from '@mongrov/db';
+import { createDatabase } from '@mongrov/db';
+import { closeRingDatabase, getRingDatabase, initializeRingDatabase, ringManager } from '../ring-db';
 
 // Mock @mongrov/db
 jest.mock('@mongrov/db', () => ({
@@ -22,7 +22,7 @@ jest.mock('rxdb-premium/plugins/storage-sqlite', () => ({
   getRxStorageSQLite: jest.fn(),
 }));
 
-describe('RingDB', () => {
+describe('ringDB', () => {
   let mockDb: any;
   let mockRingCollection: any;
   let mockHeartRateCollection: any;
@@ -31,7 +31,6 @@ describe('RingDB', () => {
     jest.clearAllMocks();
 
     mockRingCollection = {
-
 
       findOne: jest.fn().mockReturnThis(),
       exec: jest.fn(),
@@ -57,7 +56,6 @@ describe('RingDB', () => {
   afterEach(async () => {
     await closeRingDatabase();
   });
-
 
   describe('initialization', () => {
     it('initializes the database once', async () => {
@@ -196,7 +194,7 @@ describe('RingDB', () => {
 
         const callback = jest.fn();
         const unsubscribe = ringManager.subscribeToRingChanges(callback);
-        
+
         expect(mockRingCollection.$.subscribe).toHaveBeenCalled();
         unsubscribe();
         expect(mockUnsubscribe).toHaveBeenCalled();
@@ -211,7 +209,7 @@ describe('RingDB', () => {
 
         const callback = jest.fn();
         ringManager.subscribeToRingChanges(callback);
-        
+
         capturedCallback({ toJSON: () => ({ _id: RING_DOC_ID, batteryLevel: 50 }) });
         expect(callback).toHaveBeenCalledWith({ _id: RING_DOC_ID, batteryLevel: 50 });
 
@@ -221,4 +219,3 @@ describe('RingDB', () => {
     });
   });
 });
-

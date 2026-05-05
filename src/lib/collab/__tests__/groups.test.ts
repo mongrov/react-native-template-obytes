@@ -4,7 +4,7 @@ jest.mock('../client', () => ({
 
 const mockZivaFetch = jest.requireMock('../client').zivaFetch as jest.Mock;
 
-describe('Collab Groups', () => {
+describe('collab Groups', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -24,7 +24,7 @@ describe('Collab Groups', () => {
       expect(mockZivaFetch).toHaveBeenCalledWith(
         'POST',
         '/channels.create',
-        channelData
+        channelData,
       );
     });
 
@@ -45,7 +45,7 @@ describe('Collab Groups', () => {
         expect.objectContaining({
           name: 'Read Only Group',
           readOnly: true,
-        })
+        }),
       );
     });
 
@@ -80,7 +80,7 @@ describe('Collab Groups', () => {
       expect(mockZivaFetch).toHaveBeenCalledWith(
         'POST',
         '/channels.join',
-        { roomId: 'room123' }
+        { roomId: 'room123' },
       );
     });
 
@@ -96,7 +96,7 @@ describe('Collab Groups', () => {
         expect.objectContaining({
           roomId: 'room123',
           joinCode: 'code456',
-        })
+        }),
       );
     });
 
@@ -109,7 +109,7 @@ describe('Collab Groups', () => {
       expect(mockZivaFetch).toHaveBeenCalledWith(
         'POST',
         '/channels.join',
-        { roomName: 'general' }
+        { roomName: 'general' },
       );
     });
 
@@ -148,7 +148,7 @@ describe('Collab Groups', () => {
         'GET',
         '/channels.members',
         undefined,
-        { roomId: 'channel123' }
+        { roomId: 'channel123' },
       );
     });
 
@@ -215,7 +215,7 @@ describe('Collab Groups', () => {
         undefined,
         {
           query: JSON.stringify(query),
-        }
+        },
       );
     });
 
@@ -286,7 +286,7 @@ describe('Collab Groups', () => {
         'GET',
         '/channels.history',
         undefined,
-        { roomId: 'room123' }
+        { roomId: 'room123' },
       );
     });
 
@@ -310,7 +310,7 @@ describe('Collab Groups', () => {
           roomId: 'room123',
           count: '50',
           offset: '100',
-        })
+        }),
       );
     });
 
@@ -359,7 +359,7 @@ describe('Collab Groups', () => {
       expect(mockZivaFetch).toHaveBeenCalledWith(
         'POST',
         '/chat.sendMessage',
-        { message: messageData }
+        { message: messageData },
       );
     });
 
@@ -427,7 +427,7 @@ describe('Collab Groups', () => {
             rid: 'room123',
             msg: '',
           },
-        })
+        }),
       );
     });
   });

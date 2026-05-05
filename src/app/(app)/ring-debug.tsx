@@ -36,8 +36,9 @@ import {
 import { usePermissions } from '@/lib/bluetooth/hooks/use-permissions';
 import { useRingConnection } from '@/lib/bluetooth/hooks/use-ring-connection';
 import { useRingSync } from '@/lib/bluetooth/hooks/use-ring-sync';
-import { getChannelsList } from '@/lib/collab/groups';
+import { useCollabMounted } from '@/lib/collab';
 
+import { getChannelsList } from '@/lib/collab/groups';
 import { useCollabSync } from '@/lib/collab/hooks/use-collab-sync';
 import { useSocialLogin } from '@/lib/collab/hooks/use-social-login';
 import { useWellnessGroups } from '@/lib/collab/hooks/use-wellness-groups';
@@ -952,6 +953,7 @@ export default function RingDebugScreen() {
   const timonDebug = useTimonDebug();
   const { logs, addLog } = useActivityLog();
   const rxdb = useRxDBStatus();
+  const collabMounted = useCollabMounted();
   const collabStore = useCollabStore();
   const collabSync = useCollabSync();
   const [adapter, setAdapter] = useState<JStyleAdapter | null>(null);
@@ -994,7 +996,9 @@ export default function RingDebugScreen() {
 
         addLog('🤝 Handshaking...');
         await newAdapter.handshake();
-        await new Promise<void>((resolve) => { setTimeout(resolve, 500); });
+        await new Promise<void>((resolve) => {
+          setTimeout(resolve, 500);
+        });
 
         const battery = await newAdapter.getBatteryLevel();
         const version = await newAdapter.getDeviceVersion();
@@ -1049,8 +1053,7 @@ export default function RingDebugScreen() {
         collabSync.pushRingInfo(ringId, timezone).catch(console.error);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sync.isSuccess]);
+  }, [sync.isSuccess, sync.heartRateData, sync.sleepData, sync.activityData, sync.hrvData, sync.spo2Data, sync.temperatureData, addLog, rxdb, collabStore, collabSync]);
 
   // Actions
   const handleScan = useCallback(async () => {
@@ -1284,7 +1287,7 @@ export default function RingDebugScreen() {
 
         <Text style={styles.sectionHeader}>☁️ Collab Debug</Text>
 
-        <CollabDebugCard />
+        {collabMounted && <CollabDebugCard />}
 
         <Text style={styles.sectionHeader}>👥 Wellness Groups</Text>
 

@@ -10,7 +10,7 @@ jest.mock('../adapters/rocketchat', () => ({
   })),
 }));
 
-describe('Collab Config', () => {
+describe('collab Config', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -80,7 +80,7 @@ describe('Collab Config', () => {
     });
   });
 
-  describe('Constants', () => {
+  describe('constants', () => {
     it('exports auth type constants', () => {
       const { APPLE, GOOGLE, COLLAB_LOGIN, GOOGLE_LOGIN, APPLE_LOGIN } = require('../config');
 

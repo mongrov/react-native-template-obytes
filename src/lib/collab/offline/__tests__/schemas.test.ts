@@ -123,7 +123,7 @@ describe('syncCheckpointSchema', () => {
 
 // ─── Schema Type Tests ──────────────────────────────────────────────────────
 
-describe('Schema properties', () => {
+describe('schema properties', () => {
   it('messageSchema should have type property', () => {
     expect(messageSchema).toHaveProperty('type');
   });
@@ -198,7 +198,7 @@ describe('conversationSchema extended properties', () => {
 
 // ─── Schema Validity Tests ──────────────────────────────────────────────
 
-describe('Schema validity', () => {
+describe('schema validity', () => {
   it('messageSchema should have type object', () => {
     expect(messageSchema.type).toBe('object');
   });

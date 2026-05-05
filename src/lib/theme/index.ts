@@ -28,7 +28,8 @@ function getInitialScheme(): ColorScheme {
         _initialScheme = stored;
       }
       Uniwind.setTheme(_initialScheme);
-    } catch {
+    }
+    catch {
       // Native module not ready yet, use default
       _initialScheme = 'system';
     }
@@ -41,12 +42,13 @@ type ThemeState = {
   setColorScheme: (scheme: ColorScheme) => void;
 };
 
-const useThemeStore = create<ThemeState>((set) => ({
+const useThemeStore = create<ThemeState>(set => ({
   colorScheme: getInitialScheme(),
   setColorScheme: (scheme: ColorScheme) => {
     try {
       storage.set(STORAGE_KEY, scheme);
-    } catch {
+    }
+    catch {
       // Ignore storage errors
     }
     Uniwind.setTheme(scheme);

@@ -15,7 +15,7 @@ import type {
   TemperatureDataItem,
 } from '../types';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   DB_NAME,
   DEFAULT_BUCKET_INTERVAL,
@@ -74,14 +74,15 @@ export function useTimonDebug() {
     isBusy: false,
   });
 
-  let logId = 0;
+  const logIdRef = useRef(0);
+
   const addLog = useCallback(
     (action: string, success: boolean, message: string) => {
       setState(s => ({
         ...s,
         logs: [
           {
-            id: ++logId,
+            id: ++logIdRef.current,
             timestamp: new Date(),
             action,
             success,
@@ -91,7 +92,7 @@ export function useTimonDebug() {
         ].slice(0, 50),
       }));
     },
-    [logId],
+    [],
   );
 
   // ── Initialize Timon + create default DB + tables ──
@@ -235,7 +236,7 @@ export function useTimonDebug() {
           addLog('insert', true, `Activity: ${activityDocs.length} rows`);
         }
 
-        addLog('persistSync', true, '✅ Real ring data persisted to Timon');
+        addLog('persistSync', true, 'Real ring data persisted to Timon');
       }
       catch (e) {
         addLog('persistSync', false, String(e));
@@ -250,6 +251,10 @@ export function useTimonDebug() {
   // ── Query a table ──
   const queryTable = useCallback(
     async (tableName: string) => {
+      if (!TABLES_LIST.includes(tableName)) {
+        addLog('query', false, `Unknown table: ${tableName}`);
+        return;
+      }
       try {
         const result: any = await query(
           DB_NAME,
@@ -257,9 +262,6 @@ export function useTimonDebug() {
         );
         if (result === null || result === undefined) {
           throw new Error('Table empty or query failed (Rust returned null)');
-        }
-        if (result instanceof Error) {
-          throw result;
         }
         const resultStr = JSON.stringify(result);
         addLog('query', true, `${tableName}: ${resultStr}`);
@@ -301,6 +303,8 @@ export function useTimonDebug() {
           JSON.stringify(TABLES_SCHEMA[table as keyof typeof TABLES_SCHEMA]),
         );
       }
+      const finalTables = (await listTables(DB_NAME)) ?? [];
+      setState(s => ({ ...s, tables: finalTables }));
       addLog('clearAll', true, `All ${TABLES_LIST.length} tables cleared`);
     }
     catch (e) {

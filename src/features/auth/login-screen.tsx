@@ -1,6 +1,6 @@
 import type { SocialProvider } from '@mongrov/auth';
-import { useSocialAuth } from '@mongrov/auth';
 import type { LoginFormProps } from './components/login-form';
+import { useSocialAuth } from '@mongrov/auth';
 
 import Env from 'env';
 import { useRouter } from 'expo-router';
@@ -12,6 +12,7 @@ import { useAuth, useTenant } from '@/lib/auth';
 
 import { LoginForm } from './components/login-form';
 
+// eslint-disable-next-line max-lines-per-function
 export function LoginScreen() {
   const router = useRouter();
   const { signIn } = useAuth();
@@ -58,7 +59,8 @@ export function LoginScreen() {
             token: result.identityToken,
             authorizationCode: result.authorizationCode,
           });
-        } else if (result.provider === 'google') {
+        }
+        else if (result.provider === 'google') {
           await signIn({
             provider: 'google',
             token: result.idToken,

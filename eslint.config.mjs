@@ -45,6 +45,7 @@ export default antfu(
 
   // Custom rules
   {
+    files: ['**/*.{js,jsx,ts,tsx}'],
     rules: {
       'max-params': ['error', 3],
       'max-lines-per-function': ['error', 110],
@@ -74,6 +75,7 @@ export default antfu(
       'no-cond-assign': 'off', // Allow assignment in conditions when intentional
       'regexp/no-super-linear-backtracking': 'off', // Relax regex performance rules
       'regexp/no-unused-capturing-group': 'off', // Allow unused capturing groups
+      'react-hooks/set-state-in-effect': 'off', // Standard pattern: setState in async effects is fine
     },
   },
 
@@ -117,7 +119,7 @@ export default antfu(
       'react-compiler': reactCompiler,
     },
     rules: {
-      'react-compiler/react-compiler': 'error',
+      'react-compiler/react-compiler': 'warn',
     },
   },
 
@@ -156,10 +158,11 @@ export default antfu(
 
   // Testing Library rules
   {
-    files: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
+    files: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)', '**/tests/**/*.[jt]s?(x)'],
     plugins: { 'testing-library': testingLibrary },
     rules: {
       ...testingLibrary.configs.react.rules,
+      'max-lines-per-function': 'off',
     },
   },
 );

@@ -22,19 +22,19 @@ jest.mock('react-native', () => ({
   },
 }));
 
-global.fetch = jest.fn();
+globalThis.fetch = jest.fn();
 
 const mockUseCollabStore = jest.requireMock('../store').useCollabStore as any;
 
-describe('Collab Client', () => {
+describe('collab Client', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (global.fetch as jest.Mock).mockClear();
+    (globalThis.fetch as jest.Mock).mockClear();
   });
 
   describe('zivaFetchUnauth', () => {
     it('makes POST request with body', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         json: jest.fn().mockResolvedValue({ success: true, data: 'response' }),
       });
 
@@ -45,7 +45,7 @@ describe('Collab Client', () => {
       });
 
       expect(result).toEqual({ success: true, data: 'response' });
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         'http://rc.test/api/v1/login',
         expect.objectContaining({
           method: 'POST',
@@ -56,39 +56,39 @@ describe('Collab Client', () => {
             user: 'testuser',
             password: 'password123',
           }),
-        })
+        }),
       );
     });
 
     it('makes GET request without body', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         json: jest.fn().mockResolvedValue({ success: true }),
       });
 
       const { zivaFetchUnauth } = require('../client');
       await zivaFetchUnauth('GET', '/public');
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         'http://rc.test/api/v1/public',
         expect.objectContaining({
           method: 'GET',
           body: undefined,
-        })
+        }),
       );
     });
 
     it('includes default headers', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         json: jest.fn().mockResolvedValue({}),
       });
 
       const { zivaFetchUnauth } = require('../client');
       await zivaFetchUnauth('GET', '/public');
 
-      const call = (global.fetch as jest.Mock).mock.calls[0];
+      const call = (globalThis.fetch as jest.Mock).mock.calls[0];
       const headers = call[1].headers;
 
-      expect(headers['Accept']).toBe('application/json');
+      expect(headers.Accept).toBe('application/json');
       expect(headers['Content-Type']).toBe('application/json');
       expect(headers['User-Agent']).toBe('ios');
     });
@@ -96,14 +96,14 @@ describe('Collab Client', () => {
 
   describe('zivaFetch', () => {
     it('makes authenticated POST request with auth headers', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         json: jest.fn().mockResolvedValue({ success: true }),
       });
 
       const { zivaFetch } = require('../client');
       await zivaFetch('POST', '/users.update', { name: 'New Name' });
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         'http://rc.test/api/v1/users.update',
         expect.objectContaining({
           method: 'POST',
@@ -111,7 +111,7 @@ describe('Collab Client', () => {
             'X-Auth-Token': 'token123',
             'X-User-Id': 'user456',
           }),
-        })
+        }),
       );
     });
 
@@ -123,7 +123,7 @@ describe('Collab Client', () => {
 
       const { zivaFetch } = require('../client');
       await expect(zivaFetch('POST', '/users.update', {})).rejects.toThrow(
-        'Not authenticated with collab'
+        'Not authenticated with collab',
       );
     });
 
@@ -135,12 +135,12 @@ describe('Collab Client', () => {
 
       const { zivaFetch } = require('../client');
       await expect(zivaFetch('POST', '/users.update', {})).rejects.toThrow(
-        'Not authenticated with collab'
+        'Not authenticated with collab',
       );
     });
 
     it('adds params to GET request as query string', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         json: jest.fn().mockResolvedValue({ success: true }),
       });
 
@@ -149,13 +149,13 @@ describe('Collab Client', () => {
         query: '{"test":"value"}',
       });
 
-      const url = (global.fetch as jest.Mock).mock.calls[0][0];
+      const url = (globalThis.fetch as jest.Mock).mock.calls[0][0];
       expect(url).toContain('?');
       expect(url).toContain('query=');
     });
 
     it('does not add params to POST request body', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         json: jest.fn().mockResolvedValue({ success: true }),
       });
 
@@ -164,7 +164,7 @@ describe('Collab Client', () => {
         query: 'shouldBeIgnored',
       });
 
-      const call = (global.fetch as jest.Mock).mock.calls[0];
+      const call = (globalThis.fetch as jest.Mock).mock.calls[0];
       const url = call[0];
       const body = call[1].body;
 
@@ -180,16 +180,16 @@ describe('Collab Client', () => {
     });
   });
 
-  describe('Base URL construction', () => {
+  describe('base URL construction', () => {
     it('constructs correct base URL from config', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         json: jest.fn().mockResolvedValue({}),
       });
 
       const { zivaFetchUnauth } = require('../client');
       await zivaFetchUnauth('GET', '/test');
 
-      const url = (global.fetch as jest.Mock).mock.calls[0][0];
+      const url = (globalThis.fetch as jest.Mock).mock.calls[0][0];
       expect(url).toBe('http://rc.test/api/v1/test');
     });
   });

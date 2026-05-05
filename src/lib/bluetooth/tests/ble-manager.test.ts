@@ -18,12 +18,10 @@ jest.mock('react-native-ble-plx', () => {
   };
 });
 
-describe('BleManager', () => {
+describe('bleManager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-
 
   afterEach(() => {
     jest.useRealTimers();

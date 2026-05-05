@@ -88,7 +88,7 @@ export async function getChannelMembers(channelId: string): Promise<ChannelMembe
  * List channels by query — ported from rc/index.js L3432
  * GET /api/v1/channels.list
  */
-export async function getChannelsList(query: object): Promise<ChannelsListResponse> {
+export async function getChannelsList(query: Record<string, unknown>): Promise<ChannelsListResponse> {
   return zivaFetch<ChannelsListResponse>('GET', '/channels.list', undefined, {
     // zivaFetch() already uses URLSearchParams, so avoid pre-encoding.
     query: JSON.stringify(query),

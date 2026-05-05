@@ -101,7 +101,7 @@ export function useSocialAuth(
   const scopes = config.scopes ?? DEFAULT_SCOPES[provider];
 
   const redirectUri
-    = config.redirectUri ?? AuthSession.makeRedirectUri({ scheme: 'obytesapp' });
+    = config.redirectUri ?? AuthSession.makeRedirectUri({ scheme: 'obytesApp' });
 
   const [request, response, promptAsyncInternal] = AuthSession.useAuthRequest(
     {
@@ -112,21 +112,6 @@ export function useSocialAuth(
     },
     discovery,
   );
-
-  // Handle the OAuth response
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { code } = response.params;
-      handleAuthCode(code);
-    }
-    else if (response?.type === 'error') {
-      setError(response.error?.message ?? 'Authentication failed');
-      setLoading(false);
-    }
-    else if (response?.type === 'cancel' || response?.type === 'dismiss') {
-      setLoading(false);
-    }
-  }, [response]);
 
   const handleAuthCode = async (code: string) => {
     try {
@@ -146,6 +131,22 @@ export function useSocialAuth(
       setLoading(false);
     }
   };
+
+  // Handle the OAuth response
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { code } = response.params;
+      handleAuthCode(code);
+    }
+    else if (response?.type === 'error') {
+      setError(response.error?.message ?? 'Authentication failed');
+      setLoading(false);
+    }
+    else if (response?.type === 'cancel' || response?.type === 'dismiss') {
+      setLoading(false);
+    }
+  }, [response]);
 
   const promptAsync = useCallback(async () => {
     if (!request) {
@@ -184,7 +185,7 @@ export function useSSOAuth(config: SSOConfig): OAuthResult {
   const [discovery, setDiscovery] = useState<AuthSession.DiscoveryDocument | null>(null);
 
   const scopes = config.scopes ?? ['openid', 'profile', 'email'];
-  const redirectUri = AuthSession.makeRedirectUri({ scheme: 'obytesapp' });
+  const redirectUri = AuthSession.makeRedirectUri({ scheme: 'obytesApp' });
 
   // Fetch OIDC discovery document
   useEffect(() => {
@@ -205,21 +206,6 @@ export function useSSOAuth(config: SSOConfig): OAuthResult {
     discovery,
   );
 
-  // Handle the OAuth response
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { code } = response.params;
-      handleAuthCode(code);
-    }
-    else if (response?.type === 'error') {
-      setError(response.error?.message ?? 'SSO authentication failed');
-      setLoading(false);
-    }
-    else if (response?.type === 'cancel' || response?.type === 'dismiss') {
-      setLoading(false);
-    }
-  }, [response]);
-
   const handleAuthCode = async (code: string) => {
     try {
       // Exchange code for tokens via your backend
@@ -238,6 +224,22 @@ export function useSSOAuth(config: SSOConfig): OAuthResult {
       setLoading(false);
     }
   };
+
+  // Handle the OAuth response
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { code } = response.params;
+      handleAuthCode(code);
+    }
+    else if (response?.type === 'error') {
+      setError(response.error?.message ?? 'SSO authentication failed');
+      setLoading(false);
+    }
+    else if (response?.type === 'cancel' || response?.type === 'dismiss') {
+      setLoading(false);
+    }
+  }, [response]);
 
   const promptAsync = useCallback(async () => {
     if (!request || !discovery) {

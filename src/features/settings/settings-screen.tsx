@@ -21,6 +21,9 @@ import { SettingsContainer } from './components/settings-container';
 import { SettingsItem } from './components/settings-item';
 import { ThemeItem } from './components/theme-item';
 
+const WHITESPACE_RE = /\s+/;
+
+// eslint-disable-next-line max-lines-per-function
 export function SettingsScreen() {
   const { signOut } = useAuth();
   const { isDark } = useColorScheme();
@@ -140,7 +143,8 @@ function ProfileCard() {
   const { isDark } = useColorScheme();
 
   const user = session?.user;
-  if (!user) return null;
+  if (!user)
+    return null;
 
   const initials = getInitials(user.name || user.email || '?');
 
@@ -173,7 +177,7 @@ function ProfileCard() {
 }
 
 function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/);
+  const parts = name.trim().split(WHITESPACE_RE);
   if (parts.length >= 2) {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }

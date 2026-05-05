@@ -11,16 +11,25 @@
  */
 
 import type { Conversation, Message } from '@mongrov/types';
+import type { RxCollection, RxDocument } from 'rxdb';
 import type { RocketChatAdapter, SendMessageParams } from '../adapters/rocketchat';
-import type { ConversationDoc, MessageDoc } from './schemas';
+import type { ConversationDoc, MessageDoc, SyncCheckpointDoc } from './schemas';
+
+import { useCollabStore } from '../store';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
+
+export type CollabDatabase = {
+  messages: RxCollection<MessageDoc>;
+  conversations: RxCollection<ConversationDoc>;
+  syncCheckpoints: RxCollection<SyncCheckpointDoc>;
+};
 
 export type OfflineManagerConfig = {
   /** RocketChat adapter instance */
   adapter: RocketChatAdapter;
   /** RxDB database instance */
-  db: any;
+  db: CollabDatabase;
   /** Optional logger */
   logger?: OfflineLogger;
 };
@@ -136,7 +145,7 @@ function docToConversation(doc: ConversationDoc): Conversation {
 
 export class OfflineManager {
   private adapter: RocketChatAdapter;
-  private db: any;
+  private db: CollabDatabase;
   private logger?: OfflineLogger;
   private isOnline = false;
 
@@ -177,11 +186,13 @@ export class OfflineManager {
     const localId = `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const now = new Date().toISOString();
 
+    const currentUserId = useCollabStore.getState().userId ?? '';
+
     // Create optimistic message
     const optimisticDoc: MessageDoc = {
       id: localId,
       conversationId,
-      senderId: '', // Will be filled by adapter
+      senderId: currentUserId,
       senderName: 'Me',
       senderType: 'human',
       contentType: content.type,
@@ -248,7 +259,7 @@ export class OfflineManager {
       const result = await this.adapter.sendMessage({
         conversationId: doc.conversationId,
         content: {
-          type: doc.contentType,
+          type: doc.contentType as SendMessageParams['content']['type'],
           text: doc.contentText,
           uri: doc.contentUri,
           mimeType: doc.contentMimeType,
@@ -353,6 +364,7 @@ export class OfflineManager {
 
   /**
    * Sync messages for a conversation using high-water mark.
+   * Iterative pagination with a 20-page safety cap.
    */
   async syncMessages(conversationId: string): Promise<void> {
     if (!this.isOnline) {
@@ -360,50 +372,58 @@ export class OfflineManager {
       return;
     }
 
-    try {
-      // Get high-water mark (last synced updatedAt)
-      const checkpoint = await this.db.syncCheckpoints.findOne(conversationId).exec();
-      const lastUpdatedAt = checkpoint?.updatedAt ?? '1970-01-01T00:00:00.000Z';
+    const MAX_PAGES = 20;
+    let page = 0;
+    let hasMore = true;
 
-      // Fetch messages since last sync
-      const result = await this.adapter.fetchMessages(conversationId, {
-        after: lastUpdatedAt,
-        limit: 100,
-      });
+    while (hasMore && page < MAX_PAGES) {
+      page++;
+      try {
+        const checkpoint = await this.db.syncCheckpoints.findOne(conversationId).exec();
+        const lastUpdatedAt = (checkpoint as RxDocument<SyncCheckpointDoc> | null)?.updatedAt
+          ?? '1970-01-01T00:00:00.000Z';
 
-      // Upsert messages (server wins)
-      for (const message of result.messages) {
-        const doc = messageToDoc(message);
-        await this.db.messages.upsert(doc);
-      }
-
-      // Update checkpoint
-      if (result.messages.length > 0) {
-        const latestUpdatedAt = result.messages
-          .map(m => (m.metadata?.updatedAt as string | undefined) ?? m.createdAt)
-          .sort()
-          .pop();
-
-        await this.db.syncCheckpoints.upsert({
-          id: conversationId,
-          updatedAt: latestUpdatedAt,
-          syncedAt: new Date().toISOString(),
+        const result = await this.adapter.fetchMessages(conversationId, {
+          after: lastUpdatedAt,
+          limit: 100,
         });
+
+        for (const message of result.messages) {
+          await this.db.messages.upsert(messageToDoc(message));
+        }
+
+        if (result.messages.length > 0) {
+          const latestUpdatedAt = result.messages
+            .map(m => (m.metadata?.updatedAt as string | undefined) ?? m.createdAt)
+            .sort()
+            .pop();
+
+          await this.db.syncCheckpoints.upsert({
+            id: conversationId,
+            updatedAt: latestUpdatedAt ?? lastUpdatedAt,
+            syncedAt: new Date().toISOString(),
+          });
+        }
+
+        this.log('info', 'Synced messages page', {
+          conversationId,
+          page,
+          count: result.messages.length,
+        });
+
+        hasMore = result.hasMore;
       }
-
-      this.log('info', 'Synced messages', {
-        conversationId,
-        count: result.messages.length,
-      });
-
-      // Continue if there are more
-      if (result.hasMore) {
-        await this.syncMessages(conversationId);
+      catch (error) {
+        this.log('error', 'Failed to sync messages', { conversationId, page, error });
+        throw error;
       }
     }
-    catch (error) {
-      this.log('error', 'Failed to sync messages', { conversationId, error });
-      throw error;
+
+    if (page >= MAX_PAGES) {
+      this.log('warn', 'Sync hit page limit, will resume next reconnect', {
+        conversationId,
+        maxPages: MAX_PAGES,
+      });
     }
   }
 

@@ -26,7 +26,6 @@ export type UseRingConnectionReturn = {
   disconnect: () => void;
   retry: () => void;
   reset: () => void;
-  sendConnected: () => void;
   sendConnectionLost: (error?: string) => void;
   context: ConnectionContext;
 };
@@ -53,11 +52,12 @@ export function useRingConnection(): UseRingConnectionReturn {
   const disconnect = useCallback(() => send({ type: 'DISCONNECT' }), [send]);
   const retry = useCallback(() => send({ type: 'RETRY' }), [send]);
   const reset = useCallback(() => send({ type: 'RESET' }), [send]);
-  const sendConnected = useCallback(() => send({ type: 'CONNECTED' }), [send]);
   const sendConnectionLost = useCallback(
     (error?: string) => send({ type: 'CONNECTION_LOST', error }),
     [send],
   );
+
+  const { discoveredDevices, deviceId, deviceName, error } = state.context;
 
   return useMemo(
     () => ({
@@ -66,17 +66,16 @@ export function useRingConnection(): UseRingConnectionReturn {
       isConnecting,
       isConnected,
       isDisconnecting,
-      discoveredDevices: state.context.discoveredDevices,
-      deviceId: state.context.deviceId,
-      deviceName: state.context.deviceName,
-      error: state.context.error,
+      discoveredDevices,
+      deviceId,
+      deviceName,
+      error,
       startScan,
       stopScan,
       selectDevice,
       disconnect,
       retry,
       reset,
-      sendConnected,
       sendConnectionLost,
       context: state.context,
     }),
@@ -86,15 +85,18 @@ export function useRingConnection(): UseRingConnectionReturn {
       isConnecting,
       isConnected,
       isDisconnecting,
-      state.context,
+      discoveredDevices,
+      deviceId,
+      deviceName,
+      error,
       startScan,
       stopScan,
       selectDevice,
       disconnect,
       retry,
       reset,
-      sendConnected,
       sendConnectionLost,
+      state.context,
     ],
   );
 }

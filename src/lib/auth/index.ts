@@ -8,14 +8,14 @@ export const authConfig: AuthClientConfig = {
 };
 
 export { defaultTenantId, isMultiTenant, tenants } from './tenants';
-// Tenant management
-export { getTenantById, useTenant } from './use-tenant';
 // Biometric lock
 export { useBiometricLock } from './use-biometric-lock';
 export type { UseBiometricLockResult } from './use-biometric-lock';
+// Tenant management
+export { getTenantById, useTenant } from './use-tenant';
 
 // Re-export for app consumption
-export { useAuth, useSession, useBiometricGate } from '@mongrov/auth';
+export { useAuth, useBiometricGate, useSession } from '@mongrov/auth';
 export type {
   AuthMethodConfig,
   AuthState,

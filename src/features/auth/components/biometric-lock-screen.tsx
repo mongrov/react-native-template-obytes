@@ -9,7 +9,7 @@ import * as React from 'react';
 
 import { Button, Text, View } from '@/components/ui';
 
-interface BiometricLockScreenProps {
+type BiometricLockScreenProps = {
   /** Attempt to unlock with biometrics */
   onUnlock: () => Promise<boolean>;
   /** Whether authentication is in progress */
@@ -18,7 +18,7 @@ interface BiometricLockScreenProps {
   error: string | null;
   /** Optional: Sign out instead of unlocking */
   onSignOut?: () => void;
-}
+};
 
 export function BiometricLockScreen({
   onUnlock,

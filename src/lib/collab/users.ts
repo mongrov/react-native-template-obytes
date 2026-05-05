@@ -93,5 +93,9 @@ export async function updateUserAvatar(formData: FormData): Promise<unknown> {
     },
     body: formData,
   });
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(`HTTP ${res.status}: ${text}`);
+  }
   return res.json();
 }

@@ -15,7 +15,7 @@ jest.mock('../ble-manager', () => {
   };
 });
 
-describe('BleScanner', () => {
+describe('bleScanner', () => {
   let mockBleManager: any;
   let scanner: any;
   let bleManagerModule: any;
@@ -24,14 +24,12 @@ describe('BleScanner', () => {
     jest.clearAllMocks();
     bleManagerModule = require('../ble-manager');
 
-
-
     mockBleManager = {
       startDeviceScan: jest.fn(),
       stopDeviceScan: jest.fn(),
     };
     (bleManagerModule.getBleManager as jest.Mock).mockReturnValue(
-      mockBleManager
+      mockBleManager,
     );
     bleManagerModule.isPhysicalDevice = true;
 
@@ -90,7 +88,7 @@ describe('BleScanner', () => {
       mockBleManager.startDeviceScan.mockImplementation(
         (uuids: any, options: any, callback: any) => {
           callback(new Error('Scan failed'), null);
-        }
+        },
       );
 
       const devices = await scanner.startScan();
@@ -113,7 +111,7 @@ describe('BleScanner', () => {
       mockBleManager.startDeviceScan.mockImplementation(
         (uuids: any, options: any, callback: any) => {
           callback(null, { id: '1', name: 'ZR100', rssi: -60 });
-        }
+        },
       );
 
       scanner.startScan();

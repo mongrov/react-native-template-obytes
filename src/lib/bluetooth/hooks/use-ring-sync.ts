@@ -60,6 +60,39 @@ async function persistAllSyncData(ctx: SyncContext): Promise<void> {
             })),
           )
         : Promise.resolve(),
+      ctx.spo2Data.length > 0
+        ? ringManager.insertSpO2Data(
+            ctx.spo2Data.map(s => ({ date: s.date, automaticSpo2Data: s.bloodOxygen })),
+          )
+        : Promise.resolve(),
+      ctx.hrvData.length > 0
+        ? ringManager.insertHRVData(
+            ctx.hrvData.map(h => ({
+              date: h.date,
+              hrv: h.hrv,
+              stress: h.stress,
+              vascularAging: h.vascularAging,
+              highBP: h.highBP,
+              lowBP: h.lowBP,
+            })),
+          )
+        : Promise.resolve(),
+      ctx.activityData.length > 0
+        ? ringManager.insertActivityData(
+            ctx.activityData.map(a => ({
+              date: a.date,
+              step: a.steps,
+              calories: a.calories,
+              distance: a.distance,
+              arraySteps: a.stepsArray,
+            })),
+          )
+        : Promise.resolve(),
+      ctx.temperatureData.length > 0
+        ? ringManager.insertTemperatureData(
+            ctx.temperatureData.map(t => ({ date: t.date, temperature: t.temperature })),
+          )
+        : Promise.resolve(),
     ]);
     await ringManager.setLastSyncDate(new Date().toISOString());
     console.log('[RingSync] Background RxDB persistence complete.');
@@ -69,6 +102,7 @@ async function persistAllSyncData(ctx: SyncContext): Promise<void> {
   }
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function useRingSync(): UseRingSyncReturn {
   const [state, send] = useMachine(ringSyncMachine);
   const [isPersisting, setIsPersisting] = useState(false);
@@ -82,16 +116,24 @@ export function useRingSync(): UseRingSyncReturn {
 
   // Fire-and-forget: persist all data to RxDB when a new sync succeeds
   React.useEffect(() => {
+    let cancelled = false;
     const currentSyncTime = state.context.lastSyncTime?.getTime() ?? 0;
     if (isSuccess && currentSyncTime > lastPersistedTimeRef.current) {
       lastPersistedTimeRef.current = currentSyncTime;
-      // Defer setState to next microtask to avoid synchronous setState-in-effect lint
       void Promise.resolve().then(() => {
+        if (cancelled)
+          return;
         setIsPersisting(true);
-        persistAllSyncData(state.context).finally(() => setIsPersisting(false));
+        persistAllSyncData(state.context).finally(() => {
+          if (!cancelled)
+            setIsPersisting(false);
+        });
       });
     }
-  }, [isSuccess, state.context]);
+    return () => {
+      cancelled = true;
+    };
+  }, [isSuccess, state.context.lastSyncTime]);
 
   const startSync = useCallback(
     (adapter: JStyleAdapter) => send({ type: 'START_SYNC', adapter }),
@@ -104,6 +146,21 @@ export function useRingSync(): UseRingSyncReturn {
   );
   const reset = useCallback(() => send({ type: 'RESET' }), [send]);
 
+  const {
+    progress,
+    completedStages,
+    batteryLevel,
+    deviceVersion,
+    sleepData,
+    activityData,
+    heartRateData,
+    hrvData,
+    spo2Data,
+    temperatureData,
+    lastSyncTime,
+    error,
+  } = state.context;
+
   return useMemo(
     () => ({
       currentStage,
@@ -112,18 +169,18 @@ export function useRingSync(): UseRingSyncReturn {
       isPersisting,
       isError,
       isIdle,
-      progress: state.context.progress,
-      completedStages: state.context.completedStages,
-      batteryLevel: state.context.batteryLevel,
-      deviceVersion: state.context.deviceVersion,
-      sleepData: state.context.sleepData,
-      activityData: state.context.activityData,
-      heartRateData: state.context.heartRateData,
-      hrvData: state.context.hrvData,
-      spo2Data: state.context.spo2Data,
-      temperatureData: state.context.temperatureData,
-      lastSyncTime: state.context.lastSyncTime,
-      error: state.context.error,
+      progress,
+      completedStages,
+      batteryLevel,
+      deviceVersion,
+      sleepData,
+      activityData,
+      heartRateData,
+      hrvData,
+      spo2Data,
+      temperatureData,
+      lastSyncTime,
+      error,
       startSync,
       abort,
       retry,
@@ -137,11 +194,23 @@ export function useRingSync(): UseRingSyncReturn {
       isPersisting,
       isError,
       isIdle,
-      state.context,
+      progress,
+      completedStages,
+      batteryLevel,
+      deviceVersion,
+      sleepData,
+      activityData,
+      heartRateData,
+      hrvData,
+      spo2Data,
+      temperatureData,
+      lastSyncTime,
+      error,
       startSync,
       abort,
       retry,
       reset,
+      state.context,
     ],
   );
 }

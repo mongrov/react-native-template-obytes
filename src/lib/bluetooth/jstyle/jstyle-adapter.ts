@@ -18,7 +18,7 @@ import type {
   TemperatureDataItem,
 } from './response-parser';
 
-import { Buffer } from 'buffer';
+import { Buffer } from 'node:buffer';
 import { CMD, MODE, PacketBuilder } from './packet-builder';
 import { ResponseParser } from './response-parser';
 

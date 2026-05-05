@@ -1,4 +1,3 @@
-/* eslint-disable max-lines-per-function */
 import { act } from '@testing-library/react-native';
 
 // Mock ble-manager
@@ -7,7 +6,7 @@ jest.mock('../ble-manager', () => ({
   isPhysicalDevice: true,
 }));
 
-describe('BleConnector', () => {
+describe('bleConnector', () => {
   let mockBleManager: any;
   let mockDevice: any;
   let connector: any;
@@ -16,8 +15,6 @@ describe('BleConnector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     bleManagerModule = require('../ble-manager');
-
-
 
     mockDevice = {
       id: '123',
@@ -34,7 +31,7 @@ describe('BleConnector', () => {
     };
 
     (bleManagerModule.getBleManager as jest.Mock).mockReturnValue(
-      mockBleManager
+      mockBleManager,
     );
     bleManagerModule.isPhysicalDevice = true;
 

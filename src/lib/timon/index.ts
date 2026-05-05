@@ -33,6 +33,7 @@ export {
 
 // ── Data helpers ──────────────────────────────────────────────────────
 export {
+  configureTimonHelpers,
   handleActivityDetailsData,
   handleAutomaticSpo2Data,
   handleBatteryLevel,

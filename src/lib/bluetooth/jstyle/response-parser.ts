@@ -199,8 +199,9 @@ export const ResponseParser = {
       const startTime = parseDate(data, 3);
       const sleepLength = getValue(data[9], 0);
       const sleepQuality: number[] = [];
+      const maxItems = Math.min(sleepLength, data.length - 10);
 
-      for (let j = 0; j < sleepLength; j++) {
+      for (let j = 0; j < maxItems; j++) {
         sleepQuality.push(getValue(data[10 + j], 0));
       }
 

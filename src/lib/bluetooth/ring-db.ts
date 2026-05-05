@@ -40,7 +40,7 @@ function getSQLiteBasicsNitroSQLite(openDB: any) {
     close: async (db: any) => {
       db.close();
     },
-    journalMode: '',
+    journalMode: '' as const,
   };
 }
 
@@ -366,19 +366,51 @@ export const ringManager = {
   },
 
   async insertHeartRateData(data: HeartRateDocType[]): Promise<void> {
-    if (!data.length) {
+    if (!data.length)
       return;
-    }
+    const deduped = Array.from(new Map(data.map(item => [item.date, item])).values());
     const db = await getRingDatabaseAsync();
-    await db.heartrate.bulkUpsert(data);
+    await db.heartrate.bulkUpsert(deduped);
   },
 
   async insertSleepData(data: SleepDocType[]): Promise<void> {
-    if (!data.length) {
+    if (!data.length)
       return;
-    }
+    const deduped = Array.from(new Map(data.map(item => [item.date, item])).values());
     const db = await getRingDatabaseAsync();
-    await db.sleep.bulkUpsert(data);
+    await db.sleep.bulkUpsert(deduped);
+  },
+
+  async insertSpO2Data(data: Array<{ date: string; automaticSpo2Data?: number | string }>): Promise<void> {
+    if (!data.length)
+      return;
+    const deduped = Array.from(new Map(data.map(item => [item.date, item])).values());
+    const db = await getRingDatabaseAsync();
+    await db.spo2.bulkUpsert(deduped as Spo2DocType[]);
+  },
+
+  async insertHRVData(data: Array<{ date: string; hrv?: number | string; stress?: number | string; vascularAging?: number | string; highBP?: number | string; lowBP?: number | string }>): Promise<void> {
+    if (!data.length)
+      return;
+    const deduped = Array.from(new Map(data.map(item => [item.date, item])).values());
+    const db = await getRingDatabaseAsync();
+    await db.hrv.bulkUpsert(deduped as HrvDocType[]);
+  },
+
+  async insertActivityData(data: Array<{ date: string; step?: number | string; calories?: number | string; distance?: number | string; arraySteps?: unknown[] }>): Promise<void> {
+    if (!data.length)
+      return;
+    const deduped = Array.from(new Map(data.map(item => [item.date, item])).values());
+    const db = await getRingDatabaseAsync();
+    await db.activitydetails.bulkUpsert(deduped as ActivityDetailsDocType[]);
+  },
+
+  async insertTemperatureData(data: Array<{ date: string; temperature?: number | string }>): Promise<void> {
+    if (!data.length)
+      return;
+    const deduped = Array.from(new Map(data.map(item => [item.date, item])).values());
+    const db = await getRingDatabaseAsync();
+    await db.temperature.bulkUpsert(deduped as TemperatureDocType[]);
   },
 
   subscribeToRingChanges(callback: (doc: RingDocType | null) => void): () => void {

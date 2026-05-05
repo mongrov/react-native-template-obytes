@@ -1,5 +1,5 @@
 import * as Location from 'expo-location';
-/* eslint-disable max-lines-per-function */
+
 import { PermissionsAndroid, Platform } from 'react-native';
 
 import { storage } from '@/lib/storage';
@@ -51,7 +51,7 @@ jest.mock('../ble-manager', () => ({
   getBleManager: jest.fn(),
 }));
 
-describe('BlePermissions', () => {
+describe('blePermissions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsDevice = true;
@@ -59,7 +59,7 @@ describe('BlePermissions', () => {
 
   const getModule = (
     os: 'ios' | 'android' | 'web' = 'ios',
-    version: number = 0
+    version: number = 0,
   ) => {
     (Platform as any).OS = os;
     (Platform as any).Version = version;
@@ -122,7 +122,7 @@ describe('BlePermissions', () => {
       const status = await blePermissions.checkBluetoothStatus();
       expect(status).toBe('granted');
       expect(PermissionsAndroid.check).toHaveBeenCalledWith(
-        'android.permission.ACCESS_FINE_LOCATION'
+        'android.permission.ACCESS_FINE_LOCATION',
       );
     });
   });
@@ -191,7 +191,7 @@ describe('BlePermissions', () => {
 
     it('returns undetermined on error', async () => {
       (Location.getForegroundPermissionsAsync as jest.Mock).mockRejectedValue(
-        new Error('fail')
+        new Error('fail'),
       );
       const blePermissions = getModule('ios');
       expect(await blePermissions.checkLocationStatus()).toBe('undetermined');

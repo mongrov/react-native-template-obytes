@@ -6,19 +6,20 @@
  * returning to the app.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { AppState, type AppStateStatus } from 'react-native';
-
+import type { AppStateStatus } from 'react-native';
 import { useBiometricGate } from '@mongrov/auth';
 
+import { useCallback, useEffect, useState } from 'react';
+import { AppState } from 'react-native';
+
+import { getItem, removeItem, setItem } from '../storage';
 import { useAuth } from './index';
-import { getItem, setItem, removeItem } from '../storage';
 
 const BIOMETRIC_ENABLED_KEY = 'biometric_lock_enabled';
 const LAST_BACKGROUND_KEY = 'last_background_time';
 const LOCK_TIMEOUT_MS = 30000; // 30 seconds - require auth if backgrounded longer
 
-export interface UseBiometricLockResult {
+export type UseBiometricLockResult = {
   /** Whether biometric hardware is available on device */
   isAvailable: boolean;
   /** Whether biometric lock is enabled by user */
@@ -35,7 +36,7 @@ export interface UseBiometricLockResult {
   disable: () => void;
   /** Attempt to unlock with biometrics */
   unlock: () => Promise<boolean>;
-}
+};
 
 export function useBiometricLock(): UseBiometricLockResult {
   const { status } = useAuth();
@@ -64,7 +65,8 @@ export function useBiometricLock(): UseBiometricLockResult {
       if (nextState === 'background' || nextState === 'inactive') {
         // Record when we went to background
         setItem(LAST_BACKGROUND_KEY, Date.now());
-      } else if (nextState === 'active') {
+      }
+      else if (nextState === 'active') {
         // Check if we should lock
         const lastBackground = getItem<number>(LAST_BACKGROUND_KEY);
         if (lastBackground) {

@@ -12,7 +12,7 @@ jest.mock('../store', () => ({
 
 const mockZivaFetchUnauth = jest.requireMock('../client').zivaFetchUnauth as jest.Mock;
 
-describe('Collab Auth', () => {
+describe('collab Auth', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -35,7 +35,7 @@ describe('Collab Auth', () => {
       expect(mockZivaFetchUnauth).toHaveBeenCalledWith(
         'POST',
         '/login',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 

@@ -5,7 +5,7 @@
  */
 
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
+import * as React from 'react';
 import {
   Linking,
   ScrollView,
@@ -16,8 +16,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { usePermissions } from '@/lib/bluetooth/hooks/use-permissions';
 import { useAuth } from '@/lib/auth';
+import { usePermissions } from '@/lib/bluetooth/hooks/use-permissions';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -42,7 +42,8 @@ function PermissionItem({
   const handlePress = () => {
     if (isBlocked) {
       Linking.openSettings();
-    } else {
+    }
+    else {
       onPress();
     }
   };
@@ -90,7 +91,10 @@ function PermissionItem({
           {['Open Settings', 'Tap Bluetooth', 'Turn Bluetooth ON', 'Return to App'].map(
             (step, i) => (
               <View key={step} style={styles.instructionStep}>
-                <Text style={styles.stepNumber}>{i + 1}.</Text>
+                <Text style={styles.stepNumber}>
+                  {i + 1}
+                  .
+                </Text>
                 <Text style={styles.stepText}>{step}</Text>
               </View>
             ),
@@ -123,7 +127,8 @@ export default function PermissionsScreen() {
     if (canContinue) {
       if (returnTo) {
         router.replace(`/(app)/${returnTo}` as never);
-      } else {
+      }
+      else {
         router.replace('/(app)');
       }
     }
@@ -179,7 +184,8 @@ export default function PermissionsScreen() {
             onPress={() => {
               if (returnTo) {
                 router.replace(`/(app)/${returnTo}` as never);
-              } else {
+              }
+              else {
                 router.replace('/(app)');
               }
             }}
