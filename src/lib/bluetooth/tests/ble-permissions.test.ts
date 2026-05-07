@@ -59,7 +59,7 @@ describe('blePermissions', () => {
 
   const getModule = (
     os: 'ios' | 'android' | 'web' = 'ios',
-    version: number = 0
+    version: number = 0,
   ) => {
     (Platform as any).OS = os;
     (Platform as any).Version = version;
@@ -122,7 +122,7 @@ describe('blePermissions', () => {
       const status = await blePermissions.checkBluetoothStatus();
       expect(status).toBe('granted');
       expect(PermissionsAndroid.check).toHaveBeenCalledWith(
-        'android.permission.ACCESS_FINE_LOCATION'
+        'android.permission.ACCESS_FINE_LOCATION',
       );
     });
   });
@@ -191,7 +191,7 @@ describe('blePermissions', () => {
 
     it('returns undetermined on error', async () => {
       (Location.getForegroundPermissionsAsync as jest.Mock).mockRejectedValue(
-        new Error('fail')
+        new Error('fail'),
       );
       const blePermissions = getModule('ios');
       expect(await blePermissions.checkLocationStatus()).toBe('undetermined');

@@ -2,4 +2,4 @@
  * Collab Adapters
  */
 
-export * from './rocketchat'
+export * from './rocketchat';

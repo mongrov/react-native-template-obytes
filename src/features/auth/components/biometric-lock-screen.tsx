@@ -9,7 +9,7 @@ import * as React from 'react';
 
 import { Button, Text, View } from '@/components/ui';
 
-interface BiometricLockScreenProps {
+type BiometricLockScreenProps = {
   /** Attempt to unlock with biometrics */
   onUnlock: () => Promise<boolean>;
   /** Whether authentication is in progress */
@@ -18,7 +18,7 @@ interface BiometricLockScreenProps {
   error: string | null;
   /** Optional: Sign out instead of unlocking */
   onSignOut?: () => void;
-}
+};
 
 export function BiometricLockScreen({
   onUnlock,
@@ -37,7 +37,7 @@ export function BiometricLockScreen({
   return (
     <View className="flex-1 items-center justify-center bg-white p-8 dark:bg-neutral-900">
       {/* Lock icon */}
-      <View className="mb-8 h-24 w-24 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
+      <View className="mb-8 size-24 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900">
         <Text className="text-5xl">🔒</Text>
       </View>
 

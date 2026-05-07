@@ -1,8 +1,11 @@
+import type { PresenceState } from '@mongrov/collab';
 import type { Message } from '@mongrov/types';
+import type { SendMessageParams } from '@/lib/collab/adapters/rocketchat';
 import { useSession } from '@mongrov/auth';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import * as React from 'react';
+
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -11,7 +14,6 @@ import {
   Platform,
   TextInput,
 } from 'react-native';
-
 import {
   ActivityIndicator,
   Pressable,
@@ -19,21 +21,20 @@ import {
   View,
 } from '@/components/ui';
 import { useCollab, useCollabConnected } from '@/lib/collab';
-import type { PresenceState } from '@mongrov/collab';
-import type { SendMessageParams } from '@/lib/collab/adapters/rocketchat';
 
 // Attachment type for pending uploads
-interface PendingAttachment {
+type PendingAttachment = {
   uri: string;
   type: 'image' | 'file';
   mimeType?: string;
   fileName?: string;
-}
+};
 
 // Typing indicator timeout (ms)
 const TYPING_TIMEOUT = 3000;
 const TYPING_DEBOUNCE = 1000;
 
+// eslint-disable-next-line max-lines-per-function
 export default function ChatRoomScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const navigation = useNavigation();
@@ -73,9 +74,11 @@ export default function ChatRoomScreen() {
       adapter.markAsRead(id).catch(() => {
         // Ignore mark as read errors
       });
-    } catch (err) {
+    }
+    catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load messages');
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   }, [adapter, isConnected, id]);
@@ -86,7 +89,8 @@ export default function ChatRoomScreen() {
 
   // Subscribe to real-time updates
   useEffect(() => {
-    if (!adapter || !isConnected || !id) return;
+    if (!adapter || !isConnected || !id)
+      return;
 
     // Subscribe to room messages and typing
     const unsubscribePromise = adapter.subscribeToConversation(id);
@@ -96,7 +100,7 @@ export default function ChatRoomScreen() {
       if (message.conversationId === id) {
         setMessages((prev) => {
           // Avoid duplicates
-          if (prev.some((m) => m.id === message.id)) {
+          if (prev.some(m => m.id === message.id)) {
             return prev;
           }
           return [...prev, message];
@@ -177,28 +181,30 @@ export default function ChatRoomScreen() {
       unsubPresenceChanged();
       unsubPresenceOnline();
       unsubPresenceOffline();
-      unsubscribePromise.then((unsub) => unsub());
+      unsubscribePromise.then(unsub => unsub());
     };
   }, [adapter, isConnected, id, currentUserId]);
 
   // Subscribe to presence for users in conversation
   useEffect(() => {
-    if (!adapter || !isConnected || messages.length === 0) return;
+    if (!adapter || !isConnected || messages.length === 0)
+      return;
 
     // Get unique user IDs from messages (excluding current user)
     const userIds = [...new Set(
       messages
-        .map((m) => m.sender.id)
-        .filter((uid) => uid !== currentUserId)
+        .map(m => m.sender.id)
+        .filter(uid => uid !== currentUserId),
     )];
 
-    if (userIds.length === 0) return;
+    if (userIds.length === 0)
+      return;
 
     // Subscribe to presence updates
     const unsubPromise = adapter.subscribeToPresence(userIds);
 
     return () => {
-      unsubPromise.then((unsub) => unsub()).catch(() => {});
+      unsubPromise.then(unsub => unsub()).catch(() => {});
     };
   }, [adapter, isConnected, messages, currentUserId]);
 
@@ -237,7 +243,7 @@ export default function ChatRoomScreen() {
         }, TYPING_TIMEOUT);
       }
     },
-    [adapter, id]
+    [adapter, id],
   );
 
   // Pick an image from camera roll or camera
@@ -266,7 +272,8 @@ export default function ChatRoomScreen() {
           fileName: asset.fileName || `image-${Date.now()}.jpg`,
         });
       }
-    } catch {
+    }
+    catch {
       Alert.alert('Not Available', 'Image picker requires a development build.');
     }
   }, []);
@@ -290,7 +297,8 @@ export default function ChatRoomScreen() {
           fileName: asset.name,
         });
       }
-    } catch {
+    }
+    catch {
       Alert.alert('Not Available', 'Document picker requires a development build.');
     }
   }, []);
@@ -304,7 +312,7 @@ export default function ChatRoomScreen() {
         { text: 'Photo', onPress: handlePickImage },
         { text: 'Document', onPress: handlePickDocument },
         { text: 'Cancel', style: 'cancel' },
-      ]
+      ],
     );
   }, [handlePickImage, handlePickDocument]);
 
@@ -315,7 +323,8 @@ export default function ChatRoomScreen() {
 
   // Send message
   const handleSend = useCallback(async () => {
-    if (!adapter || !isConnected || !id || (!inputText.trim() && !pendingAttachment)) return;
+    if (!adapter || !isConnected || !id || (!inputText.trim() && !pendingAttachment))
+      return;
 
     const trimmedText = inputText.trim();
     setInputText('');
@@ -346,7 +355,8 @@ export default function ChatRoomScreen() {
             text: trimmedText || undefined,
           },
         };
-      } else {
+      }
+      else {
         // Send text message
         params = {
           conversationId: id,
@@ -361,7 +371,7 @@ export default function ChatRoomScreen() {
 
       // Add the sent message to the list (if not already added by subscription)
       setMessages((prev) => {
-        if (prev.some((m) => m.id === result.message.id)) {
+        if (prev.some(m => m.id === result.message.id)) {
           return prev;
         }
         return [...prev, result.message];
@@ -371,12 +381,15 @@ export default function ChatRoomScreen() {
       setTimeout(() => {
         listRef.current?.scrollToEnd({ animated: true });
       }, 100);
-    } catch (err) {
+    }
+    catch (err) {
       // Restore text and attachment on error
       setInputText(trimmedText);
-      if (attachment) setPendingAttachment(attachment);
+      if (attachment)
+        setPendingAttachment(attachment);
       setError(err instanceof Error ? err.message : 'Failed to send message');
-    } finally {
+    }
+    finally {
       setSending(false);
     }
   }, [adapter, isConnected, id, inputText, pendingAttachment]);
@@ -384,9 +397,12 @@ export default function ChatRoomScreen() {
   // Format typing indicator text
   const typingText = useMemo(() => {
     const users = Array.from(typingUsers.values());
-    if (users.length === 0) return null;
-    if (users.length === 1) return `${users[0]} is typing...`;
-    if (users.length === 2) return `${users[0]} and ${users[1]} are typing...`;
+    if (users.length === 0)
+      return null;
+    if (users.length === 1)
+      return `${users[0]} is typing...`;
+    if (users.length === 2)
+      return `${users[0]} and ${users[1]} are typing...`;
     return `${users.length} people are typing...`;
   }, [typingUsers]);
 
@@ -431,7 +447,7 @@ export default function ChatRoomScreen() {
         <FlatList
           ref={listRef}
           data={messages}
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
           renderItem={({ item }) => (
             <MessageBubble
               message={item}
@@ -452,7 +468,7 @@ export default function ChatRoomScreen() {
       {/* Typing indicator */}
       {typingText && (
         <View className="px-4 py-1">
-          <Text className="text-xs italic text-neutral-500">{typingText}</Text>
+          <Text className="text-xs text-neutral-500 italic">{typingText}</Text>
         </View>
       )}
 
@@ -460,17 +476,19 @@ export default function ChatRoomScreen() {
       {pendingAttachment && (
         <View className="border-t border-neutral-200 bg-neutral-50 p-2 dark:border-neutral-700 dark:bg-neutral-800">
           <View className="flex-row items-center">
-            {pendingAttachment.type === 'image' ? (
-              <Image
-                source={{ uri: pendingAttachment.uri }}
-                style={{ width: 60, height: 60, borderRadius: 8 }}
-                contentFit="cover"
-              />
-            ) : (
-              <View className="h-14 w-14 items-center justify-center rounded-lg bg-neutral-200 dark:bg-neutral-700">
-                <Text className="text-2xl">📄</Text>
-              </View>
-            )}
+            {pendingAttachment.type === 'image'
+              ? (
+                  <Image
+                    source={{ uri: pendingAttachment.uri }}
+                    style={{ width: 60, height: 60, borderRadius: 8 }}
+                    contentFit="cover"
+                  />
+                )
+              : (
+                  <View className="size-14 items-center justify-center rounded-lg bg-neutral-200 dark:bg-neutral-700">
+                    <Text className="text-2xl">📄</Text>
+                  </View>
+                )}
             <View className="ml-3 flex-1">
               <Text className="text-sm text-neutral-700 dark:text-neutral-300" numberOfLines={1}>
                 {pendingAttachment.fileName || 'Attachment'}
@@ -481,7 +499,7 @@ export default function ChatRoomScreen() {
             </View>
             <Pressable
               onPress={clearAttachment}
-              className="h-8 w-8 items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-700"
+              className="size-8 items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-700"
             >
               <Text className="text-neutral-600 dark:text-neutral-400">✕</Text>
             </Pressable>
@@ -495,7 +513,7 @@ export default function ChatRoomScreen() {
         <Pressable
           onPress={handleAttachmentPress}
           disabled={sending}
-          className="mr-2 h-10 w-10 items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-700"
+          className="mr-2 size-10 items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-700"
         >
           <Text className="text-lg">+</Text>
         </Pressable>
@@ -513,24 +531,26 @@ export default function ChatRoomScreen() {
         <Pressable
           onPress={handleSend}
           disabled={(!inputText.trim() && !pendingAttachment) || sending}
-          className="ml-2 h-10 w-10 items-center justify-center rounded-full bg-primary-500 disabled:opacity-50"
+          className="ml-2 size-10 items-center justify-center rounded-full bg-primary-500 disabled:opacity-50"
         >
-          {sending ? (
-            <ActivityIndicator size="small" color="white" />
-          ) : (
-            <Text className="text-lg text-white">↑</Text>
-          )}
+          {sending
+            ? (
+                <ActivityIndicator size="small" color="white" />
+              )
+            : (
+                <Text className="text-lg text-white">↑</Text>
+              )}
         </Pressable>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
-interface MessageBubbleProps {
+type MessageBubbleProps = {
   message: Message;
   currentUserId?: string;
   presenceStatus?: PresenceState;
-}
+};
 
 function MessageBubble({ message, currentUserId, presenceStatus }: MessageBubbleProps) {
   const isOwn = message.sender.id === currentUserId;
@@ -617,13 +637,13 @@ function MessageBubble({ message, currentUserId, presenceStatus }: MessageBubble
           </View>
         )}
 
-        {content.type === 'location' && (
-          <Text className="italic text-neutral-500">[Location]</Text>
+        {(content.type as string) === 'location' && (
+          <Text className="text-neutral-500 italic">[Location]</Text>
         )}
       </View>
 
       {/* Timestamp and delivery status */}
-      <View className={`mt-1 flex-row items-center ${isOwn ? 'justify-end mr-2' : 'ml-2'}`}>
+      <View className={`mt-1 flex-row items-center ${isOwn ? 'mr-2 justify-end' : 'ml-2'}`}>
         <Text className="text-xs text-neutral-400">
           {formatMessageTime(message.createdAt)}
         </Text>
@@ -635,9 +655,9 @@ function MessageBubble({ message, currentUserId, presenceStatus }: MessageBubble
   );
 }
 
-interface DeliveryStatusIconProps {
+type DeliveryStatusIconProps = {
   status: Message['deliveryStatus'];
-}
+};
 
 function DeliveryStatusIcon({ status }: DeliveryStatusIconProps) {
   let icon = '';
@@ -671,12 +691,13 @@ function DeliveryStatusIcon({ status }: DeliveryStatusIconProps) {
   );
 }
 
-interface PresenceIndicatorProps {
+type PresenceIndicatorProps = {
   status?: PresenceState;
-}
+};
 
 function PresenceIndicator({ status }: PresenceIndicatorProps) {
-  if (!status) return null;
+  if (!status)
+    return null;
 
   let bgColor = 'bg-neutral-400'; // default/offline
 
@@ -696,7 +717,7 @@ function PresenceIndicator({ status }: PresenceIndicatorProps) {
   }
 
   return (
-    <View className={`mr-1.5 h-2 w-2 rounded-full ${bgColor}`} />
+    <View className={`mr-1.5 size-2 rounded-full ${bgColor}`} />
   );
 }
 

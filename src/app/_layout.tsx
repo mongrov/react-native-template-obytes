@@ -17,10 +17,13 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { aiConfig } from '@/lib/ai';
 import { APIProvider } from '@/lib/api';
 import { authConfig } from '@/lib/auth';
+import { ringManager } from '@/lib/bluetooth';
 import { CollabProvider } from '@/lib/collab';
 import { luminxFontSources } from '@/lib/luminx-fonts';
 import { initSentry, SentryErrorBoundary } from '@/lib/sentry';
+import { kvStore } from '@/lib/storage';
 import { useColorScheme, useNavigationTheme } from '@/lib/theme';
+import { configureTimonHelpers } from '@/lib/timon';
 // Import  global CSS file
 import '../global.css';
 // Lazy-load Sentry to avoid crashes in Expo Go
@@ -44,6 +47,15 @@ export const unstable_settings = {
 if (Env.EXPO_PUBLIC_SENTRY_DSN) {
   initSentry(Env.EXPO_PUBLIC_SENTRY_DSN);
 }
+
+// Wire Timon battery-throttle storage and ring manager
+configureTimonHelpers({
+  storage: {
+    getItem: key => kvStore.get(key),
+    setItem: (key, value) => kvStore.set(key, value),
+  },
+  ringManager,
+});
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 // Set the animation options. This is optional.

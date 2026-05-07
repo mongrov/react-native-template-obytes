@@ -46,7 +46,7 @@ export async function submitGlucoseData(
   jcData: GlucoseSubmitRequest,
 ): Promise<GlucoseSubmitResponse> {
   const { userId } = useCollabStore.getState();
-  return zivaFetch<GlucoseSubmitResponse>('POST', '/ziva.glucose', { userId, ...jcData });
+  return zivaFetch<GlucoseSubmitResponse>('POST', '/ziva.glucose', { ...jcData, userId });
 }
 
 /**

@@ -33,11 +33,8 @@ export type ConnectionEvent
     | { type: 'STOP_SCAN' }
     | { type: 'DEVICE_FOUND'; device: ScannedDevice }
     | { type: 'SELECT_DEVICE'; deviceId: string; deviceName: string }
-    | { type: 'CONNECTED' }
     | { type: 'DISCONNECT' }
-    | { type: 'DISCONNECTED' }
     | { type: 'CONNECTION_LOST'; error?: string }
-    | { type: 'ERROR'; error: string }
     | { type: 'RETRY' }
     | { type: 'RESET' };
 
@@ -66,7 +63,7 @@ const connectToDevice = fromPromise<
 
   const result = await bleConnector.connect(input.deviceId, {
     timeout: 15000,
-    retryCount: 3,
+    retryCount: 1,
   });
 
   return {
@@ -105,19 +102,6 @@ export const ringConnectionMachine = setup({
         }
         return [...context.discoveredDevices, event.device];
       },
-    }),
-    setConnectedDevice: assign({
-      deviceId: ({ event }) =>
-        event.type === 'SELECT_DEVICE' || event.type === 'CONNECTED'
-          ? ((event as { deviceId?: string }).deviceId ?? null)
-          : null,
-      deviceName: ({ event }) =>
-        event.type === 'SELECT_DEVICE' || event.type === 'CONNECTED'
-          ? ((event as { deviceName?: string }).deviceName ?? null)
-          : null,
-    }),
-    setError: assign({
-      error: ({ event }) => (event.type === 'ERROR' ? event.error : null),
     }),
     setConnectionLostError: assign({
       error: ({ event }) =>

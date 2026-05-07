@@ -32,6 +32,8 @@ export type HRVDataItem = {
   heartRate: number;
   highBP: number;
   lowBP: number;
+  diastolicBP?: number;
+  systolicBP?: number;
 };
 
 export type SpO2DataItem = {

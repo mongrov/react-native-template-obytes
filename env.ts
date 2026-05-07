@@ -29,6 +29,7 @@ const envSchema = z.object({
   // Collab/RocketChat
   EXPO_PUBLIC_RC_SERVER_URL: z.string().url().optional(),
   EXPO_PUBLIC_RC_WS_URL: z.string().optional(),
+  EXPO_PUBLIC_COLLAB_ADMIN_TOKEN: z.string().optional(),
 
   // Google OAuth (for social auth)
   EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: z.string().optional(),
@@ -88,6 +89,7 @@ const _env: z.infer<typeof envSchema> = {
   EXPO_PUBLIC_OPENAI_API_KEY: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
   EXPO_PUBLIC_RC_SERVER_URL: process.env.EXPO_PUBLIC_RC_SERVER_URL,
   EXPO_PUBLIC_RC_WS_URL: process.env.EXPO_PUBLIC_RC_WS_URL,
+  EXPO_PUBLIC_COLLAB_ADMIN_TOKEN: process.env.EXPO_PUBLIC_COLLAB_ADMIN_TOKEN,
   EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
   EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
   EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,

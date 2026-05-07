@@ -8,158 +8,158 @@
 // --- RC User ---
 
 export type RCUser = {
-  _id: string
-  username: string
-  name?: string
-}
+  _id: string;
+  username?: string;
+  name?: string;
+};
 
 export type RCMention = {
-  _id: string
-  username: string
-  name?: string
-  type?: string
-}
+  _id: string;
+  username: string;
+  name?: string;
+  type?: string;
+};
 
 // --- RC Attachments & Files ---
 
 export type RCAttachment = {
-  title?: string
-  title_link?: string
-  text?: string
-  image_url?: string
-  audio_url?: string
-  video_url?: string
-  type?: string
-  description?: string
-}
+  title?: string;
+  title_link?: string;
+  text?: string;
+  image_url?: string;
+  audio_url?: string;
+  video_url?: string;
+  type?: string;
+  description?: string;
+};
 
 export type RCFile = {
-  _id: string
-  name: string
-  type: string
-  size?: number
-  url?: string
-}
+  _id: string;
+  name: string;
+  type: string;
+  size?: number;
+  url?: string;
+};
 
 export type RCUrlMeta = {
-  url: string
-  meta?: Record<string, string>
-  headers?: Record<string, string>
-}
+  url: string;
+  meta?: Record<string, string>;
+  headers?: Record<string, string>;
+};
 
 // --- RC Message ---
 
 export type RCMessage = {
-  _id: string
-  rid: string
-  msg: string
-  ts: string // ISO date
-  u: RCUser
-  _updatedAt: string
-  tmid?: string // thread parent
-  t?: string // system message type
-  attachments?: RCAttachment[]
-  files?: RCFile[]
-  reactions?: Record<string, { usernames: string[] }>
-  mentions?: RCMention[]
-  starred?: { _id: string }[]
-  pinned?: boolean
-  pinnedAt?: string
-  pinnedBy?: RCUser
-  editedAt?: string
-  editedBy?: RCUser
-  urls?: RCUrlMeta[]
-  tcount?: number // thread reply count
-  tlm?: string // thread last message timestamp
-  replies?: string[] // thread reply user IDs
-  drid?: string // discussion room ID
-  e2e?: 'pending' | 'done'
-  groupable?: boolean
-  _hidden?: boolean
-}
+  _id: string;
+  rid: string;
+  msg: string;
+  ts: string; // ISO date
+  u: RCUser;
+  _updatedAt?: string;
+  tmid?: string; // thread parent
+  t?: string; // system message type
+  attachments?: RCAttachment[];
+  files?: RCFile[];
+  reactions?: Record<string, { usernames: string[] }>;
+  mentions?: RCMention[];
+  starred?: { _id: string }[];
+  pinned?: boolean;
+  pinnedAt?: string;
+  pinnedBy?: RCUser;
+  editedAt?: string;
+  editedBy?: RCUser;
+  urls?: RCUrlMeta[];
+  tcount?: number; // thread reply count
+  tlm?: string; // thread last message timestamp
+  replies?: string[]; // thread reply user IDs
+  drid?: string; // discussion room ID
+  e2e?: 'pending' | 'done';
+  groupable?: boolean;
+  _hidden?: boolean;
+};
 
 // --- RC Room ---
 
 export type RCRoom = {
-  _id: string
-  t: 'd' | 'c' | 'p' | 'l' | 'v' // d=DM, c=channel, p=private, l=livechat, v=voip
-  name?: string
-  fname?: string // friendly name
-  topic?: string
-  description?: string
-  u?: RCUser // creator
-  uids?: string[] // DM user IDs
-  usernames?: string[] // DM usernames
-  usersCount?: number
-  lastMessage?: RCMessage
-  lm?: string // last message timestamp
-  msgs?: number // message count
-  ro?: boolean // read-only
-  archived?: boolean
-  encrypted?: boolean
-  broadcast?: boolean
-  avatarETag?: string
-  ts?: string // created timestamp
-  prid?: string // parent room ID (for discussions)
-  teamId?: string
-  teamMain?: boolean
-}
+  _id: string;
+  t: 'd' | 'c' | 'p' | 'l' | 'v'; // d=DM, c=channel, p=private, l=livechat, v=voip
+  name?: string;
+  fname?: string; // friendly name
+  topic?: string;
+  description?: string;
+  u?: RCUser; // creator
+  uids?: string[]; // DM user IDs
+  usernames?: string[]; // DM usernames
+  usersCount?: number;
+  lastMessage?: RCMessage;
+  lm?: string; // last message timestamp
+  msgs?: number; // message count
+  ro?: boolean; // read-only
+  archived?: boolean;
+  encrypted?: boolean;
+  broadcast?: boolean;
+  avatarETag?: string;
+  ts?: string; // created timestamp
+  prid?: string; // parent room ID (for discussions)
+  teamId?: string;
+  teamMain?: boolean;
+};
 
 // --- RC Subscription (per-user room state) ---
 
 export type RCSubscription = {
-  _id: string
-  rid: string
-  u: RCUser
-  open: boolean
-  unread: number
-  userMentions: number
-  groupMentions: number
-  t: string
-  name?: string
-  fname?: string
-  ls?: string // last seen
-  lr?: string // last reply read
-  f?: boolean // favorite (maps to pinned)
-  alert?: boolean
-  roles?: string[]
-  tunread?: string[] // thread unread message IDs
-  archived?: boolean
-}
+  _id: string;
+  rid: string;
+  u: RCUser;
+  open: boolean;
+  unread: number;
+  userMentions: number;
+  groupMentions: number;
+  t: string;
+  name?: string;
+  fname?: string;
+  ls?: string; // last seen
+  lr?: string; // last reply read
+  f?: boolean; // favorite (maps to pinned)
+  alert?: boolean;
+  roles?: string[];
+  tunread?: string[]; // thread unread message IDs
+  archived?: boolean;
+};
 
 // --- RC API Response Wrappers ---
 
 export type RCApiResponse<T> = {
-  success: boolean
-  [key: string]: T | boolean | string | undefined
-}
+  success: boolean;
+  [key: string]: T | boolean | string | undefined;
+};
 
 export type RCRoomsResponse = {
-  success: boolean
-  update: RCRoom[]
-  remove: RCRoom[]
-}
+  success: boolean;
+  update: RCRoom[];
+  remove: RCRoom[];
+};
 
 export type RCSubscriptionsResponse = {
-  success: boolean
-  update: RCSubscription[]
-  remove: RCSubscription[]
-}
+  success: boolean;
+  update: RCSubscription[];
+  remove: RCSubscription[];
+};
 
 export type RCMessagesResponse = {
-  success: boolean
-  messages: RCMessage[]
-}
+  success: boolean;
+  messages: RCMessage[];
+};
 
 export type RCSendMessageResponse = {
-  success: boolean
-  message: RCMessage
-}
+  success: boolean;
+  message: RCMessage;
+};
 
 export type RCChannelMembersResponse = {
-  success: boolean
-  members: RCUser[]
-  count: number
-  offset: number
-  total: number
-}
+  success: boolean;
+  members: RCUser[];
+  count: number;
+  offset: number;
+  total: number;
+};

@@ -29,7 +29,7 @@ export * from './hooks/use-wellness-groups';
 // Offline sync
 export * from './offline';
 // Provider and compat hooks
-export { CollabProvider, useCollabConnected, ZivaCollabProvider } from './provider';
+export { CollabProvider, useCollabConnected, useCollabMounted, ZivaCollabProvider } from './provider';
 export type { CollabProviderProps } from './provider';
 
 // RC client layer

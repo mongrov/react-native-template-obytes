@@ -89,10 +89,13 @@ class BleManagerSingleton {
    */
   public destroy(): void {
     this.manager?.destroy();
+    this.manager = null;
   }
 }
 
 // Export singleton getter
-export const getBleManager = () => BleManagerSingleton.getInstance().getManager();
+export function getBleManager() {
+  return BleManagerSingleton.getInstance().getManager();
+}
 
 export default BleManagerSingleton;

@@ -12,6 +12,7 @@ import {
 } from '@/components/ui';
 import { useCollab, useCollabConnected } from '@/lib/collab';
 
+// eslint-disable-next-line max-lines-per-function
 export default function SearchScreen() {
   const router = useRouter();
   const { adapter } = useCollab();
@@ -23,7 +24,8 @@ export default function SearchScreen() {
   const [searched, setSearched] = useState(false);
 
   const handleSearch = useCallback(async () => {
-    if (!adapter || !isConnected || !query.trim()) return;
+    if (!adapter || !isConnected || !query.trim())
+      return;
 
     setLoading(true);
     setSearched(true);
@@ -31,10 +33,12 @@ export default function SearchScreen() {
     try {
       const messages = await adapter.searchMessages(query.trim(), { limit: 50 });
       setResults(messages);
-    } catch (err) {
+    }
+    catch (err) {
       console.error('Search failed:', err);
       setResults([]);
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   }, [adapter, isConnected, query]);
@@ -44,7 +48,7 @@ export default function SearchScreen() {
       // Navigate to the conversation containing this message
       router.push(`/chat/${message.conversationId}`);
     },
-    [router]
+    [router],
   );
 
   const handleClear = useCallback(() => {
@@ -91,45 +95,51 @@ export default function SearchScreen() {
       </View>
 
       {/* Results */}
-      {loading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator />
-          <Text className="mt-2 text-neutral-500">Searching...</Text>
-        </View>
-      ) : searched && results.length === 0 ? (
-        <View className="flex-1 items-center justify-center p-8">
-          <Text className="text-2xl">🔍</Text>
-          <Text className="mt-2 text-neutral-500">No messages found</Text>
-          <Text className="text-sm text-neutral-400">
-            Try a different search term
-          </Text>
-        </View>
-      ) : !searched ? (
-        <View className="flex-1 items-center justify-center p-8">
-          <Text className="text-2xl">💬</Text>
-          <Text className="mt-2 text-neutral-500">Search messages</Text>
-          <Text className="text-sm text-neutral-400">
-            Enter a search term above
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={results}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <SearchResultItem message={item} onPress={handleResultPress} />
-          )}
-          contentContainerStyle={{ paddingVertical: 8 }}
-        />
-      )}
+      {loading
+        ? (
+            <View className="flex-1 items-center justify-center">
+              <ActivityIndicator />
+              <Text className="mt-2 text-neutral-500">Searching...</Text>
+            </View>
+          )
+        : searched && results.length === 0
+          ? (
+              <View className="flex-1 items-center justify-center p-8">
+                <Text className="text-2xl">🔍</Text>
+                <Text className="mt-2 text-neutral-500">No messages found</Text>
+                <Text className="text-sm text-neutral-400">
+                  Try a different search term
+                </Text>
+              </View>
+            )
+          : !searched
+              ? (
+                  <View className="flex-1 items-center justify-center p-8">
+                    <Text className="text-2xl">💬</Text>
+                    <Text className="mt-2 text-neutral-500">Search messages</Text>
+                    <Text className="text-sm text-neutral-400">
+                      Enter a search term above
+                    </Text>
+                  </View>
+                )
+              : (
+                  <FlatList
+                    data={results}
+                    keyExtractor={item => item.id}
+                    renderItem={({ item }) => (
+                      <SearchResultItem message={item} onPress={handleResultPress} />
+                    )}
+                    contentContainerStyle={{ paddingVertical: 8 }}
+                  />
+                )}
     </View>
   );
 }
 
-interface SearchResultItemProps {
+type SearchResultItemProps = {
   message: Message;
   onPress: (message: Message) => void;
-}
+};
 
 function SearchResultItem({ message, onPress }: SearchResultItemProps) {
   const handlePress = useCallback(() => {
@@ -169,11 +179,14 @@ function formatTime(isoString: string): string {
 
   if (diffDays === 0) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  } else if (diffDays === 1) {
+  }
+  else if (diffDays === 1) {
     return 'Yesterday';
-  } else if (diffDays < 7) {
+  }
+  else if (diffDays < 7) {
     return date.toLocaleDateString([], { weekday: 'short' });
-  } else {
+  }
+  else {
     return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
   }
 }

@@ -16,7 +16,7 @@ export type UseWellnessGroupsResult = {
   createGroup: (data: ChannelCreateRequest) => Promise<unknown>;
   joinGroup: (data: ChannelJoinRequest) => Promise<unknown>;
   getGroupMembers: (channelId: string) => Promise<ChannelMembersResponse>;
-  listGroups: (query?: object) => Promise<ChannelsListResponse>;
+  listGroups: (query?: Record<string, unknown>) => Promise<ChannelsListResponse>;
 };
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
@@ -56,7 +56,7 @@ export function useWellnessGroups(): UseWellnessGroupsResult {
   );
 
   const listGroups = useCallback(
-    (query: object = {}): Promise<ChannelsListResponse> => {
+    (query: Record<string, unknown> = {}): Promise<ChannelsListResponse> => {
       if (!isAuthenticated)
         throw new Error('Not authenticated');
       return getChannelsList(query);

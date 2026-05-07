@@ -3,7 +3,7 @@ import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 
-export interface DeepLinkData {
+export type DeepLinkData = {
   /** The raw URL that was received */
   url: string;
   /** The parsed path from the URL */
@@ -12,9 +12,9 @@ export interface DeepLinkData {
   hostname: string | null;
   /** Query parameters */
   queryParams: Record<string, string>;
-}
+};
 
-export interface UseDeepLinkResult {
+export type UseDeepLinkResult = {
   /** The last received deep link data */
   lastDeepLink: DeepLinkData | null;
   /** Create a deep link URL for the app */
@@ -23,7 +23,7 @@ export interface UseDeepLinkResult {
   openURL: (url: string) => Promise<void>;
   /** Check if a URL can be opened */
   canOpenURL: (url: string) => Promise<boolean>;
-}
+};
 
 /**
  * Hook for handling deep links in the app.
@@ -49,7 +49,8 @@ export function useDeepLink(): UseDeepLinkResult {
         hostname: parsed.hostname,
         queryParams: (parsed.queryParams || {}) as Record<string, string>,
       };
-    } catch {
+    }
+    catch {
       console.error('Failed to parse deep link URL:', url);
       return null;
     }
@@ -59,7 +60,8 @@ export function useDeepLink(): UseDeepLinkResult {
   const handleURL = useCallback(
     (url: string) => {
       const data = parseURL(url);
-      if (!data) return;
+      if (!data)
+        return;
 
       setLastDeepLink(data);
 
@@ -69,7 +71,7 @@ export function useDeepLink(): UseDeepLinkResult {
         router.push(data.path as never);
       }
     },
-    [parseURL, router]
+    [parseURL, router],
   );
 
   // Create a deep link URL
@@ -81,14 +83,15 @@ export function useDeepLink(): UseDeepLinkResult {
         : '';
       return `${scheme}://${path}${queryString}`;
     },
-    []
+    [],
   );
 
   // Open a URL
   const openURL = useCallback(async (url: string): Promise<void> => {
     try {
       await Linking.openURL(url);
-    } catch (err) {
+    }
+    catch (err) {
       console.error('Failed to open URL:', url, err);
     }
   }, []);

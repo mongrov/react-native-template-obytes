@@ -1,5 +1,6 @@
-import { ringManager, initializeRingDatabase, getRingDatabase, closeRingDatabase } from '../ring-db';
 import { createDatabase } from '@mongrov/db';
+
+import { closeRingDatabase, getRingDatabase, initializeRingDatabase, ringManager } from '../ring-db';
 
 // Mock @mongrov/db
 jest.mock('@mongrov/db', () => ({

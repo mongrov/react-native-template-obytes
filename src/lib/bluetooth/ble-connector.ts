@@ -3,7 +3,7 @@
  * Handles device connection, MTU negotiation, and reconnection
  */
 
-import type { ConnectionOptions, Device } from 'react-native-ble-plx';
+import type { BleManager, ConnectionOptions, Device } from 'react-native-ble-plx';
 
 import { getBleManager, isPhysicalDevice } from './ble-manager';
 
@@ -33,9 +33,6 @@ class BleConnector {
     if (!isPhysicalDevice)
       throw new Error('BLE not available on simulator');
     const manager = getBleManager();
-    if (!manager)
-      throw new Error('BLE Manager not available');
-
     const {
       timeout = 15000,
       autoConnect = false,
@@ -104,7 +101,7 @@ class BleConnector {
     autoConnect,
     timeout,
   }: {
-    manager: any;
+    manager: BleManager;
     deviceId: string;
     autoConnect: boolean;
     timeout: number;
@@ -172,9 +169,6 @@ class BleConnector {
    */
   public async isConnected(deviceId?: string): Promise<boolean> {
     const manager = getBleManager();
-    if (!manager)
-      return false;
-
     const id = deviceId || this.connectedDevice?.id;
 
     if (!id)
@@ -204,10 +198,6 @@ class BleConnector {
     callback: (error: Error | null) => void,
   ): () => void {
     const manager = getBleManager();
-    if (!manager) {
-      return () => {}; // No-op if no manager
-    }
-
     const subscription = manager.onDeviceDisconnected(
       deviceId,
       (error, device) => {

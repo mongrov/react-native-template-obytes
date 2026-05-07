@@ -21,6 +21,8 @@ import { SettingsContainer } from './components/settings-container';
 import { SettingsItem } from './components/settings-item';
 import { ThemeItem } from './components/theme-item';
 
+const WHITESPACE_RE = /\s+/;
+
 export function SettingsScreen() {
   const { signOut } = useAuth();
   const { isDark } = useColorScheme();
@@ -140,7 +142,8 @@ function ProfileCard() {
   const { isDark } = useColorScheme();
 
   const user = session?.user;
-  if (!user) return null;
+  if (!user)
+    return null;
 
   const initials = getInitials(user.name || user.email || '?');
 
@@ -150,7 +153,7 @@ function ProfileCard() {
       className="mb-4 flex-row items-center rounded-xl bg-neutral-100 p-4 dark:bg-neutral-800"
     >
       {/* Avatar */}
-      <View className="h-14 w-14 items-center justify-center rounded-full bg-primary-500">
+      <View className="size-14 items-center justify-center rounded-full bg-primary-500">
         <Text className="text-xl font-bold text-white">{initials}</Text>
       </View>
 
@@ -173,7 +176,7 @@ function ProfileCard() {
 }
 
 function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/);
+  const parts = name.trim().split(WHITESPACE_RE);
   if (parts.length >= 2) {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }

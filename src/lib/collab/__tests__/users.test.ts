@@ -25,16 +25,16 @@ jest.mock('react-native', () => ({
   },
 }));
 
-global.fetch = jest.fn();
+globalThis.fetch = jest.fn();
 
 const mockZivaFetch = jest.requireMock('../client').zivaFetch as jest.Mock;
 const mockZivaFetchAdmin = jest.requireMock('../client').zivaFetchAdmin as jest.Mock;
 const mockUseCollabStore = jest.requireMock('../store').useCollabStore as any;
 
-describe('Collab Users', () => {
+describe('collab Users', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (global.fetch as jest.Mock).mockClear();
+    (globalThis.fetch as jest.Mock).mockClear();
   });
 
   describe('updateUsersInfo', () => {
@@ -55,7 +55,7 @@ describe('Collab Users', () => {
         {
           userId: 'user123',
           data: updateData,
-        }
+        },
       );
     });
 
@@ -78,7 +78,7 @@ describe('Collab Users', () => {
         expect.objectContaining({
           userId: 'user123',
           data: updateData,
-        })
+        }),
       );
     });
 
@@ -129,7 +129,7 @@ describe('Collab Users', () => {
         {
           userId: 'user123',
           fields: JSON.stringify({ customFields: 1 }),
-        }
+        },
       );
     });
 
@@ -151,7 +151,7 @@ describe('Collab Users', () => {
         {
           userId: 'other_user_id',
           fields: JSON.stringify({ customFields: 1 }),
-        }
+        },
       );
     });
 
@@ -225,7 +225,7 @@ describe('Collab Users', () => {
         {
           userId: 'user123',
           data: { customFields },
-        }
+        },
       );
     });
 
@@ -270,7 +270,7 @@ describe('Collab Users', () => {
       expect(mockZivaFetchAdmin).toHaveBeenCalledWith(
         'POST',
         '/vertivusers.update',
-        adminData
+        adminData,
       );
     });
 
@@ -307,7 +307,7 @@ describe('Collab Users', () => {
       expect(mockZivaFetch).toHaveBeenCalledWith(
         'POST',
         '/users.resetAvatar',
-        data
+        data,
       );
     });
 
@@ -334,7 +334,7 @@ describe('Collab Users', () => {
 
   describe('updateUserAvatar', () => {
     it('posts avatar FormData to users.setAvatar', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         json: jest.fn().mockResolvedValue({ success: true }),
       });
 
@@ -344,17 +344,17 @@ describe('Collab Users', () => {
 
       await updateUserAvatar(formData);
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         'http://rc.test/api/v1/users.setAvatar',
         expect.objectContaining({
           method: 'POST',
           body: formData,
-        })
+        }),
       );
     });
 
     it('includes auth headers in avatar upload', async () => {
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         json: jest.fn().mockResolvedValue({ success: true }),
       });
 
@@ -363,7 +363,7 @@ describe('Collab Users', () => {
 
       await updateUserAvatar(formData);
 
-      const call = (global.fetch as jest.Mock).mock.calls[0];
+      const call = (globalThis.fetch as jest.Mock).mock.calls[0];
       const headers = call[1].headers;
 
       expect(headers['X-Auth-Token']).toBe('token123');
@@ -381,7 +381,7 @@ describe('Collab Users', () => {
       const formData = new FormData();
 
       await expect(updateUserAvatar(formData)).rejects.toThrow(
-        'Not authenticated with collab'
+        'Not authenticated with collab',
       );
     });
 
@@ -395,13 +395,13 @@ describe('Collab Users', () => {
       const formData = new FormData();
 
       await expect(updateUserAvatar(formData)).rejects.toThrow(
-        'Not authenticated with collab'
+        'Not authenticated with collab',
       );
     });
 
     it('returns upload response', async () => {
       const response = { success: true, url: 'avatar_url' };
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         json: jest.fn().mockResolvedValue(response),
       });
 
@@ -415,7 +415,7 @@ describe('Collab Users', () => {
 
     it('handles upload error', async () => {
       const response = { success: false, error: 'File too large' };
-      (global.fetch as jest.Mock).mockResolvedValue({
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
         json: jest.fn().mockResolvedValue(response),
       });
 

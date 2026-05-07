@@ -10,10 +10,13 @@ import type { CollabConfig } from '@mongrov/collab';
 import { CollabProvider, useCollab } from '@mongrov/collab';
 
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { getCollabAdapter, getCollabConfig } from './config';
 import { useCollabStore } from './store';
+
+const CollabMountedContext = React.createContext(false);
+export const useCollabMounted = () => React.use(CollabMountedContext);
 
 // ─── Auto-connect child (must be inside CollabProvider) ─────────────────────
 
@@ -45,37 +48,46 @@ export type CollabProviderProps = {
 
 export function ZivaCollabProvider({ children }: CollabProviderProps) {
   const config = getCollabConfig();
-  const adapter = getCollabAdapter();
 
-  // If collab is not configured (no server URL), skip
-  if (!config.enabled || !adapter) {
-    return <>{children}</>;
+  const collabConfig = useMemo<CollabConfig | null>(() => {
+    const currentAdapter = getCollabAdapter();
+    if (!config.enabled || !currentAdapter)
+      return null;
+    return {
+      adapter: currentAdapter,
+      autoConnect: false,
+      reconnect: {
+        enabled: true,
+        maxAttempts: 5,
+        baseDelay: 1000,
+        maxDelay: 30_000,
+      },
+      logger: __DEV__
+        ? {
+            debug: (msg, data) => console.log(`[RC] ${msg}`, data),
+            info: (msg, data) => console.log(`[RC] ${msg}`, data),
+            warn: (msg, data) => console.warn(`[RC] ${msg}`, data),
+            error: (msg, data) => console.error(`[RC] ${msg}`, data),
+          }
+        : undefined,
+    };
+  }, [config.enabled]);
+
+  if (!collabConfig) {
+    return (
+      <CollabMountedContext value={false}>
+        {children}
+      </CollabMountedContext>
+    );
   }
 
-  const collabConfig: CollabConfig = {
-    adapter,
-    autoConnect: false,
-    reconnect: {
-      enabled: true,
-      maxAttempts: 5,
-      baseDelay: 1000,
-      maxDelay: 30_000,
-    },
-    logger: __DEV__
-      ? {
-          debug: (msg, data) => console.log(`[RC] ${msg}`, data),
-          info: (msg, data) => console.log(`[RC] ${msg}`, data),
-          warn: (msg, data) => console.warn(`[RC] ${msg}`, data),
-          error: (msg, data) => console.error(`[RC] ${msg}`, data),
-        }
-      : undefined,
-  };
-
   return (
-    <CollabProvider config={collabConfig}>
-      <CollabAutoConnect serverUrl={config.serverUrl} />
-      {children}
-    </CollabProvider>
+    <CollabMountedContext value={true}>
+      <CollabProvider config={collabConfig}>
+        <CollabAutoConnect serverUrl={config.serverUrl} />
+        {children}
+      </CollabProvider>
+    </CollabMountedContext>
   );
 }
 

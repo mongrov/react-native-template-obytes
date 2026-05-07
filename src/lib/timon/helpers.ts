@@ -21,24 +21,30 @@ import {
   handleCatch,
 } from './utils';
 
-// Dependency placeholders for ring manager / storage
-// In the future, these can be replaced with real RxDB/Native calls
-const ringManager = {
-  setBatteryLevel: async (level: number) =>
-    console.log('Battery level set:', level),
-  setDeviceVersion: async (version: string) =>
-    console.log('Device version set:', version),
-  setMacAddressToStore: async (mac: string) =>
-    console.log('MAC address set:', mac),
+type StorageDep = {
+  getItem: (key: string) => Promise<string | null>;
+  setItem: (key: string, value: string) => Promise<void>;
 };
 
-const storage = {
-  getItem: async (_key: string) => null,
-  setItem: async (_key: string, _value: string) =>
-    console.log('Storage set:', _key, _value),
+type RingManagerDep = {
+  setBatteryLevel: (level: number) => Promise<void>;
 };
+
+let _storage: StorageDep | null = null;
+let _ringManager: RingManagerDep | null = null;
+
+export function configureTimonHelpers(deps: {
+  storage?: StorageDep;
+  ringManager?: RingManagerDep;
+}) {
+  if (deps.storage)
+    _storage = deps.storage;
+  if (deps.ringManager)
+    _ringManager = deps.ringManager;
+}
 
 const LAST_BATTERY_STORED_TIME_STAMP = 'LAST_BATTERY_STORED_TIME_STAMP';
+const EMPTY_DATA_ERROR_MESSAGE = 'Empty or falsy data received';
 
 /**
  * Transforms aggregate sleep records into individual resolution rows (1 or 5 min).
@@ -76,82 +82,73 @@ export function transformSleepData(data: any[]) {
   });
 }
 
-/**
- * Handle insertion of Sleep data with transformation.
- */
 export async function handleDetailSleepData(arrayDetailSleepData: any[]) {
   if (!arrayDetailSleepData?.length)
     return;
 
   const processedSleep = transformSleepData(arrayDetailSleepData);
-  const result = await insert(DB_NAME, SLEEP_COLLECTION, processedSleep);
-  if (result instanceof Error)
-    throw result;
-  return result;
+  return insert(DB_NAME, SLEEP_COLLECTION, processedSleep);
 }
 
-/**
- * Standard handlers for simpler data types.
- */
 export async function handleStaticHR(data: any[]) {
   if (!data?.length)
     return;
-  return await insert(DB_NAME, HEART_RATE_COLLECTION, data);
+  return insert(DB_NAME, HEART_RATE_COLLECTION, data);
 }
 
 export async function handleHrvData(data: any[]) {
   if (!data?.length)
     return;
-  return await insert(DB_NAME, HRV_COLLECTION, data);
+  return insert(DB_NAME, HRV_COLLECTION, data);
 }
 
 export async function handleAutomaticSpo2Data(data: any[]) {
   if (!data?.length)
     return;
-  return await insert(DB_NAME, SPO2_COLLECTION, data);
+  return insert(DB_NAME, SPO2_COLLECTION, data);
 }
 
 export async function handleTemperatureData(data: any[]) {
   if (!data?.length)
     return;
-  return await insert(DB_NAME, TEMPERATURE_COLLECTION, data);
+  return insert(DB_NAME, TEMPERATURE_COLLECTION, data);
 }
 
 export async function handleActivityDetailsData(data: any[]) {
   if (!data?.length)
     return;
-  return await insert(DB_NAME, ACTIVITY_DETAILS_COLLECTION, data);
+  return insert(DB_NAME, ACTIVITY_DETAILS_COLLECTION, data);
 }
 
 /**
  * Battery level handling with once-per-day throttling.
+ * Inserts one snapshot per day into battery_table, then updates ringManager state.
+ * Requires storage + ringManager deps via configureTimonHelpers.
  */
 export async function handleBatteryLevel(batteryLevel: number | string) {
   try {
-    if (batteryLevel === undefined || batteryLevel === null)
+    if (!batteryLevel) {
+      handleCatch(EMPTY_DATA_ERROR_MESSAGE, 'handleBatteryLevel', false, batteryLevel);
       return;
+    }
 
-    const lastBatteryUpdated = await storage.getItem(
-      LAST_BATTERY_STORED_TIME_STAMP,
-    );
+    const lastBatteryUpdated = await _storage?.getItem(LAST_BATTERY_STORED_TIME_STAMP) ?? null;
     const today = getTodaysDate();
 
     if (lastBatteryUpdated !== today) {
-      const result = await insert(DB_NAME, BATTERY_COLLECTION, [
+      await insert(DB_NAME, BATTERY_COLLECTION, [
         {
           date: getTodaysDateInUtc(FULL_DATE_24_HOUR_TIME_FORMAT),
           battery: +batteryLevel,
         },
       ]);
 
-      if (result instanceof Error)
-        throw result;
-      await storage.setItem(LAST_BATTERY_STORED_TIME_STAMP, today);
+      await _storage?.setItem(LAST_BATTERY_STORED_TIME_STAMP, today);
     }
 
-    await ringManager.setBatteryLevel(+batteryLevel);
+    await _ringManager?.setBatteryLevel(+batteryLevel);
   }
   catch (error) {
-    handleCatch(error, 'handleBatteryLevel error');
+    handleCatch(error, 'handleBatteryLevel error', true, { batteryLevel });
   }
 }

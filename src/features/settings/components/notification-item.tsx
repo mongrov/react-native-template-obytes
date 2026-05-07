@@ -10,9 +10,9 @@ import {
 import { Switch } from '@/components/ui/checkbox';
 import { useNotifications } from '@/lib/notifications';
 
-interface NotificationItemProps {
+type NotificationItemProps = {
   isLast?: boolean;
-}
+};
 
 export function NotificationItem({ isLast = false }: NotificationItemProps) {
   const { isEnabled, isLoading, requestPermission } = useNotifications();
@@ -22,10 +22,12 @@ export function NotificationItem({ isLast = false }: NotificationItemProps) {
       // Can't programmatically disable - open settings
       if (Platform.OS === 'ios') {
         Linking.openURL('app-settings:');
-      } else {
+      }
+      else {
         Linking.openSettings();
       }
-    } else {
+    }
+    else {
       await requestPermission();
     }
   };
@@ -45,15 +47,17 @@ export function NotificationItem({ isLast = false }: NotificationItemProps) {
           {isEnabled ? 'Enabled' : 'Get notified about new messages'}
         </Text>
       </View>
-      {isLoading ? (
-        <ActivityIndicator size="small" />
-      ) : (
-        <Switch
-          checked={isEnabled}
-          onChange={handleToggle}
-          accessibilityLabel="Toggle push notifications"
-        />
-      )}
+      {isLoading
+        ? (
+            <ActivityIndicator size="small" />
+          )
+        : (
+            <Switch
+              checked={isEnabled}
+              onChange={handleToggle}
+              accessibilityLabel="Toggle push notifications"
+            />
+          )}
     </Pressable>
   );
 }

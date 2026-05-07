@@ -185,7 +185,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         sounds: [],
       },
     ],
-    ['@config-plugins/react-native-ble-plx', {
+    ['react-native-ble-plx', {
       isBackgroundEnabled: true,
       modes: ['peripheral', 'central'],
       bluetoothAlwaysPermission: 'Allow ZivaOne to find and connect to your ZivaRing.',

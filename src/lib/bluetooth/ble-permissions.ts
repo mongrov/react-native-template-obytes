@@ -15,16 +15,17 @@ function getExpoLocation(): any | null {
     // Avoid crashing the whole app when the native module isn't in the current runtime
     // (common when using a custom dev client that wasn't rebuilt).
     return require('expo-location');
-  } catch {
+  }
+  catch {
     return null;
   }
 }
 
 export type PermissionStatus
   = | 'granted'
-  | 'denied'
-  | 'undetermined'
-  | 'blocked';
+    | 'denied'
+    | 'undetermined'
+    | 'blocked';
 
 const HAS_REQUESTED_BLE = 'has_requested_ble';
 const BLE_DENIED_IOS = 'ble_denied_ios';
@@ -53,15 +54,18 @@ class BlePermissions {
    */
   public async checkBluetoothState(): Promise<boolean> {
     // Simulator Bypass
-    if (!Device.isDevice) return true;
+    if (!Device.isDevice)
+      return true;
 
     const manager = getBleManager();
-    if (!manager) return false;
+    if (!manager)
+      return false;
 
     try {
       const state = await manager.state();
       return state === 'PoweredOn';
-    } catch {
+    }
+    catch {
       return false;
     }
   }
@@ -78,12 +82,14 @@ class BlePermissions {
     if (Platform.OS === 'ios') {
       // iOS: BLE Manager instantiation triggers the permission popup.
       // We must check if we have requested it before to avoid premature popups.
-      const hasRequested = storage.getString(HAS_REQUESTED_BLE);
-      if (!hasRequested) return 'undetermined';
+      const hasRequested = storage.contains(HAS_REQUESTED_BLE);
+      if (!hasRequested)
+        return 'undetermined';
 
       // If requested previously, it's safe to instantiate manager to check real status
       const manager = getBleManager();
-      if (!manager) return 'undetermined';
+      if (!manager)
+        return 'undetermined';
 
       try {
         let state = await manager.state();
@@ -119,25 +125,28 @@ class BlePermissions {
         // We return 'granted' so the permission check passes.
         // The app layout will separately check isBluetoothEnabled to enforce Radio On.
         return 'granted';
-      } catch {
+      }
+      catch {
         return 'undetermined';
       }
-    } else {
+    }
+    else {
       // Android
       if (this.isAndroid12OrHigher()) {
         const scan = await PermissionsAndroid.check(
-          PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN
+          PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
         );
         const connect = await PermissionsAndroid.check(
-          PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT
+          PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
         );
-        return scan && connect ? 'granted' : 'undetermined';
-      } else {
+        return scan && connect ? 'granted' : 'denied';
+      }
+      else {
         // Android < 12 uses basic Location for BLE
         const granted = await PermissionsAndroid.check(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         );
-        return granted ? 'granted' : 'undetermined';
+        return granted ? 'granted' : 'denied';
       }
     }
   }
@@ -168,10 +177,11 @@ class BlePermissions {
           = result['android.permission.BLUETOOTH_CONNECT'] === 'granted';
 
         return scanGranted && connectGranted;
-      } else {
+      }
+      else {
         // Android < 12 requires Location
         const result = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         );
         return result === 'granted';
       }
@@ -189,7 +199,8 @@ class BlePermissions {
 
     // iOS requests permission automatically when instantiating BLE Manager or scanning
     const manager = getBleManager();
-    if (!manager) return false;
+    if (!manager)
+      return false;
 
     try {
       let state = await manager.state();
@@ -219,12 +230,14 @@ class BlePermissions {
       // Store denied state if permission was not granted
       if (!granted) {
         storage.set(BLE_DENIED_IOS, true);
-      } else {
+      }
+      else {
         storage.delete(BLE_DENIED_IOS);
       }
 
       return granted;
-    } catch (err) {
+    }
+    catch (err) {
       console.warn('Bluetooth request error:', err);
       return false;
     }
@@ -266,7 +279,8 @@ class BlePermissions {
 
       // Status is denied or undetermined
       return result.status === 'undetermined' ? 'undetermined' : 'denied';
-    } catch {
+    }
+    catch {
       return 'undetermined';
     }
   }
@@ -288,7 +302,8 @@ class BlePermissions {
       // Use expo-location to force the native popup on iOS and Android
       const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
       return status === 'granted';
-    } catch (err) {
+    }
+    catch (err) {
       console.warn(err);
       return false;
     }

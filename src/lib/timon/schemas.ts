@@ -66,6 +66,9 @@ export const SleepSchema = {
   start: {
     type: 'string',
   },
+  is_sync: {
+    type: 'bool',
+  },
 };
 
 export const HeartRateSchema = {
@@ -189,5 +192,8 @@ export const BloodGlucoseSchema = {
   },
   timeStamp: {
     type: 'string',
+  },
+  is_sync: {
+    type: 'bool',
   },
 };

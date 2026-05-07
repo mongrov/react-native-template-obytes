@@ -9,7 +9,7 @@ import { ScanMode } from 'react-native-ble-plx';
 import BleManagerSingleton, { getBleManager, isPhysicalDevice } from './ble-manager';
 
 // Regex pattern for Ziva ring device names
-export const ZIVA_RING_NAMES_REGEX = /^2301B|ZR100|X1B/;
+export const ZIVA_RING_NAMES_REGEX = /^(2301B|ZR100|X1B)/;
 
 export type ScannedDevice = {
   id: string;
@@ -72,6 +72,8 @@ class BleScanner {
         .then(() => {
           const mgr = getBleManager();
           if (!mgr) {
+            this.isScanning = false;
+            this.scanResolve = null;
             reject(new Error('BLE Manager not available after power-on'));
             return;
           }

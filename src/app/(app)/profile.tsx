@@ -14,12 +14,12 @@ import {
   View,
 } from '@/components/ui';
 import { useAuth, useSession } from '@/lib/auth';
-import { useColorScheme } from '@/lib/theme';
+
+const WHITESPACE_RE = /\s+/;
 
 export default function ProfileScreen() {
   const session = useSession();
   const { signOut } = useAuth();
-  useColorScheme();
 
   const user = session?.user;
 
@@ -84,7 +84,7 @@ export default function ProfileScreen() {
               Permissions
             </Text>
             <View className="flex-row flex-wrap gap-2">
-              {session.permissions.map((permission) => (
+              {session.permissions.map(permission => (
                 <View
                   key={permission}
                   className="rounded-full bg-primary-100 px-3 py-1 dark:bg-primary-900"
@@ -127,11 +127,11 @@ export default function ProfileScreen() {
   );
 }
 
-interface InfoRowProps {
+type InfoRowProps = {
   label: string;
   value: string;
   isLast?: boolean;
-}
+};
 
 function InfoRow({ label, value, isLast = false }: InfoRowProps) {
   return (
@@ -152,7 +152,7 @@ function InfoRow({ label, value, isLast = false }: InfoRowProps) {
 }
 
 function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/);
+  const parts = name.trim().split(WHITESPACE_RE);
   if (parts.length >= 2) {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }

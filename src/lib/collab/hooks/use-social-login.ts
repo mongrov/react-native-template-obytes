@@ -40,10 +40,10 @@ function decodeAppleEmail(identityToken: string | undefined, fallbackEmail: stri
   }
 }
 
-function buildGoogleSocialData(result: { accessToken: string; idToken: string }) {
+function buildGoogleSocialData(result: { accessToken: string | null; idToken: string }) {
   return {
     serviceName: 'google' as const,
-    accessToken: result.accessToken,
+    accessToken: result.accessToken ?? undefined,
     idToken: result.idToken,
     expiresIn: 2000,
     scope: 'profile',
